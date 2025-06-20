@@ -16,6 +16,7 @@ from typing import (
     Generic,
     Optional,
     Tuple,
+    TypedDict,
     TypeVar,
     Union,
     overload,
@@ -35,13 +36,12 @@ P = ParamSpec("P")
 ChecksumFn = Callable[[Tuple[Callable[P, T], Tuple, Dict[str, Any]]], int]
 
 
-@dataclass
-class CacheContent(Generic[T]):
+class CacheContent(TypedDict):
     datetime: str
     duration: float
     checksum: int
     fn_name: str
-    output: T
+    output: Any
     input: Optional[tuple[Any, Any]]
 
 
@@ -152,8 +152,8 @@ def disk_cache_decorator(
     cache_verbose: int = 0,
     cache_checksum_fn: ChecksumFn = checksum_any,
     cache_fname_fmt: str = "{fn_name}_{csum}.pickle",
-    cache_dumps_fn: Callable[[CacheContent[T]], bytes] = pickle.dumps,
-    cache_loads_fn: Callable[[bytes], CacheContent[T]] = pickle.loads,
+    cache_dumps_fn: Callable[[CacheContent], bytes] = pickle.dumps,
+    cache_loads_fn: Callable[[bytes], CacheContent] = pickle.loads,
     cache_enable: bool = True,
     cache_store_args: bool = False,
 ) -> Callable[P, T]:
@@ -198,7 +198,7 @@ def disk_cache_decorator(
             if cache_verbose > 0:
                 pylog.info(compute_end_msg.format(now=get_now(), duration=duration))
 
-            cache_content_dict = {
+            cache_content: CacheContent = {
                 "datetime": get_now(),
                 "duration": duration,
                 "checksum": csum,
@@ -206,7 +206,6 @@ def disk_cache_decorator(
                 "output": output,
                 "input": (args, kwargs) if cache_store_args else None,
             }
-            cache_content = CacheContent(**cache_content_dict)
             cache_bytes = cache_dumps_fn(cache_content)
 
             cache_dpath.mkdir(parents=True, exist_ok=True)
@@ -254,8 +253,8 @@ def disk_cache_call(
     cache_verbose: int = 0,
     cache_checksum_fn: ChecksumFn = checksum_any,
     cache_fname_fmt: str = "{fn_name}_{csum}.pickle",
-    cache_dumps_fn: Callable[[CacheContent[T]], bytes] = pickle.dumps,
-    cache_loads_fn: Callable[[bytes], CacheContent[T]] = pickle.loads,
+    cache_dumps_fn: Callable[[CacheContent], bytes] = pickle.dumps,
+    cache_loads_fn: Callable[[bytes], CacheContent] = pickle.loads,
     cache_enable: bool = True,
     cache_store_args: bool = False,
     **kwargs,
