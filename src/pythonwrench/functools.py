@@ -160,9 +160,9 @@ def disk_cache_decorator(
 
     Cache file is identified by the checksum of the function arguments, and stored by default in `~/.cache/disk_cache/<Function_name>/` directory.
     """
-    fn_name = get_fullname(fn)
-    cache_dpath = get_cache_dpath(cache_dpath)
-    cache_dpath = cache_dpath.joinpath(fn_name)
+    fn_name = get_fullname(fn).replace("<locals>", "_locals_")
+    cache_fn_dpath = _get_fn_cache_dpath(fn, cache_dpath=cache_dpath)
+    del cache_dpath
 
     if cache_force:
         compute_start_msg = f"[{fn_name}] Force mode enabled, computing outputs'... (started at {{now}})"
@@ -181,7 +181,7 @@ def disk_cache_decorator(
         checksum_args = fn, args, kwargs
         csum = cache_checksum_fn(checksum_args)
         cache_fname = cache_fname_fmt.format(fn_name=fn_name, csum=csum)
-        cache_fpath = cache_dpath.joinpath(cache_fname)
+        cache_fpath = cache_fn_dpath.joinpath(cache_fname)
 
         if not cache_enable:
             output = fn(*args, **kwargs)
@@ -207,7 +207,7 @@ def disk_cache_decorator(
             }
             cache_bytes = cache_dumps_fn(cache_content)
 
-            cache_dpath.mkdir(parents=True, exist_ok=True)
+            cache_fn_dpath.mkdir(parents=True, exist_ok=True)
             cache_fpath.write_bytes(cache_bytes)
 
         elif cache_fpath.is_file():
@@ -280,10 +280,21 @@ def get_cache_dpath(cache_dpath: Union[str, Path, None] = None) -> Path:
 
 
 def remove_fn_cache(
-    fn: Callable, *, cache_dpath: Union[str, Path, None] = None
+    fn: Callable,
+    *,
+    cache_dpath: Union[str, Path, None] = None,
 ) -> None:
+    cache_fn_dpath = _get_fn_cache_dpath(fn, cache_dpath=cache_dpath)
+    if cache_fn_dpath.is_dir():
+        shutil.rmtree(cache_fn_dpath)
+
+
+def _get_fn_cache_dpath(
+    fn: Callable,
+    *,
+    cache_dpath: Union[str, Path, None] = None,
+) -> Path:
+    fn_name = get_fullname(fn).replace("<locals>", "_locals_")
     cache_dpath = get_cache_dpath(cache_dpath)
-    fn_name = get_fullname(fn)
-    cache_dpath = cache_dpath.joinpath(fn_name)
-    if cache_dpath.is_dir():
-        shutil.rmtree(cache_dpath)
+    cache_fn_dpath = cache_dpath.joinpath(fn_name)
+    return cache_fn_dpath
