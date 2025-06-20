@@ -319,7 +319,8 @@ class Version:
                 if isinstance(self_vi, str) and isinstance(other_vi, str):
                     return self_vi < other_vi
 
-                raise TypeError(f"Invalid attribute type {self_vi=} and {other_vi=}.")
+                msg = f"Invalid attribute type {self_vi=} and {other_vi=}."
+                raise TypeError(msg)
 
         return False
 
