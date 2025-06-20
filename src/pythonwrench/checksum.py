@@ -164,7 +164,7 @@ def checksum_builtin_number(x: BuiltinNumber, **kwargs) -> int:
 
 @register_checksum_fn(None, custom_predicate=is_builtin_scalar)
 def checksum_builtin_scalar(x: BuiltinScalar, **kwargs) -> int:
-    if isinstance(x, BuiltinNumber):
+    if is_builtin_number(x):
         return checksum_builtin_number(x, **kwargs)
     elif isinstance(x, bytes):
         return checksum_bytes(x, **kwargs)
