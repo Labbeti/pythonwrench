@@ -18,7 +18,7 @@ class TestReadmeExamples(TestCase):
         values = [3, 1, 6, 4]
         assert pw.prod(values) == 72
         assert pw.argmax(values) == 2
-        assert pw.is_sorted(values) == False
+        assert not pw.is_sorted(values)
 
     def test_collections_example_3(self) -> None:
         list_of_dicts = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
@@ -51,10 +51,10 @@ class TestReadmeExamples(TestCase):
             # Lot of stuff here
             ...
 
-        data1 = (
+        _data1 = (
             heavy_processing()
         )  # first call function is called and the result is stored on disk
-        data2 = heavy_processing()  # second call result is loaded from disk directly
+        _data2 = heavy_processing()  # second call result is loaded from disk directly
 
     def test_version_example_1(self) -> None:
         version = pw.Version("1.12.2")

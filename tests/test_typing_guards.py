@@ -3,7 +3,7 @@
 
 import unittest
 from dataclasses import dataclass
-from numbers import Integral, Number
+from numbers import Number
 from typing import (
     Any,
     Callable,
@@ -15,20 +15,16 @@ from typing import (
     Mapping,
     NamedTuple,
     Optional,
-    Sequence,
     Tuple,
     TypedDict,
     Union,
 )
 from unittest import TestCase
 
-from typing_extensions import NotRequired, TypeGuard, TypeIs
+from typing_extensions import NotRequired
 
 from pythonwrench.typing import (
-    BuiltinNumber,
-    NamedTupleInstance,
     NoneType,
-    is_builtin_number,
     is_dataclass_instance,
     is_iterable_str,
     is_namedtuple_instance,
