@@ -218,20 +218,18 @@ def disk_cache_decorator(
             cache_bytes = cache_fpath.read_bytes()
             cache_content = cache_loads_fn(cache_bytes)
 
-            input_ = cache_content.input
+            input_ = cache_content["input"]
             if cache_store_args and input_ is not None and input_ != (args, kwargs):
                 os.remove(cache_fpath)
                 return disk_cache_impl(*args, **kwargs)
 
-            output = cache_content.output
+            output = cache_content["output"]
 
             if cache_verbose > 0:
                 pylog.info(load_end_msg)
 
             if cache_verbose > 1:
-                metadata = {
-                    k: v for k, v in asdict(cache_content).items() if k != "output"
-                }
+                metadata = {k: v for k, v in cache_content.items() if k != "output"}
                 msgs = f"Found cache metadata:\n{dump_json(metadata)}".split("\n")
                 for msg in msgs:
                     pylog.debug(msg)
