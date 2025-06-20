@@ -2,7 +2,7 @@
 pythonwrench's documentation
 ========================================
 
-Collection of functions and modules to help development in PyTorch.
+Set of tools for Python that could be in the standard library.
 
 .. toctree::
    :maxdepth: 2
