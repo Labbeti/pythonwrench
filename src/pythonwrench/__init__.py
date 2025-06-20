@@ -37,7 +37,6 @@ from . import re as re
 from . import semver as semver
 from . import warnings as warnings
 
-
 # Global library imports
 from .abc import Singleton  # noqa: F401
 from .argparse import (  # noqa: F401
@@ -47,6 +46,7 @@ from .argparse import (  # noqa: F401
     str_to_optional_int,
     str_to_optional_str,
 )
+from .checksum import checksum_any, register_checksum_fn  # noqa: F401
 from .collections import (  # noqa: F401
     all_eq,
     all_ne,
@@ -81,7 +81,6 @@ from .collections import (  # noqa: F401
     unzip,
 )
 from .csv import dump_csv, load_csv  # noqa: F401
-from .checksum import register_checksum_fn, checksum_any  # noqa: F401
 from .dataclasses import get_defaults_values  # noqa: F401
 from .datetime import get_now, get_now_iso8601  # noqa: F401
 from .difflib import find_closest_in_list, sequence_matcher_ratio  # noqa: F401
@@ -89,6 +88,8 @@ from .enum import StrEnum  # noqa: F401
 from .functools import (  # noqa: F401
     Compose,
     compose,
+    disk_cache_call,
+    disk_cache_decorator,
     filter_and_call,
     function_alias,
     get_argnames,
@@ -121,7 +122,7 @@ from .logging import (  # noqa: F401
     setup_logging_level,
     setup_logging_verbose,
 )
-from .math import clamp, clip, argmax, argmin, argsort  # noqa: F401
+from .math import argmax, argmin, argsort, clamp, clip  # noqa: F401
 from .os import get_num_cpus_available, safe_rmdir, tree_iter  # noqa: F401
 from .pickle import dump_pickle, load_pickle  # noqa: F401
 from .random import randstr  # noqa: F401
