@@ -10,13 +10,16 @@ from unittest import TestCase
 from pythonwrench.collections import (
     all_eq,
     all_ne,
+    contained,
     dict_list_to_list_dict,
+    dump_dict,
     flat_dict_of_dict,
     flat_list_of_list,
     flatten,
     intersect_lists,
     is_sorted,
     list_dict_to_dict_list,
+    recursive_generator,
     unflat_dict_of_dict,
     unflat_list_of_list,
 )
@@ -204,6 +207,21 @@ class TestFlatten(TestCase):
         assert result == expected
 
 
+class TestRecursiveGenerator(TestCase):
+    def test_example_1(self) -> None:
+        xlst = [[[3.0, 0, 1], ["a", None, 2], range(3)]]
+        expected = list(zip([3.0, 0, 1, "a", None, 2, 0, 1, 2], [0, 1, 2] * 3, [3] * 9))
+        result = list(recursive_generator(xlst))
+        assert result == expected
+
+    def test_example_2(self) -> None:
+        xlst = [[range(0, 3), range(3, 6)], [range(6, 9), range(9, 12)]]
+
+        expected = list(zip(range(0, 12), [0, 1, 2] * 4, [3] * 12))
+        result = list(recursive_generator(xlst))
+        assert result == expected
+
+
 class TestIsSorted(TestCase):
     def test_example_1(self) -> None:
         x_sorted = list(range(10))
@@ -222,6 +240,19 @@ class TestIsSorted(TestCase):
 
         for input_, expected in tests:
             assert is_sorted(input_) == expected
+
+
+class TestSearch(TestCase):
+    def test_contained_example_1(self) -> None:
+        assert contained(2, [1, 2, 3, 4])
+        assert not contained(5, [1, 2, 3, 4])
+        assert not contained(2, [1, 2, 3, 4], [2])
+
+
+class TestDump(TestCase):
+    def test_example(self) -> None:
+        x = {"a": 1, "b": 2, "c": 3}
+        assert dump_dict(x) == "a=1, b=2, c=3"
 
 
 if __name__ == "__main__":
