@@ -8,11 +8,9 @@
 <a href="https://github.com/Labbeti/pythonwrench/actions">
     <img alt="Build" src="https://img.shields.io/github/actions/workflow/status/Labbeti/pythonwrench/test.yaml?branch=main&style=for-the-badge&logo=github">
 </a>
-<!--
-TODO: readthedocs doc ?
 <a href='https://pythonwrench.readthedocs.io/en/stable/?badge=stable'>
     <img src='https://readthedocs.org/projects/pythonwrench/badge/?version=stable&style=for-the-badge' alt='Documentation Status' />
-</a> -->
+</a>
 
 Set of tools for Python that could be in the standard library.
 

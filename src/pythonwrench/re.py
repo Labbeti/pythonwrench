@@ -9,7 +9,7 @@ from typing import Any, Callable, Iterable, List, Optional, TypeVar, Union
 
 from typing_extensions import TypeAlias
 
-from .collections import find
+from pythonwrench.collections import find
 
 T = TypeVar("T")
 

@@ -10,8 +10,6 @@ from importlib.util import find_spec
 from types import ModuleType
 from typing import Any, Dict, List
 
-from .warnings import deprecated_alias
-
 DEFAULT_SKIPPED = (
     "reimport_all",
     "get_ipython",
@@ -153,7 +151,3 @@ class Placeholder:
 
     def __getitem__(self, *args, **kwargs) -> Any:
         return self
-
-
-@deprecated_alias(is_available_package)
-def package_is_available(*args, **kwargs): ...

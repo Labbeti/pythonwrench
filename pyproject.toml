@@ -31,7 +31,7 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://pypi.org/project/pythonwrench/"
-# Documentation = "https://pythonwrench.readthedocs.io/"  # TODO: doc
+Documentation = "https://pythonwrench.readthedocs.io/"
 Repository = "https://github.com/Labbeti/pythonwrench.git"
 Changelog = "https://github.com/Labbeti/pythonwrench/blob/main/CHANGELOG.md"
 Tracker = "https://github.com/Labbeti/pythonwrench/issues"

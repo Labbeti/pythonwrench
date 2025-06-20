@@ -7,7 +7,7 @@ from typing import Any, Callable, Optional, Type, TypeVar, Union, overload
 
 from typing_extensions import ParamSpec
 
-from ._core import _decorator_factory
+from pythonwrench._core import _decorator_factory
 
 P = ParamSpec("P")
 U = TypeVar("U")
