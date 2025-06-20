@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from .checks import (  # noqa: F401
+from .checks import (
     is_builtin_number,
     is_builtin_obj,
     is_builtin_scalar,
@@ -17,7 +17,7 @@ from .checks import (  # noqa: F401
     is_typed_dict,
     isinstance_generic,
 )
-from .classes import (  # noqa: F401
+from .classes import (
     BuiltinCollection,
     BuiltinNumber,
     BuiltinScalar,

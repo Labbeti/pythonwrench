@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
-from .collections import (  # noqa: F401
+from .collections import (
     all_eq,
     all_ne,
     contained,
@@ -27,7 +27,7 @@ from .collections import (  # noqa: F401
     union_lists,
     unzip,
 )
-from .reducers import (  # noqa: F401
+from .reducers import (
     intersect,
     prod,
     reduce_add,
