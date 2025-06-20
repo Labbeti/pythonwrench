@@ -6,7 +6,7 @@ authors = [
 description = "Set of tools for Python that could be in the standard library."
 readme = "README.md"
 requires-python = ">=3.9"
-keywords = ["python", "tools", "utils"]
+keywords = ["python", "tools", "utilities"]
 license = {file = "LICENSE"}
 classifiers = [
     "Intended Audience :: Developers",

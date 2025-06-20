@@ -5,12 +5,6 @@
 <a href="https://www.python.org/">
     <img alt="Python" src="https://img.shields.io/badge/-Python 3.9+-blue?style=for-the-badge&logo=python&logoColor=white">
 </a>
-
-<!--
-TODO: ruff badge ?
-<a href="https://black.readthedocs.io/en/stable/">
-    <img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-black.svg?style=for-the-badge&labelColor=gray">
-</a> -->
 <a href="https://github.com/Labbeti/pythonwrench/actions">
     <img alt="Build" src="https://img.shields.io/github/actions/workflow/status/Labbeti/pythonwrench/test.yaml?branch=main&style=for-the-badge&logo=github">
 </a>

@@ -11,11 +11,11 @@ authors:
     affiliation: IRIT
     orcid: 'https://orcid.org/0000-0002-7219-5463'
 repository-code: 'https://github.com/Labbeti/pythonwrench/'
-abstract: Collection of functions and modules to help development in PyTorch.
+abstract: Set of tools for Python that could be in the standard library.
 keywords:
-  - pytorch
-  - deep-learning
+  - python
+  - tools
   - utilities
 license: MIT
-version: 0.6.0
+version: 0.1.0
 date-released: '2025-04-09'
