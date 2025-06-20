@@ -277,8 +277,10 @@ class Version:
     def __lt__(self, other: VersionLike) -> bool:
         if isinstance(other, (dict, tuple, str)):
             other = Version(other)
+
         elif not isinstance(other, Version):
-            raise TypeError(f"Invalid argument type {type(other)}.")
+            msg = f"Invalid argument type {type(other)}. (expected an instance of one of {(dict, tuple, str, Version)})"
+            raise TypeError(msg)
 
         self_tuple = self.to_tuple(exclude_none=False)
         other_tuple = other.to_tuple(exclude_none=False)
