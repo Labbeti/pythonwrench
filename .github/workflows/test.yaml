@@ -44,7 +44,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         enable-cache: true
-        cache-dependency-glob: "requirements**.txt"
+        cache-dependency-glob: "pyproject.toml"
 
     - name: Install the project
       run: |
