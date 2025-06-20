@@ -1,0 +1,68 @@
+# Template: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Python package using Pip
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main, dev ]
+
+env:
+  CACHE_NUMBER: 0  # increase to reset cache manually
+
+# Cancel workflow if a new push occurs
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-24.04]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        include:
+          - os: windows-2019
+            python-version: "3.9"
+          - os: windows-latest
+            python-version: "3.13"
+          - os: macos-13
+            python-version: "3.9"
+          - os: macos-latest
+            python-version: "3.13"
+
+    steps:
+    # --- INSTALLATIONS ---
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install uv and set Python ${{ matrix.python-version }}
+      uses: astral-sh/setup-uv@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+        enable-cache: true
+        cache-dependency-glob: "requirements**.txt"
+
+    - name: Install the project
+      run: |
+        uv sync --locked --all-extras --dev
+
+    # --- TESTS ---
+    - name: Print install info
+      run: |
+        uv run pythonwrench-info
+
+    - name: Check format with Ruff
+      run: |
+        uv run ruff check
+
+    - name: Test with coverage + pytest
+      run: |
+        uv run coverage run -m pytest -v
+
+    - name: Show coverage results
+      run: |
+        uv run coverage report -m

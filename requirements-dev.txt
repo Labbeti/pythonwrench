@@ -1,0 +1,12 @@
+# -*- coding: utf-8 -*-
+
+coverage[toml]
+flake8
+ipython
+# numpy<2.0.0
+pre-commit
+pytest
+sphinx
+sphinx-press-theme>=0.8.0
+twine
+ruff

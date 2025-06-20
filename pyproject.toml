@@ -1,0 +1,61 @@
+[project]
+name = "pythonwrench"
+authors = [
+    {name = "Étienne Labbé (Labbeti)", email = "labbeti.pub@gmail.com"},
+]
+description = "Set of tools for Python that could be in the standard library."
+readme = "README.md"
+requires-python = ">=3.9"
+keywords = ["python", "tools", "utils"]
+license = {file = "LICENSE"}
+classifiers = [
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering",
+    "Operating System :: OS Independent",
+]
+maintainers = [
+    {name = "Étienne Labbé (Labbeti)", email = "labbeti.pub@gmail.com"},
+]
+dynamic = ["version", "dependencies", "optional-dependencies"]
+
+[project.urls]
+Homepage = "https://pypi.org/project/pythonwrench/"
+# Documentation = "https://pythonwrench.readthedocs.io/"  # TODO: doc
+Repository = "https://github.com/Labbeti/pythonwrench.git"
+Changelog = "https://github.com/Labbeti/pythonwrench/blob/main/CHANGELOG.md"
+Tracker = "https://github.com/Labbeti/pythonwrench/issues"
+
+[project.scripts]
+pythonwrench-info = "pythonwrench.entries:print_install_info"
+pythonwrench-tree = "pythonwrench.entries:main_tree"
+pythonwrench-safe-rmdir = "pythonwrench.entries:main_safe_rmdir"
+
+[tool.setuptools.packages.find]
+where = ["src"]  # list of folders that contain the packages (["."] by default)
+# package names should match these glob patterns (["*"] by default)
+# note: star after package names is required to work
+include = ["pythonwrench*"]
+
+[tool.setuptools.dynamic]
+version = {attr = "pythonwrench.__version__"}
+dependencies = {file = ["requirements.txt"]}
+optional-dependencies = {dev = { file = ["requirements-dev.txt", "docs/requirements.txt"] }}
+
+[tool.pyright]
+include = ["src"]
+exclude = ["**/__pycache__"]
+pythonVersion = "3.9"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["src"]
