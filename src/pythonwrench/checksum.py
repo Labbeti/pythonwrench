@@ -8,8 +8,18 @@ import zlib
 from dataclasses import asdict
 from functools import lru_cache
 from pathlib import Path
-from types import FunctionType, MethodType, UnionType
-from typing import Callable, Iterable, Mapping, Union, get_args, Any, TypeVar, Optional, overload
+from types import FunctionType, MethodType
+from typing import (
+    Any,
+    Callable,
+    Iterable,
+    Mapping,
+    Optional,
+    TypeVar,
+    Union,
+    get_args,
+    overload,
+)
 
 from pythonwrench.inspect import get_fullname
 from pythonwrench.typing import (
@@ -24,21 +34,31 @@ from pythonwrench.typing import (
 
 T = TypeVar("T")
 
-ClassOrTuple =  Union[type, tuple[type, ...], UnionType]
+ClassOrTuple = Union[type, tuple[type, ...], Union]
 Predicate = Callable[[Any], bool]
 
-__CHECKSUM_FNS: dict[Callable[..., int], tuple[Optional[ClassOrTuple], Optional[Predicate]]] = {}
+__CHECKSUM_FNS: dict[
+    Callable[..., int], tuple[Optional[ClassOrTuple], Optional[Predicate]]
+] = {}
 
 
 @overload
-def register_checksum_fn(class_or_tuple: ClassOrTuple, *, custom_predicate: None = None) -> Callable: ...
+def register_checksum_fn(
+    class_or_tuple: ClassOrTuple, *, custom_predicate: None = None
+) -> Callable: ...
 
 
 @overload
-def register_checksum_fn(class_or_tuple: None = None, *, custom_predicate: Predicate) -> Callable: ...
+def register_checksum_fn(
+    class_or_tuple: None = None, *, custom_predicate: Predicate
+) -> Callable: ...
 
 
-def register_checksum_fn(class_or_tuple: Optional[ClassOrTuple] = None, *, custom_predicate: Optional[Predicate] = None) -> Callable:
+def register_checksum_fn(
+    class_or_tuple: Optional[ClassOrTuple] = None,
+    *,
+    custom_predicate: Optional[Predicate] = None,
+) -> Callable:
     """Decorator to add a checksum function.
 
     ```
@@ -72,8 +92,10 @@ def checksum_any(
         if custom_predicate is not None:
             predicate = custom_predicate
         elif class_or_tuple is not None:
+
             def target_isinstance_fn_wrap(x: Any) -> bool:
                 return isinstance_fn(x, class_or_tuple)  # type: ignore
+
             predicate = target_isinstance_fn_wrap
         else:
             msg = f"Invalid function registered. (found {class_or_tuple=} and {custom_predicate=})"
@@ -82,7 +104,11 @@ def checksum_any(
         if predicate(x):
             return fn(x, **kwargs)
 
-    valid_types = [class_or_tuple for class_or_tuple, _ in __CHECKSUM_FNS.values() if class_or_tuple is not None]
+    valid_types = [
+        class_or_tuple
+        for class_or_tuple, _ in __CHECKSUM_FNS.values()
+        if class_or_tuple is not None
+    ]
     msg = f"Invalid argument type {type(x)}. (expected one of {tuple(valid_types)})"
     raise TypeError(msg)
 
