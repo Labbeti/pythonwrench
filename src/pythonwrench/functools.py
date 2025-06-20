@@ -6,6 +6,7 @@ import os
 import pickle
 import shutil
 import time
+from dataclasses import asdict, dataclass
 from functools import wraps
 from pathlib import Path
 from typing import (
@@ -15,13 +16,12 @@ from typing import (
     Generic,
     Optional,
     Tuple,
-    TypedDict,
     TypeVar,
     Union,
     overload,
 )
 
-from typing_extensions import NotRequired, ParamSpec
+from typing_extensions import ParamSpec
 
 from pythonwrench._core import _decorator_factory, return_none  # noqa: F401
 from pythonwrench.checksum import checksum_any
@@ -35,13 +35,14 @@ P = ParamSpec("P")
 ChecksumFn = Callable[[Tuple[Callable[P, T], Tuple, Dict[str, Any]]], int]
 
 
-class CacheContent(Generic[T], TypedDict):
+@dataclass
+class CacheContent(Generic[T]):
     datetime: str
     duration: float
     checksum: int
     fn_name: str
     output: T
-    input: NotRequired[Optional[tuple[Any, Any]]]
+    input: Optional[tuple[Any, Any]]
 
 
 DEFAULT_CACHE_DPATH = Path.home().joinpath(".cache", "disk_cache")
@@ -57,6 +58,10 @@ U = TypeVar("U")
 def identity(x: T) -> T:
     """Identity function placeholder."""
     return x
+
+
+def function_alias(alternative: Callable[P, U]) -> Callable[..., Callable[P, U]]:
+    return _decorator_factory(alternative)
 
 
 class Compose(Generic[T, U]):
@@ -139,10 +144,6 @@ def filter_and_call(fn: Callable[..., T], **kwargs: Any) -> T:
     return fn(**kwargs_filtered)
 
 
-def function_alias(alternative: Callable[P, U]) -> Callable[..., Callable[P, U]]:
-    return _decorator_factory(alternative)
-
-
 def disk_cache_decorator(
     fn: Callable[P, T],
     *,
@@ -197,7 +198,7 @@ def disk_cache_decorator(
             if cache_verbose > 0:
                 pylog.info(compute_end_msg.format(now=get_now(), duration=duration))
 
-            cache_content: CacheContent[T] = {
+            cache_content_dict = {
                 "datetime": get_now(),
                 "duration": duration,
                 "checksum": csum,
@@ -205,6 +206,7 @@ def disk_cache_decorator(
                 "output": output,
                 "input": (args, kwargs) if cache_store_args else None,
             }
+            cache_content = CacheContent(**cache_content_dict)
             cache_bytes = cache_dumps_fn(cache_content)
 
             cache_dpath.mkdir(parents=True, exist_ok=True)
@@ -217,18 +219,20 @@ def disk_cache_decorator(
             cache_bytes = cache_fpath.read_bytes()
             cache_content = cache_loads_fn(cache_bytes)
 
-            input_ = cache_content.get("input", None)
+            input_ = cache_content.input
             if cache_store_args and input_ is not None and input_ != (args, kwargs):
                 os.remove(cache_fpath)
                 return disk_cache_impl(*args, **kwargs)
 
-            output = cache_content["output"]
+            output = cache_content.output
 
             if cache_verbose > 0:
                 pylog.info(load_end_msg)
 
             if cache_verbose > 1:
-                metadata = {k: v for k, v in cache_content.items() if k != "output"}
+                metadata = {
+                    k: v for k, v in asdict(cache_content).items() if k != "output"
+                }
                 msgs = f"Found cache metadata:\n{dump_json(metadata)}".split("\n")
                 for msg in msgs:
                     pylog.debug(msg)
