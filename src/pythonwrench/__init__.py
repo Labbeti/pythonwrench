@@ -99,7 +99,6 @@ from .hashlib import hash_file
 from .importlib import (
     is_available_package,
     is_editable_package,
-    package_is_available,
     reload_editable_packages,
     reload_submodules,
     search_submodules,

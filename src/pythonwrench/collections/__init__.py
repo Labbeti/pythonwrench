@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
 from .collections import (
-    all_eq,
-    all_ne,
     contained,
     dict_list_to_list_dict,
     dump_dict,
@@ -14,9 +11,6 @@ from .collections import (
     flat_list_of_list,
     flatten,
     intersect_lists,
-    is_full,
-    is_sorted,
-    is_unique,
     list_dict_to_dict_list,
     recursive_generator,
     shuffled,
@@ -26,6 +20,13 @@ from .collections import (
     union_dicts,
     union_lists,
     unzip,
+)
+from .prop import (
+    all_eq,
+    all_ne,
+    is_full,
+    is_sorted,
+    is_unique,
 )
 from .reducers import (
     intersect,
