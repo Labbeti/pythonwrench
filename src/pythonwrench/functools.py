@@ -13,14 +13,13 @@ from typing import (
     Callable,
     Dict,
     Generic,
-    NotRequired,
     Tuple,
     TypedDict,
     TypeVar,
     overload,
 )
 
-from typing_extensions import ParamSpec
+from typing_extensions import NotRequired, ParamSpec
 
 from pythonwrench._core import _decorator_factory, return_none  # noqa: F401
 from pythonwrench.checksum import checksum_any
