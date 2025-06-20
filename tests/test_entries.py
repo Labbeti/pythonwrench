@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import tempfile
 import shutil
+import tempfile
 import unittest
 from pathlib import Path
 from unittest import TestCase
@@ -13,7 +13,7 @@ from pywrench.entries import print_safe_rmdir, print_tree
 class TestEntries(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        tmpdir = Path(tempfile.gettempdir()).joinpath("torchwrench_tests")
+        tmpdir = Path(tempfile.gettempdir()).joinpath("pythonwrench_tests")
         tmpdir.mkdir(parents=True, exist_ok=True)
         cls.tmpdir = tmpdir
 

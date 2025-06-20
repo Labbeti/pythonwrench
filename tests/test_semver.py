@@ -4,9 +4,7 @@
 import unittest
 from unittest import TestCase
 
-import torch
-
-import pythonwrench as to
+import pythonwrench as pw
 from pythonwrench.semver import Version
 
 
@@ -63,8 +61,7 @@ class TestVersion(TestCase):
         assert not (v12 > v13)
 
         # Check if versions can be parsed
-        Version(to.__version__)
-        Version(torch.__version__)
+        Version(pw.__version__)
 
     def test_parse_invalid(self) -> None:
         with self.assertRaises(ValueError):
