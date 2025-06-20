@@ -220,7 +220,9 @@ class TestIsInstanceGuard(TestCase):
             (("a",), Tuple[()], False),
         ]
         for example, type_, expected in examples:
-            assert isinstance_generic(example, type_) == expected, f"{example=}, {type_}"
+            assert isinstance_generic(example, type_) == expected, (
+                f"{example=}, {type_}"
+            )
 
     def test_none(self) -> None:
         examples = [
@@ -242,7 +244,9 @@ class TestIsInstanceGuard(TestCase):
             ("", Optional[int], False),
         ]
         for example, type_, expected in examples:
-            assert isinstance_generic(example, type_) == expected, f"{example=}, {type_}"
+            assert isinstance_generic(example, type_) == expected, (
+                f"{example=}, {type_}"
+            )
 
     def test_tuple_of_types(self) -> None:
         assert not isinstance_generic(1, ())
