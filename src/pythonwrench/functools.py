@@ -14,7 +14,6 @@ from typing import (
     Dict,
     Generic,
     NotRequired,
-    ParamSpec,
     Tuple,
     TypedDict,
     TypeVar,

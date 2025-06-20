@@ -34,7 +34,7 @@ from pythonwrench.typing import (
 
 T = TypeVar("T")
 
-ClassOrTuple = Union[type, tuple[type, ...], Union]
+ClassOrTuple = Union[type, tuple[type, ...]]
 Predicate = Callable[[Any], bool]
 
 __CHECKSUM_FNS: dict[
