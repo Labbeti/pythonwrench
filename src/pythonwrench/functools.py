@@ -13,9 +13,11 @@ from typing import (
     Callable,
     Dict,
     Generic,
+    Optional,
     Tuple,
     TypedDict,
     TypeVar,
+    Union,
     overload,
 )
 
@@ -39,7 +41,7 @@ class CacheContent(Generic[T], TypedDict):
     checksum: int
     fn_name: str
     output: T
-    input: NotRequired[tuple[Any, Any] | None]
+    input: NotRequired[Optional[tuple[Any, Any]]]
 
 
 DEFAULT_CACHE_DPATH = Path.home().joinpath(".cache", "disk_cache")
@@ -144,7 +146,7 @@ def function_alias(alternative: Callable[P, U]) -> Callable[..., Callable[P, U]]
 def disk_cache_decorator(
     fn: Callable[P, T],
     *,
-    cache_dpath: str | Path | None = None,
+    cache_dpath: Union[str, Path, None] = None,
     cache_force: bool = False,
     cache_verbose: int = 0,
     cache_checksum_fn: ChecksumFn = checksum_any,
@@ -243,7 +245,7 @@ def disk_cache_decorator(
 def disk_cache_call(
     fn: Callable[..., T],
     *args,
-    cache_dpath: str | Path | None = None,
+    cache_dpath: Union[str, Path, None] = None,
     cache_force: bool = False,
     cache_verbose: int = 0,
     cache_checksum_fn: ChecksumFn = checksum_any,
@@ -269,7 +271,7 @@ def disk_cache_call(
     return wrapped_fn(*args, **kwargs)
 
 
-def get_cache_dpath(cache_dpath: None | str | Path = None) -> Path:
+def get_cache_dpath(cache_dpath: Union[str, Path, None] = None) -> Path:
     if cache_dpath is None:
         cache_dpath = DEFAULT_CACHE_DPATH
     else:
@@ -277,7 +279,9 @@ def get_cache_dpath(cache_dpath: None | str | Path = None) -> Path:
     return cache_dpath
 
 
-def remove_fn_cache(fn: Callable, *, cache_dpath: str | Path | None = None) -> None:
+def remove_fn_cache(
+    fn: Callable, *, cache_dpath: Union[str, Path, None] = None
+) -> None:
     cache_dpath = get_cache_dpath(cache_dpath)
     fn_name = get_fullname(fn)
     cache_dpath = cache_dpath.joinpath(fn_name)

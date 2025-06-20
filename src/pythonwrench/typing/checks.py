@@ -150,9 +150,11 @@ def _isinstance_generic_typed_dict(x: Any, target_type: type) -> bool:
 
     if not set(required_annotations.keys()).issubset(x.keys()):
         return False
-    if not (
-        set(required_annotations.keys()) | set(optional_annotations.keys())
-    ).issuperset(x.keys()):
+
+    annotations_set = set(required_annotations.keys()) | set(
+        optional_annotations.keys()
+    )
+    if not annotations_set.issuperset(x.keys()):
         return False
 
     for k, v in required_annotations.items():
