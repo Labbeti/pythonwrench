@@ -97,7 +97,7 @@ class TestVersion(TestCase):
         with self.assertRaises(TypeError):
             Version(1, 2, 1, minor=1)  # type: ignore
 
-    def test_semver(self) -> None:
+    def test_semver_comparisons(self) -> None:
         assert Version("1.0.0") < Version("2.0.0") < Version("2.1.0") < Version("2.1.1")
         assert Version("1.0.0-alpha") < Version("1.0.0")
         assert (

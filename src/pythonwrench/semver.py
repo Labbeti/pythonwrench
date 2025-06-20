@@ -263,7 +263,8 @@ class Version:
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, (dict, tuple, str)):
             other = Version(other)
-        elif not isinstance(other, Version):
+        # note: use self.__class__ to avoid error cause by 'pytest -v test' collect
+        elif not isinstance(other, self.__class__):
             return False
 
         return (
@@ -277,8 +278,8 @@ class Version:
     def __lt__(self, other: VersionLike) -> bool:
         if isinstance(other, (dict, tuple, str)):
             other = Version(other)
-
-        elif not isinstance(other, Version):
+        # note: use self.__class__ to avoid error cause by 'pytest -v test' collect
+        elif not isinstance(other, self.__class__):
             msg = f"Invalid argument type {type(other)}. (expected an instance of one of {(dict, tuple, str, Version)})"
             raise TypeError(msg)
 
