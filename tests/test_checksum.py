@@ -6,8 +6,8 @@ import random
 import unittest
 from unittest import TestCase
 
-from pythonwrench.collections import all_ne
 from pythonwrench.checksum import checksum_any
+from pythonwrench.collections import all_ne
 
 
 class TestChecksum(TestCase):
@@ -31,6 +31,8 @@ class TestChecksum(TestCase):
             "",
             b"abc",
             b"",
+            checksum_any,
+            bytearray(),
         ]
         csums = [checksum_any(xi) for xi in x]
         assert all_ne(csums), f"{csums=}"

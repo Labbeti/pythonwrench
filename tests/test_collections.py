@@ -4,6 +4,7 @@
 import copy
 import random
 import unittest
+from collections import Counter
 from typing import List
 from unittest import TestCase
 
@@ -13,6 +14,7 @@ from pythonwrench.collections import (
     contained,
     dict_list_to_list_dict,
     dump_dict,
+    find,
     flat_dict_of_dict,
     flat_list_of_list,
     flatten,
@@ -20,6 +22,7 @@ from pythonwrench.collections import (
     is_sorted,
     list_dict_to_dict_list,
     recursive_generator,
+    shuffled,
     unflat_dict_of_dict,
     unflat_list_of_list,
 )
@@ -248,11 +251,31 @@ class TestSearch(TestCase):
         assert not contained(5, [1, 2, 3, 4])
         assert not contained(2, [1, 2, 3, 4], [2])
 
+    def test_find_example_1(self) -> None:
+        assert find("b", ["a", "b", "c", "d"]) == 1
+        assert find("e", ["a", "b", "c", "d"]) == -1
+
+        assert (
+            find(
+                "B",
+                ["a", "b", "c", "d"],
+                match_fn=lambda x, y: x.lower() == y,
+                order="left",
+            )
+            == 1
+        )
+
 
 class TestDump(TestCase):
     def test_example(self) -> None:
         x = {"a": 1, "b": 2, "c": 3}
         assert dump_dict(x) == "a=1, b=2, c=3"
+
+
+class TestShuffle(TestCase):
+    def test_example_1(self) -> None:
+        x = [random.randint(0, 10) for _ in range(100)]
+        assert Counter(shuffled(x)) == Counter(x)
 
 
 if __name__ == "__main__":
