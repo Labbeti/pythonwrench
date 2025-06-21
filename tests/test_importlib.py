@@ -7,6 +7,7 @@ from unittest import TestCase
 import pythonwrench as pw
 from pythonwrench.importlib import (
     is_available_package,
+    is_editable_package,
     reload_submodules,
     search_submodules,
 )
@@ -18,6 +19,8 @@ class TestImportlib(TestCase):
 
         assert is_available_package("pythonwrench")
         assert len(search_submodules(pw)) > 0
+
+        assert not is_editable_package("typing_extensions")
 
 
 if __name__ == "__main__":
