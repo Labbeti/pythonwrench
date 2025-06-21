@@ -126,7 +126,7 @@ def dump_csv(
 
 @overload
 def load_csv(
-    fpath: Union[str, Path],
+    fpath: Union[str, Path, io.TextIOBase],
     /,
     *,
     orient: Literal["dict"],
@@ -141,7 +141,7 @@ def load_csv(
 
 @overload
 def load_csv(
-    fpath: Union[str, Path],
+    fpath: Union[str, Path, io.TextIOBase],
     /,
     *,
     orient: Literal["list"] = "list",
@@ -155,7 +155,7 @@ def load_csv(
 
 
 def load_csv(
-    fpath: Union[str, Path],
+    fpath: Union[str, Path, io.TextIOBase],
     /,
     *,
     orient: Orient = "list",
@@ -163,22 +163,37 @@ def load_csv(
     comment_start: Optional[str] = None,
     strip_content: bool = False,
     # CSV reader kwargs
-    delimiter: Optional[str] = None,
+    delimiter: Optional[str] = ",",
     **csv_reader_kwds,
 ) -> Union[List[Dict[str, Any]], Dict[str, List[Any]]]:
     """Load content from csv filepath."""
-    fpath = Path(fpath)
-    if delimiter is None or delimiter is ...:
-        delimiter = "\t" if fpath.suffix == ".tsv" else ","
+    if isinstance(fpath, (str, Path)):
+        fpath = Path(fpath)
+        if delimiter is None or delimiter is ...:
+            delimiter = "\t" if fpath.suffix == ".tsv" else ","
+
+        with open(fpath, "r") as file:
+            return load_csv(
+                file,
+                orient=orient,
+                header=header,
+                comment_start=comment_start,
+                strip_content=strip_content,
+                delimiter=delimiter,
+                **csv_reader_kwds,
+            )
+
+    if delimiter is None:
+        msg = f"Invalid argument {delimiter=}. (expected not None when {type(fpath)=})"
+        raise ValueError(msg)
 
     if header:
         reader_cls = DictReader
     else:
         reader_cls = csv.reader
 
-    with open(fpath, "r") as file:
-        reader = reader_cls(file, delimiter=delimiter, **csv_reader_kwds)
-        raw_data_lst = list(reader)
+    reader = reader_cls(fpath, delimiter=delimiter, **csv_reader_kwds)
+    raw_data_lst = list(reader)
 
     data_lst: List[Dict[str, Any]]
     if header:
