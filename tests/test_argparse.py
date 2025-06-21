@@ -19,10 +19,10 @@ class TestOS(TestCase):
         assert str_to_optional_str("null") is None
 
         assert str_to_optional_bool("T")
-        assert str_to_optional_bool("false") == False
+        assert str_to_optional_bool("false") == False  # noqa: E712
         assert str_to_optional_bool("none") is None
 
-        assert str_to_bool("f") == False
+        assert str_to_bool("f") == False  # noqa: E712
         with self.assertRaises(ValueError):
             assert str_to_bool("none")
 
