@@ -18,7 +18,11 @@ def randstr(
 
 @overload
 def randstr(
-    low: int, high: int, /, *, letters: Iterable[str] = string.ascii_letters
+    low: int,
+    high: int,
+    /,
+    *,
+    letters: Iterable[str] = string.ascii_letters,
 ) -> str: ...
 
 
