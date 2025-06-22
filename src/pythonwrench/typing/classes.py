@@ -89,6 +89,12 @@ class SupportsGetitemIterLen(Protocol[T]):
 
 
 @runtime_checkable
+class SupportsLen(Protocol):
+    def __len__(self) -> int:
+        raise NotImplementedError
+
+
+@runtime_checkable
 class SupportsBool(Protocol):
     def __bool__(self) -> bool:
         raise NotImplementedError
