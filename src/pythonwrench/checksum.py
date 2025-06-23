@@ -12,9 +12,11 @@ from types import FunctionType, MethodType
 from typing import (
     Any,
     Callable,
+    Dict,
     Iterable,
     Mapping,
     Optional,
+    Tuple,
     TypeVar,
     Union,
     get_args,
@@ -34,11 +36,11 @@ from pythonwrench.typing import (
 
 T = TypeVar("T")
 
-ClassOrTuple = Union[type, tuple[type, ...]]
+ClassOrTuple = Union[type, Tuple[type, ...]]
 Predicate = Callable[[Any], bool]
 
-__CHECKSUM_FNS: dict[
-    Callable[..., int], tuple[Optional[ClassOrTuple], Optional[Predicate]]
+__CHECKSUM_FNS: Dict[
+    Callable[..., int], Tuple[Optional[ClassOrTuple], Optional[Predicate]]
 ] = {}
 
 

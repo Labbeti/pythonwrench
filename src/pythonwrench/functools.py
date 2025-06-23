@@ -41,7 +41,7 @@ class CacheContent(TypedDict):
     checksum: int
     fn_name: str
     output: Any
-    input: Optional[tuple[Any, Any]]
+    input: Optional[Tuple[Any, Any]]
 
 
 DEFAULT_CACHE_DPATH = Path.home().joinpath(".cache", "disk_cache")

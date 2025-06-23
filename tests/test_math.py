@@ -8,7 +8,7 @@ from pythonwrench.collections import is_sorted
 from pythonwrench.math import argmax, argmin, argsort
 
 
-class TestOS(TestCase):
+class TestMath(TestCase):
     def test_example_1(self) -> None:
         values = [3, 1, 2, 4, 6, 0, 5]
 

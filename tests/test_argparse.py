@@ -13,7 +13,7 @@ from pythonwrench.argparse import (
 )
 
 
-class TestOS(TestCase):
+class TestArgparse(TestCase):
     def test_example_1(self) -> None:
         assert str_to_optional_str("None") is None
         assert str_to_optional_str("null") is None
