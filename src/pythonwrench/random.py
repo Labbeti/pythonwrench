@@ -3,7 +3,7 @@
 
 import random
 import string
-from typing import Iterable, overload
+from typing import Iterable, Optional, overload
 
 
 @overload
@@ -28,7 +28,7 @@ def randstr(
 
 def randstr(
     low_or_size: int = 10,
-    high: int | None = None,
+    high: Optional[int] = None,
     /,
     *,
     letters: Iterable[str] = string.ascii_letters,
