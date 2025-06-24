@@ -265,7 +265,9 @@ class TestIsInstanceGuard(TestCase):
         assert isinstance_generic((i for i in range(5)), Generator)
 
         with self.assertRaises(TypeError):
-            assert not isinstance_generic((i for i in range(5)), Generator[int, None, None])
+            assert not isinstance_generic(
+                (i for i in range(5)), Generator[int, None, None]
+            )
 
         with self.assertRaises(TypeError):
             assert not isinstance_generic(1, Generator[int, None, None])

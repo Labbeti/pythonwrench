@@ -99,7 +99,7 @@ def isinstance_generic(
     if isinstance(obj, Generator):
         msg = f"Invalid argument type {type(obj)}. (cannot check elements in generator)"
         raise TypeError(msg)
-    
+
     if issubclass(origin, Generator):
         msg = f"Invalid argument type {origin}. (cannot check generator type)"
         raise TypeError(msg)
