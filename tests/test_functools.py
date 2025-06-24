@@ -5,7 +5,7 @@ import random
 import unittest
 from unittest import TestCase
 
-from pythonwrench.functools import disk_cache_call
+import pythonwrench as pw
 
 
 class TestDiskCache(TestCase):
@@ -14,9 +14,26 @@ class TestDiskCache(TestCase):
             return random.random() * x
 
         x = random.random()
-        data1 = disk_cache_call(heavy_processing, x)
-        data2 = disk_cache_call(heavy_processing, x)
-        data3 = disk_cache_call(heavy_processing, x * 2)
+        data1 = pw.disk_cache_call(heavy_processing, x)
+        data2 = pw.disk_cache_call(heavy_processing, x)
+        data3 = pw.disk_cache_call(heavy_processing, x * 2)
+
+        assert data1 == data2
+        assert data1 != data3
+
+    def test_disk_cache_example_2(self) -> None:
+        @pw.disk_cache_decorator(
+            cache_fname_fmt="{fn_name}_{csum}.json",
+            cache_load_fn=pw.load_json,
+            cache_dump_fn=pw.dump_json,
+        )
+        def heavy_processing(x: float) -> float:
+            return random.random() * x
+
+        x = random.random()
+        data1 = heavy_processing(x)
+        data2 = heavy_processing(x)
+        data3 = heavy_processing(x * 2)
 
         assert data1 == data2
         assert data1 != data3

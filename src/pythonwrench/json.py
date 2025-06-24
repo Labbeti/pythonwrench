@@ -19,7 +19,20 @@ def dump_json(
     ensure_ascii: bool = False,
     **json_dump_kwds,
 ) -> str:
-    """Dump content to JSON format."""
+    """Dump content to JSON format into a string and/or file.
+
+    Args:
+        data: Data to dump to JSON.
+        fpath: Optional filepath to save dumped data. Not used if None. defaults to None.
+        overwrite: If True, overwrite target filepath. defaults to True.
+        make_parents: Build intermediate directories to filepath. defaults to True.
+        indent: JSON indentation size in spaces. defaults to 4.
+        ensure_ascii: Ensure only ASCII characters. defaults to False.
+        **json_dump_kwds: Other `json.dump` args.
+
+    Returns:
+        Dumped content as string.
+    """
     fpath = _setup_path(fpath, overwrite, make_parents)
     content = json.dumps(
         data,

@@ -15,10 +15,11 @@ def str_to_bool(
     true_values: Union[str, Iterable[str]] = DEFAULT_TRUE_VALUES,
     false_values: Union[str, Iterable[str]] = DEFAULT_FALSE_VALUES,
 ) -> bool:
-    """Convert string values to bool. Intended for argparse boolean arguments.
+    """Convert string values to bool safely. Intended for argparse boolean arguments.
 
     - True values: 'True', 'T', 'yes', 'y', '1'.
     - False values: 'False', 'F', 'no', 'n', '0'.
+    - None values: 'None', 'null'
     - Other raises ValueError.
     """
     true_values = _sanitize_values(true_values)
@@ -41,6 +42,13 @@ def str_to_optional_bool(
     false_values: Union[str, Iterable[str]] = DEFAULT_FALSE_VALUES,
     none_values: Union[str, Iterable[str]] = DEFAULT_NONE_VALUES,
 ) -> Optional[bool]:
+    """Convert string values to optional bool safely. Intended for argparse boolean arguments.
+
+    - True values: 'True', 'T', 'yes', 'y', '1'.
+    - False values: 'False', 'F', 'no', 'n', '0'.
+    - None values: 'None', 'null'
+    - Other raises ValueError.
+    """
     true_values = _sanitize_values(true_values)
     if _str_in(x, true_values, case_sensitive):
         return True
@@ -63,6 +71,7 @@ def str_to_optional_float(
     case_sensitive: bool = False,
     none_values: Union[str, Iterable[str]] = DEFAULT_NONE_VALUES,
 ) -> Optional[float]:
+    """Convert string values to optional float safely. Intended for argparse boolean arguments."""
     none_values = _sanitize_values(none_values)
     if _str_in(x, none_values, case_sensitive):
         return None
@@ -75,6 +84,7 @@ def str_to_optional_int(
     case_sensitive: bool = False,
     none_values: Union[str, Iterable[str]] = DEFAULT_NONE_VALUES,
 ) -> Optional[int]:
+    """Convert string values to optional int safely. Intended for argparse boolean arguments."""
     none_values = _sanitize_values(none_values)
     if _str_in(x, none_values, case_sensitive):
         return None
@@ -87,6 +97,7 @@ def str_to_optional_str(
     case_sensitive: bool = False,
     none_values: Union[str, Iterable[str]] = DEFAULT_NONE_VALUES,
 ) -> Optional[str]:
+    """Convert string values to optional str safely. Intended for argparse boolean arguments."""
     none_values = _sanitize_values(none_values)
     if _str_in(x, none_values, case_sensitive):
         return None
