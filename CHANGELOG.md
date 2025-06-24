@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 ## [0.1.1] UNRELEASED
 ### Added
 - Python 3.8 support.
+- `T_BuiltinNumber` and `T_BuiltinScalar` are covariant by default.
+- `SupportsLen` protocol.
+- `randstr` now support a range of sizes.
+- `as_builtin` function to convert object to built-in equivalent recursively.
 
 ## [0.1.0] 2025-06-21
 ### Added

@@ -12,17 +12,16 @@ from types import FunctionType, MethodType
 from typing import (
     Any,
     Callable,
-    Dict,
     Iterable,
     Mapping,
     Optional,
-    Tuple,
     TypeVar,
     Union,
     get_args,
     overload,
 )
 
+from pythonwrench._core import ClassOrTuple, Predicate, _FunctionRegistry
 from pythonwrench.inspect import get_fullname
 from pythonwrench.typing import (
     BuiltinNumber,
@@ -36,23 +35,23 @@ from pythonwrench.typing import (
 
 T = TypeVar("T")
 
-ClassOrTuple = Union[type, Tuple[type, ...]]
-Predicate = Callable[[Any], bool]
 
-__CHECKSUM_FNS: Dict[
-    Callable[..., int], Tuple[Optional[ClassOrTuple], Optional[Predicate]]
-] = {}
+_CHECKSUM_REGISTRY = _FunctionRegistry[int]()
 
 
 @overload
 def register_checksum_fn(
-    class_or_tuple: ClassOrTuple, *, custom_predicate: None = None
+    class_or_tuple: ClassOrTuple,
+    *,
+    custom_predicate: None = None,
 ) -> Callable: ...
 
 
 @overload
 def register_checksum_fn(
-    class_or_tuple: None = None, *, custom_predicate: Predicate
+    class_or_tuple: None = None,
+    *,
+    custom_predicate: Predicate,
 ) -> Callable: ...
 
 
@@ -62,7 +61,6 @@ def register_checksum_fn(
     custom_predicate: Optional[Predicate] = None,
 ) -> Callable:
     """Decorator to add a checksum function.
-
     ```
     >>> import numpy as np
 
@@ -73,15 +71,10 @@ def register_checksum_fn(
     >>> pw.checksum_any(np.array([1, 2]))  # calls my_checksum_for_numpy internally, even if array in nested inside a list, dict, etc.
     ```
     """
-    if (class_or_tuple is None) == (custom_predicate is None):
-        msg = f"Invalid combinaison of arguments: {class_or_tuple=} and {custom_predicate=}. (only one of them must be None)"
-        raise ValueError(msg)
-
-    def _impl(checksum_fn: Callable[[T], int]):
-        __CHECKSUM_FNS[checksum_fn] = (class_or_tuple, custom_predicate)
-        return checksum_fn
-
-    return _impl
+    return _CHECKSUM_REGISTRY.register_decorator(
+        class_or_tuple,
+        custom_predicate=custom_predicate,
+    )
 
 
 def checksum_any(
@@ -90,29 +83,7 @@ def checksum_any(
     isinstance_fn: Callable[[Any, Union[type, tuple]], bool] = isinstance,
     **kwargs,
 ) -> int:
-    for fn, (class_or_tuple, custom_predicate) in __CHECKSUM_FNS.items():
-        if custom_predicate is not None:
-            predicate = custom_predicate
-        elif class_or_tuple is not None:
-
-            def target_isinstance_fn_wrap(x: Any) -> bool:
-                return isinstance_fn(x, class_or_tuple)  # type: ignore
-
-            predicate = target_isinstance_fn_wrap
-        else:
-            msg = f"Invalid function registered. (found {class_or_tuple=} and {custom_predicate=})"
-            raise TypeError(msg)
-
-        if predicate(x):
-            return fn(x, **kwargs)
-
-    valid_types = [
-        class_or_tuple
-        for class_or_tuple, _ in __CHECKSUM_FNS.values()
-        if class_or_tuple is not None
-    ]
-    msg = f"Invalid argument type {type(x)}. (expected one of {tuple(valid_types)})"
-    raise TypeError(msg)
+    return _CHECKSUM_REGISTRY.apply(x, isinstance_fn=isinstance_fn, **kwargs)
 
 
 # Terminate functions

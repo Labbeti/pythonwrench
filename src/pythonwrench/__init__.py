@@ -46,6 +46,7 @@ from .argparse import (
     str_to_optional_int,
     str_to_optional_str,
 )
+from .cast import as_builtin
 from .checksum import checksum_any, register_checksum_fn
 from .collections import (
     all_eq,
@@ -153,6 +154,7 @@ from .typing import (
     SupportsOr,
     T_BuiltinNumber,
     T_BuiltinScalar,
+    is_builtin_collection,
     is_builtin_number,
     is_builtin_obj,
     is_builtin_scalar,

@@ -30,6 +30,7 @@ from typing_extensions import (
 )
 
 from pythonwrench.typing.classes import (
+    BuiltinCollection,
     BuiltinNumber,
     BuiltinScalar,
     DataclassInstance,
@@ -185,6 +186,18 @@ def is_builtin_obj(x: Any) -> bool:
     return x.__class__.__module__ == "builtins" and not isinstance(x, type)
 
 
+def is_builtin_collection(x: Any, *, strict: bool = False) -> TypeIs[BuiltinCollection]:
+    """Returns True if x is an instance of a builtin collection type (list, tuple, dict, set, frozenset).
+
+    Args:
+        x: Object to check.
+        strict: If True, it will not consider custom subtypes of builtins as builtin collections. defaults to False.
+    """
+    if strict and not is_builtin_obj(x):
+        return False
+    return isinstance(x, (list, tuple, dict, set, frozenset))
+
+
 def is_builtin_number(x: Any, *, strict: bool = False) -> TypeIs[BuiltinNumber]:
     """Returns True if x is an instance of a builtin number type (int, float, bool, complex).
 
@@ -202,7 +215,7 @@ def is_builtin_scalar(x: Any, *, strict: bool = False) -> TypeIs[BuiltinScalar]:
 
     Args:
         x: Object to check.
-        strict: If True, it will not consider subtypes of builtins as builtin numbers. defaults to False.
+        strict: If True, it will not consider subtypes of builtins as builtin scalars. defaults to False.
     """
     if strict and not is_builtin_obj(x):
         return False
