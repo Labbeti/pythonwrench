@@ -2,18 +2,46 @@
 # -*- coding: utf-8 -*-
 
 import os
+from io import TextIOWrapper
 from pathlib import Path
-from typing import Optional, TypeVar, Union
+from typing import TypeVar, Union, overload
 
 T = TypeVar("T", covariant=True)
 
 
-def _setup_path(
-    fpath: Union[str, Path, os.PathLike, None],
+@overload
+def _setup_output_fpath(
+    fpath: Union[str, Path, os.PathLike],
     overwrite: bool,
     make_parents: bool,
     absolute: bool = True,
-) -> Optional[Path]:
+) -> Path: ...
+
+
+@overload
+def _setup_output_fpath(
+    fpath: TextIOWrapper,
+    overwrite: bool,
+    make_parents: bool,
+    absolute: bool = True,
+) -> TextIOWrapper: ...
+
+
+@overload
+def _setup_output_fpath(
+    fpath: None,
+    overwrite: bool,
+    make_parents: bool,
+    absolute: bool = True,
+) -> None: ...
+
+
+def _setup_output_fpath(
+    fpath: Union[str, Path, os.PathLike, TextIOWrapper, None],
+    overwrite: bool,
+    make_parents: bool,
+    absolute: bool = True,
+) -> Union[Path, None, TextIOWrapper]:
     """Resolve & expand path and create intermediate parents."""
     if not isinstance(fpath, (str, Path, os.PathLike)):
         return fpath

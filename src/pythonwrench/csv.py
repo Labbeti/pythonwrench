@@ -4,6 +4,8 @@
 import csv
 import io
 from csv import DictReader, DictWriter
+from io import TextIOWrapper
+from os import PathLike
 from pathlib import Path
 from typing import (
     Any,
@@ -19,8 +21,9 @@ from typing import (
     overload,
 )
 
+from pythonwrench.cast import as_builtin
 from pythonwrench.collections import dict_list_to_list_dict, list_dict_to_dict_list
-from pythonwrench.io import _setup_path
+from pythonwrench.io import _setup_output_fpath
 from pythonwrench.typing import isinstance_generic
 
 T = TypeVar("T")
@@ -30,17 +33,161 @@ Orient = Literal["list", "dict"]
 
 def dump_csv(
     data: Union[Iterable[Mapping[str, Any]], Mapping[str, Iterable[Any]], Iterable],
-    fpath: Union[str, Path, None] = None,
+    fpath: Union[str, Path, None, TextIOWrapper] = None,
     *,
     overwrite: bool = True,
     make_parents: bool = True,
+    to_builtins: bool = False,
     header: Union[bool, Literal["auto"]] = "auto",
     align_content: bool = False,
     replace_newline_by: Optional[str] = "\\n",
     **csv_writer_kwds,
 ) -> str:
     """Dump content to CSV format."""
-    fpath = _setup_path(fpath, overwrite, make_parents)
+    if isinstance(fpath, (str, Path, PathLike)):
+        fpath = _setup_output_fpath(fpath, overwrite, make_parents)
+        with fpath.open("w") as file:
+            return dump_csv(
+                data,
+                file,
+                overwrite=overwrite,
+                make_parents=make_parents,
+                to_builtins=to_builtins,
+                header=header,
+                align_content=align_content,
+                replace_newline_by=replace_newline_by,
+                **csv_writer_kwds,
+            )
+
+    content = _dump_csv_impl(
+        data,
+        to_builtins=to_builtins,
+        header=header,
+        align_content=align_content,
+        replace_newline_by=replace_newline_by,
+        **csv_writer_kwds,
+    )
+
+    if isinstance(fpath, TextIOWrapper):
+        fpath.write(content)
+
+    return content
+
+
+@overload
+def load_csv(
+    fpath: Union[str, Path, TextIOWrapper],
+    /,
+    *,
+    orient: Literal["dict"],
+    header: bool = True,
+    comment_start: Optional[str] = None,
+    strip_content: bool = False,
+    # CSV reader kwargs
+    delimiter: Optional[str] = None,
+    **csv_reader_kwds,
+) -> Dict[str, List[Any]]: ...
+
+
+@overload
+def load_csv(
+    fpath: Union[str, Path, TextIOWrapper],
+    /,
+    *,
+    orient: Literal["list"] = "list",
+    header: bool = True,
+    comment_start: Optional[str] = None,
+    strip_content: bool = False,
+    # CSV reader kwargs
+    delimiter: Optional[str] = None,
+    **csv_reader_kwds,
+) -> List[Dict[str, Any]]: ...
+
+
+def load_csv(
+    fpath: Union[str, Path, TextIOWrapper],
+    /,
+    *,
+    orient: Orient = "list",
+    header: bool = True,
+    comment_start: Optional[str] = None,
+    strip_content: bool = False,
+    # CSV reader kwargs
+    delimiter: Optional[str] = ",",
+    **csv_reader_kwds,
+) -> Union[List[Dict[str, Any]], Dict[str, List[Any]]]:
+    """Load content from csv filepath."""
+    if isinstance(fpath, (str, Path)):
+        fpath = Path(fpath)
+        if delimiter is None or delimiter is ...:
+            delimiter = "\t" if fpath.suffix == ".tsv" else ","
+
+        with fpath.open("r") as file:
+            return load_csv(
+                file,
+                orient=orient,
+                header=header,
+                comment_start=comment_start,
+                strip_content=strip_content,
+                delimiter=delimiter,
+                **csv_reader_kwds,
+            )
+
+    if delimiter is None:
+        msg = f"Invalid argument {delimiter=}. (expected not None when {type(fpath)=})"
+        raise ValueError(msg)
+
+    if header:
+        reader_cls = DictReader
+    else:
+        reader_cls = csv.reader
+
+    reader = reader_cls(fpath, delimiter=delimiter, **csv_reader_kwds)
+    raw_data_lst = list(reader)
+
+    data_lst: List[Dict[str, Any]]
+    if header:
+        data_lst = raw_data_lst  # type: ignore
+    else:
+        data_lst = [
+            {str(j): data_ij for j, data_ij in enumerate(data_i)}
+            for data_i in raw_data_lst
+        ]
+    del raw_data_lst
+
+    if comment_start is not None:
+        data_lst = [
+            line
+            for line in data_lst
+            if not next(iter(line.values())).startswith(comment_start)
+        ]
+
+    if strip_content:
+        data_lst = [
+            {k.strip(): v.strip() for k, v in data_i.items()} for data_i in data_lst
+        ]
+
+    if orient == "dict":
+        result = list_dict_to_dict_list(data_lst, key_mode="same")  # type: ignore
+    elif orient == "list":
+        result = data_lst
+    else:
+        msg = f"Invalid argument {orient=}. (expected one of {get_args(Orient)})"
+        raise ValueError(msg)
+
+    return result  # type: ignore
+
+
+def _dump_csv_impl(
+    data: Union[Iterable[Mapping[str, Any]], Mapping[str, Iterable[Any]], Iterable],
+    to_builtins: bool = False,
+    header: Union[bool, Literal["auto"]] = "auto",
+    align_content: bool = False,
+    replace_newline_by: Optional[str] = "\\n",
+    **csv_writer_kwds,
+) -> str:
+    if to_builtins:
+        data = as_builtin(data)
 
     if header == "auto":
         header = isinstance_generic(
@@ -118,114 +265,7 @@ def dump_csv(
     content = file.getvalue()
     file.close()
 
-    if fpath is not None:
-        fpath.write_text(content)
-
     return content
-
-
-@overload
-def load_csv(
-    fpath: Union[str, Path, io.TextIOBase],
-    /,
-    *,
-    orient: Literal["dict"],
-    header: bool = True,
-    comment_start: Optional[str] = None,
-    strip_content: bool = False,
-    # CSV reader kwargs
-    delimiter: Optional[str] = None,
-    **csv_reader_kwds,
-) -> Dict[str, List[Any]]: ...
-
-
-@overload
-def load_csv(
-    fpath: Union[str, Path, io.TextIOBase],
-    /,
-    *,
-    orient: Literal["list"] = "list",
-    header: bool = True,
-    comment_start: Optional[str] = None,
-    strip_content: bool = False,
-    # CSV reader kwargs
-    delimiter: Optional[str] = None,
-    **csv_reader_kwds,
-) -> List[Dict[str, Any]]: ...
-
-
-def load_csv(
-    fpath: Union[str, Path, io.TextIOBase],
-    /,
-    *,
-    orient: Orient = "list",
-    header: bool = True,
-    comment_start: Optional[str] = None,
-    strip_content: bool = False,
-    # CSV reader kwargs
-    delimiter: Optional[str] = ",",
-    **csv_reader_kwds,
-) -> Union[List[Dict[str, Any]], Dict[str, List[Any]]]:
-    """Load content from csv filepath."""
-    if isinstance(fpath, (str, Path)):
-        fpath = Path(fpath)
-        if delimiter is None or delimiter is ...:
-            delimiter = "\t" if fpath.suffix == ".tsv" else ","
-
-        with open(fpath, "r") as file:
-            return load_csv(
-                file,
-                orient=orient,
-                header=header,
-                comment_start=comment_start,
-                strip_content=strip_content,
-                delimiter=delimiter,
-                **csv_reader_kwds,
-            )
-
-    if delimiter is None:
-        msg = f"Invalid argument {delimiter=}. (expected not None when {type(fpath)=})"
-        raise ValueError(msg)
-
-    if header:
-        reader_cls = DictReader
-    else:
-        reader_cls = csv.reader
-
-    reader = reader_cls(fpath, delimiter=delimiter, **csv_reader_kwds)
-    raw_data_lst = list(reader)
-
-    data_lst: List[Dict[str, Any]]
-    if header:
-        data_lst = raw_data_lst  # type: ignore
-    else:
-        data_lst = [
-            {str(j): data_ij for j, data_ij in enumerate(data_i)}
-            for data_i in raw_data_lst
-        ]
-    del raw_data_lst
-
-    if comment_start is not None:
-        data_lst = [
-            line
-            for line in data_lst
-            if not next(iter(line.values())).startswith(comment_start)
-        ]
-
-    if strip_content:
-        data_lst = [
-            {k.strip(): v.strip() for k, v in data_i.items()} for data_i in data_lst
-        ]
-
-    if orient == "dict":
-        result = list_dict_to_dict_list(data_lst, key_mode="same")  # type: ignore
-    elif orient == "list":
-        result = data_lst
-    else:
-        msg = f"Invalid argument {orient=}. (expected one of {get_args(Orient)})"
-        raise ValueError(msg)
-
-    return result  # type: ignore
 
 
 def _stringify(x: Any) -> Any:
