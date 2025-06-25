@@ -73,7 +73,11 @@ def register_as_builtin_fn(
 _AS_BUILTIN_REGISTRY.register(
     identity, custom_predicate=partial(is_builtin_scalar, strict=True)
 )
-_AS_BUILTIN_REGISTRY.register(str, Path)
+
+
+@register_as_builtin_fn(Path)
+def _path_to_builtin(x: Path) -> str:
+    return str(x)
 
 
 @register_as_builtin_fn(Enum)

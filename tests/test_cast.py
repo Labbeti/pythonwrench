@@ -18,7 +18,8 @@ class TestCast(TestCase):
         examples = [
             ("a", "a"),
             ((), []),
-            (Path("path/to/something"), "path/to/something"),
+            # note: on windows, forward slashes will be converted to backward slashes
+            (Path("path/to/something"), str(Path("path/to/something"))),
             (["c", ("d",), {1, ()}], ["c", ["d"], [1, []]]),
             (CustomClass(), {"a": 0, "b": "", "added_prop": None}),
         ]
