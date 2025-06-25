@@ -12,7 +12,8 @@ from pythonwrench.io import _setup_output_fpath
 
 def dump_json(
     data: Any,
-    fpath: Union[str, Path, None, TextIOWrapper] = None,
+    file: Union[str, Path, None, TextIOWrapper] = None,
+    /,
     *,
     overwrite: bool = True,
     make_parents: bool = True,
@@ -37,13 +38,13 @@ def dump_json(
     Returns:
         Dumped content as string.
     """
-    if isinstance(fpath, (str, Path)):
-        fpath = _setup_output_fpath(fpath, overwrite, make_parents)
+    if isinstance(file, (str, Path)):
+        file = _setup_output_fpath(file, overwrite, make_parents)
 
-        with fpath.open("w") as file:
+        with file.open("w") as opened_file:
             return dump_json(
                 data,
-                file,
+                opened_file,
                 overwrite=overwrite,
                 make_parents=make_parents,
                 to_builtins=to_builtins,
@@ -61,24 +62,25 @@ def dump_json(
         ensure_ascii=ensure_ascii,
         **json_dumps_kwds,
     )
-    if isinstance(fpath, TextIOWrapper):
-        fpath.write(content)
+
+    if isinstance(file, TextIOWrapper):
+        file.write(content)
 
     return content
 
 
-def load_json(fpath: Union[str, Path, TextIOWrapper], **json_loads_kwds) -> Any:
-    if isinstance(fpath, (str, Path)):
-        fpath = Path(fpath)
-        with fpath.open("r") as file:
-            return load_json(file, **json_loads_kwds)
+def load_json(file: Union[str, Path, TextIOWrapper], /, **json_loads_kwds) -> Any:
+    if isinstance(file, (str, Path)):
+        file = Path(file)
+        with file.open("r") as opened_file:
+            return load_json(opened_file, **json_loads_kwds)
 
-    elif isinstance(fpath, TextIOWrapper):
-        content = fpath.read()
+    elif isinstance(file, TextIOWrapper):
+        content = file.read()
         return _parse_json(content, **json_loads_kwds)
 
     else:
-        msg = f"Invalid argument type {type(fpath)}."
+        msg = f"Invalid argument type {type(file)}."
         raise TypeError(msg)
 
 

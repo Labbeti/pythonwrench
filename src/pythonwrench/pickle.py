@@ -13,7 +13,8 @@ from pythonwrench.io import _setup_output_fpath
 
 def dump_pickle(
     data: Any,
-    fpath: Union[str, Path, os.PathLike, None, BufferedWriter],
+    file: Union[str, Path, os.PathLike, None, BufferedWriter],
+    /,
     *,
     overwrite: bool = True,
     make_parents: bool = True,
@@ -21,12 +22,12 @@ def dump_pickle(
     **pkl_dumps_kwds,
 ) -> bytes:
     """Dump data to pickle format."""
-    if isinstance(fpath, (str, Path, os.PathLike)):
-        fpath = _setup_output_fpath(fpath, overwrite, make_parents)
-        with fpath.open("wb") as file:
+    if isinstance(file, (str, Path, os.PathLike)):
+        file = _setup_output_fpath(file, overwrite, make_parents)
+        with file.open("wb") as opened_file:
             return dump_pickle(
                 data,
-                file,
+                opened_file,
                 overwrite=overwrite,
                 make_parents=make_parents,
                 to_builtins=to_builtins,
@@ -35,22 +36,23 @@ def dump_pickle(
 
     if to_builtins:
         data = as_builtin(data)
-    content = pickle.dumps(data)
 
-    if isinstance(fpath, BufferedWriter):
-        fpath.write(content)
+    content = pickle.dumps(data, **pkl_dumps_kwds)
+
+    if isinstance(file, BufferedWriter):
+        file.write(content)
 
     return content
 
 
-def load_pickle(fpath: Union[str, Path, BufferedReader], **pkl_loads_kwds) -> Any:
+def load_pickle(file: Union[str, Path, BufferedReader], /, **pkl_loads_kwds) -> Any:
     """Load and parse pickle file."""
-    if isinstance(fpath, (str, Path, os.PathLike)):
-        fpath = Path(fpath)
-        with fpath.open("rb") as file:
+    if isinstance(file, (str, Path, os.PathLike)):
+        file = Path(file)
+        with file.open("rb") as file:
             return load_pickle(file, **pkl_loads_kwds)
 
-    content = fpath.read()
+    content = file.read()
     return _parse_pickle(content, **pkl_loads_kwds)
 
 

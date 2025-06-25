@@ -33,7 +33,8 @@ Orient = Literal["list", "dict"]
 
 def dump_csv(
     data: Union[Iterable[Mapping[str, Any]], Mapping[str, Iterable[Any]], Iterable],
-    fpath: Union[str, Path, None, TextIOWrapper] = None,
+    file: Union[str, Path, None, TextIOWrapper] = None,
+    /,
     *,
     overwrite: bool = True,
     make_parents: bool = True,
@@ -44,12 +45,12 @@ def dump_csv(
     **csv_writer_kwds,
 ) -> str:
     """Dump content to CSV format."""
-    if isinstance(fpath, (str, Path, PathLike)):
-        fpath = _setup_output_fpath(fpath, overwrite, make_parents)
-        with fpath.open("w") as file:
+    if isinstance(file, (str, Path, PathLike)):
+        file = _setup_output_fpath(file, overwrite, make_parents)
+        with file.open("w") as opened_file:
             return dump_csv(
                 data,
-                file,
+                opened_file,
                 overwrite=overwrite,
                 make_parents=make_parents,
                 to_builtins=to_builtins,
@@ -68,15 +69,15 @@ def dump_csv(
         **csv_writer_kwds,
     )
 
-    if isinstance(fpath, TextIOWrapper):
-        fpath.write(content)
+    if isinstance(file, TextIOWrapper):
+        file.write(content)
 
     return content
 
 
 @overload
 def load_csv(
-    fpath: Union[str, Path, TextIOWrapper],
+    file: Union[str, Path, TextIOWrapper],
     /,
     *,
     orient: Literal["dict"],
@@ -91,7 +92,7 @@ def load_csv(
 
 @overload
 def load_csv(
-    fpath: Union[str, Path, TextIOWrapper],
+    file: Union[str, Path, TextIOWrapper],
     /,
     *,
     orient: Literal["list"] = "list",
@@ -105,7 +106,7 @@ def load_csv(
 
 
 def load_csv(
-    fpath: Union[str, Path, TextIOWrapper],
+    file: Union[str, Path, TextIOWrapper],
     /,
     *,
     orient: Orient = "list",
@@ -117,14 +118,14 @@ def load_csv(
     **csv_reader_kwds,
 ) -> Union[List[Dict[str, Any]], Dict[str, List[Any]]]:
     """Load content from csv filepath."""
-    if isinstance(fpath, (str, Path)):
-        fpath = Path(fpath)
+    if isinstance(file, (str, Path)):
+        file = Path(file)
         if delimiter is None or delimiter is ...:
-            delimiter = "\t" if fpath.suffix == ".tsv" else ","
+            delimiter = "\t" if file.suffix == ".tsv" else ","
 
-        with fpath.open("r") as file:
+        with file.open("r") as opened_file:
             return load_csv(
-                file,
+                opened_file,
                 orient=orient,
                 header=header,
                 comment_start=comment_start,
@@ -134,7 +135,7 @@ def load_csv(
             )
 
     if delimiter is None:
-        msg = f"Invalid argument {delimiter=}. (expected not None when {type(fpath)=})"
+        msg = f"Invalid argument {delimiter=}. (expected not None when {type(file)=})"
         raise ValueError(msg)
 
     if header:
@@ -142,7 +143,7 @@ def load_csv(
     else:
         reader_cls = csv.reader
 
-    reader = reader_cls(fpath, delimiter=delimiter, **csv_reader_kwds)
+    reader = reader_cls(file, delimiter=delimiter, **csv_reader_kwds)
     raw_data_lst = list(reader)
 
     data_lst: List[Dict[str, Any]]
