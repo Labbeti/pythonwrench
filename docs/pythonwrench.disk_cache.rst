@@ -1,7 +1,7 @@
-pythonwrench.dataclasses module
+pythonwrench.disk\_cache module
 ===============================
 
-.. automodule:: pythonwrench.dataclasses
+.. automodule:: pythonwrench.disk_cache
    :members:
    :undoc-members:
    :show-inheritance:

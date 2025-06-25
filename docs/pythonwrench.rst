@@ -3,8 +3,8 @@ pythonwrench package
 
 .. automodule:: pythonwrench
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 Subpackages
 -----------
@@ -23,11 +23,13 @@ Submodules
 
    pythonwrench.abc
    pythonwrench.argparse
+   pythonwrench.cast
    pythonwrench.checksum
    pythonwrench.csv
    pythonwrench.dataclasses
    pythonwrench.datetime
    pythonwrench.difflib
+   pythonwrench.disk_cache
    pythonwrench.entries
    pythonwrench.enum
    pythonwrench.functools
