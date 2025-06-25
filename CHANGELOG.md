@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.1.1] UNRELEASED
+## [0.2.0] 2025-06-25
 ### Added
 - Python 3.8 support.
 - `T_BuiltinNumber` and `T_BuiltinScalar` are covariant by default.
