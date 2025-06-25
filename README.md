@@ -3,7 +3,7 @@
 <center>
 
 <a href="https://www.python.org/">
-    <img alt="Python" src="https://img.shields.io/badge/-Python 3.9+-blue?style=for-the-badge&logo=python&logoColor=white">
+    <img alt="Python" src="https://img.shields.io/badge/-Python 3.8+-blue?style=for-the-badge&logo=python&logoColor=white">
 </a>
 <a href="https://github.com/Labbeti/pythonwrench/actions">
     <img alt="Build" src="https://img.shields.io/github/actions/workflow/status/Labbeti/pythonwrench/test.yaml?branch=main&style=for-the-badge&logo=github">
@@ -29,7 +29,7 @@ With uv:
 uv add pythonwrench
 ```
 
-This library works on all Python versions **>=3.9**, requires only `typing_extensions>=4.10.0`, and runs on **Linux, Mac and Windows** systems.
+This library has been tested on all Python versions **3.8 - 3.13**, requires only `typing_extensions>=4.10.0`, and runs on **Linux, Mac and Windows** systems.
 
 ## Examples
 

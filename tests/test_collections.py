@@ -25,6 +25,8 @@ from pythonwrench.collections import (
     shuffled,
     unflat_dict_of_dict,
     unflat_list_of_list,
+    union_dicts,
+    union_lists,
 )
 from pythonwrench.re import get_key_fn
 from pythonwrench.typing import isinstance_generic
@@ -276,6 +278,18 @@ class TestShuffle(TestCase):
     def test_example_1(self) -> None:
         x = [random.randint(0, 10) for _ in range(100)]
         assert Counter(shuffled(x)) == Counter(x)
+
+
+class TestReduce(TestCase):
+    def test_union_dicts(self) -> None:
+        dicts = [{"a": 1}, {"a": 2, "b": 3}, {"c": 4}, {"b": 5}]
+        expected = {"a": 2, "b": 5, "c": 4}
+        assert union_dicts(dicts) == expected
+
+    def test_union_lists(self) -> None:
+        lists = [[1, 3, 2], [3, 4, 1]]
+        expected = [1, 3, 2, 4]
+        assert union_lists(lists) == expected
 
 
 if __name__ == "__main__":

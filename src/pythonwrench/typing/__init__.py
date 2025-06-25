@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from .checks import (
+    is_builtin_collection,
     is_builtin_number,
     is_builtin_obj,
     is_builtin_scalar,

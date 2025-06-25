@@ -1,7 +1,7 @@
-pythonwrench.math module
+pythonwrench.cast module
 ========================
 
-.. automodule:: pythonwrench.math
+.. automodule:: pythonwrench.cast
    :members:
    :undoc-members:
    :show-inheritance:

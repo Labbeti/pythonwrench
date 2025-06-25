@@ -3,6 +3,7 @@
 
 import unittest
 from dataclasses import dataclass, field
+from typing import List, Tuple
 from unittest import TestCase
 
 from pythonwrench.dataclasses import get_defaults_values, is_dataclass_instance
@@ -12,8 +13,8 @@ from pythonwrench.dataclasses import get_defaults_values, is_dataclass_instance
 class Dummy:
     a: int
     b: str = "b"
-    c: tuple[int, ...] = ()
-    d: list[str] = field(default_factory=list)
+    c: Tuple[int, ...] = ()
+    d: List[str] = field(default_factory=list)
 
 
 class TestDataclass(TestCase):

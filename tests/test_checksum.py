@@ -8,6 +8,7 @@ from unittest import TestCase
 
 from pythonwrench.checksum import checksum_any
 from pythonwrench.collections import all_ne
+from pythonwrench.math import nextafter
 
 
 class TestChecksum(TestCase):
@@ -39,11 +40,11 @@ class TestChecksum(TestCase):
 
     def test_smallest_diff(self) -> None:
         x0 = random.random()
-        x1 = math.nextafter(x0, 1.0)
+        x1 = nextafter(x0, 1.0)
         assert x0 != x1
         assert checksum_any(x0) != checksum_any(x1)
 
-        x1 = math.nextafter(x0, -1.0)
+        x1 = nextafter(x0, -1.0)
         assert x0 != x1
         assert checksum_any(x0) != checksum_any(x1)
 

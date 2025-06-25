@@ -3,6 +3,7 @@
 
 import os
 import unittest
+from typing import Dict
 from unittest import TestCase
 
 import pythonwrench as pw
@@ -37,8 +38,8 @@ class TestReadmeExamples(TestCase):
         # Behaves like builtin isinstance() :
         assert pw.isinstance_generic({"a": 1, "b": 2}, dict)
         # But works with generic types !
-        assert pw.isinstance_generic({"a": 1, "b": 2}, dict[str, int])
-        assert not pw.isinstance_generic({"a": 1, "b": 2}, dict[str, str])
+        assert pw.isinstance_generic({"a": 1, "b": 2}, Dict[str, int])
+        assert not pw.isinstance_generic({"a": 1, "b": 2}, Dict[str, str])
 
     def test_typing_example_2(self) -> None:
         # Combines Iterable and Sized !

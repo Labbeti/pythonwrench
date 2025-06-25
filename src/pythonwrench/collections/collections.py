@@ -10,6 +10,7 @@ from typing import (
     Callable,
     Dict,
     Generator,
+    Hashable,
     Iterable,
     List,
     Literal,
@@ -28,11 +29,13 @@ from typing_extensions import TypeGuard, TypeIs
 
 from pythonwrench.collections.prop import all_eq
 from pythonwrench.collections.reducers import reduce_or
-from pythonwrench.functools import function_alias, identity
+from pythonwrench.functools import identity
+from pythonwrench.semver import Version
 from pythonwrench.typing.checks import is_builtin_scalar, isinstance_generic
 from pythonwrench.typing.classes import T_BuiltinScalar
 
-K = TypeVar("K", covariant=True)
+K = TypeVar("K", covariant=True, bound=Hashable)
+
 T = TypeVar("T", covariant=True)
 U = TypeVar("U", covariant=True)
 V = TypeVar("V", covariant=True)
@@ -667,11 +670,21 @@ def unflat_list_of_list(
     return lst
 
 
-@function_alias(reduce_or)
-def union_dicts(*args, **kwargs): ...
+def union_dicts(dicts: Iterable[Dict[K, V]]) -> Dict[K, V]:
+    if Version.python() >= Version("3.9.0"):
+        return reduce_or(*dicts)
+
+    it = iter(dicts)
+    try:
+        dic0 = next(it)
+    except StopIteration:
+        return {}
+    for dic in it:
+        dic0.update(dic)
+    return dic0
 
 
-def union_lists(lst_of_lst: Iterable[Iterable[T]]) -> List[T]:
+def union_lists(lst_of_lst: Iterable[Iterable[K]]) -> List[K]:
     """Performs union of elements in lists (like set union), but keep their original order."""
     out = {}
     for lst_i in lst_of_lst:

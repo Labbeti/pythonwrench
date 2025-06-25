@@ -106,8 +106,8 @@ class TestIsInstanceGuard(TestCase):
 
         assert isinstance_generic(x, int)
         assert isinstance_generic(x, Number)
-        assert isinstance_generic(x, Optional[int])
-        assert isinstance_generic(x, Union[int, str])
+        assert isinstance_generic(x, Optional[int])  # type: ignore
+        assert isinstance_generic(x, Union[int, str])  # type: ignore
         assert isinstance_generic(x, Literal[1])  # type: ignore
         assert isinstance_generic(x, Literal[2, None, 1, "a"])  # type: ignore
 
@@ -259,6 +259,18 @@ class TestIsInstanceGuard(TestCase):
         assert isinstance_generic(("a", "b", "c"), (List[str], Tuple[str, ...]))
         assert isinstance_generic((), (List[str], Tuple[str, ...]))
         assert not isinstance_generic(("a",), (str,))
+
+    def test_edges_cases(self) -> None:
+        assert not isinstance_generic(1, Generator)
+        assert isinstance_generic((i for i in range(5)), Generator)
+
+        with self.assertRaises(TypeError):
+            assert not isinstance_generic(
+                (i for i in range(5)), Generator[int, None, None]
+            )
+
+        with self.assertRaises(TypeError):
+            assert not isinstance_generic(1, Generator[int, None, None])
 
 
 if __name__ == "__main__":

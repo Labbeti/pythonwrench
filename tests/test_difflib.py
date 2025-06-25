@@ -7,7 +7,7 @@ from unittest import TestCase
 from pythonwrench.difflib import find_closest_in_list
 
 
-class TestMath(TestCase):
+class TestDifflib(TestCase):
     def test_find(self) -> None:
         lst = ["a", "ghi", "abcd", "defff", "dff", ""]
 
