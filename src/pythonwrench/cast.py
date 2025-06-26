@@ -2,12 +2,13 @@
 # -*- coding: utf-8 -*-
 
 from argparse import Namespace
+from collections import Counter
 from dataclasses import asdict
 from enum import Enum
 from functools import partial
 from pathlib import Path
 from re import Pattern
-from typing import Any, Callable, Dict, Iterable, Mapping, Optional, TypeVar, overload
+from typing import Any, Callable, Dict, Iterable, Mapping, Optional, TypeVar, overload, Hashable
 
 from pythonwrench._core import ClassOrTuple, Predicate, _FunctionRegistry
 from pythonwrench.functools import identity
@@ -20,8 +21,8 @@ from pythonwrench.typing import (
 
 __all__ = ["register_as_builtin_fn", "as_builtin"]
 
-
-K = TypeVar("K")
+T = TypeVar("T")
+K = TypeVar("K", bound=Hashable)
 V = TypeVar("V")
 
 _AS_BUILTIN_REGISTRY = _FunctionRegistry[Any]()
@@ -75,6 +76,11 @@ _AS_BUILTIN_REGISTRY.register(
 )
 
 
+@register_as_builtin_fn(Counter)
+def _counter_to_builtin(x: Counter[T]) -> Dict[T, int]:
+    return dict(x)
+
+
 @register_as_builtin_fn(Path)
 def _path_to_builtin(x: Path) -> str:
     return str(x)
@@ -113,6 +119,10 @@ def _mapping_to_builtin(x: Mapping) -> Any:
 @register_as_builtin_fn(Iterable, priority=-100)
 def _iterable_to_builtin(x: Iterable) -> Any:
     return [as_builtin(xi) for xi in x]
+
+
+@overload
+def as_builtin(x: Counter[T]) -> Dict[T, int]: ...
 
 
 @overload
