@@ -8,7 +8,17 @@ from enum import Enum
 from functools import partial
 from pathlib import Path
 from re import Pattern
-from typing import Any, Callable, Dict, Iterable, Mapping, Optional, TypeVar, overload, Hashable
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Hashable,
+    Iterable,
+    Mapping,
+    Optional,
+    TypeVar,
+    overload,
+)
 
 from pythonwrench._core import ClassOrTuple, Predicate, _FunctionRegistry
 from pythonwrench.functools import identity
@@ -77,7 +87,7 @@ _AS_BUILTIN_REGISTRY.register(
 
 
 @register_as_builtin_fn(Counter)
-def _counter_to_builtin(x: Counter[T]) -> Dict[T, int]:
+def _counter_to_builtin(x: Counter) -> Dict[Any, int]:
     return dict(x)
 
 
