@@ -345,7 +345,8 @@ def check_args_types(fn: Callable[P, T]) -> Callable[P, T]:
 
     def _wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
         num_positional = len(args)
-        given_kwargs = dict(zip(argnames[:num_positional], args)) | kwargs
+        given_kwargs = dict(zip(argnames[:num_positional], args))
+        given_kwargs.update(kwargs)
 
         msgs = []
         for i, (k, v) in enumerate(given_kwargs.items()):
