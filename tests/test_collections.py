@@ -22,6 +22,7 @@ from pythonwrench.collections import (
     is_sorted,
     list_dict_to_dict_list,
     recursive_generator,
+    reduce_add,
     shuffled,
     unflat_dict_of_dict,
     unflat_list_of_list,
@@ -290,6 +291,30 @@ class TestReduce(TestCase):
         lists = [[1, 3, 2], [3, 4, 1]]
         expected = [1, 3, 2, 4]
         assert union_lists(lists) == expected
+
+    def test_reduce_add(self) -> None:
+        args = [1, 2, 3]
+
+        assert reduce_add(args) == 6
+        assert reduce_add(args, start=-3) == 3
+
+        assert reduce_add(*args) == 6
+        assert reduce_add(*args, start=10) == 16
+
+        assert reduce_add([], start=2) == 2
+        assert reduce_add(start=4) == 4
+
+        with self.assertRaises(ValueError):
+            assert reduce_add([])
+
+        with self.assertRaises(ValueError):
+            assert reduce_add()
+
+        assert reduce_add(args, args) == [1, 2, 3, 1, 2, 3]
+        assert reduce_add(args, args, start=[4]) == [4, 1, 2, 3, 1, 2, 3]
+
+        with self.assertRaises(TypeError):
+            assert reduce_add(args, args, start=1)
 
 
 if __name__ == "__main__":
