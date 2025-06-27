@@ -12,6 +12,7 @@ from types import FunctionType, MethodType
 from typing import (
     Any,
     Callable,
+    Generator,
     Iterable,
     Mapping,
     Optional,
@@ -233,6 +234,12 @@ def checksum_range(x: range, **kwargs) -> int:
         get_fullname(x)
     )
     return _checksum_iterable([x.start, x.stop, x.step], **kwargs)
+
+
+@register_checksum_fn(Generator, priority=100)
+def checksum_generator(x: Generator, **kwargs) -> int:
+    msg = f"Cannot compute checksum for the generator object {type(x)=}, it will be consumed."
+    raise RuntimeError(msg)
 
 
 @register_checksum_fn(MethodType)
