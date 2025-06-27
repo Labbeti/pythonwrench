@@ -45,6 +45,7 @@ def register_checksum_fn(
     class_or_tuple: ClassOrTuple,
     *,
     custom_predicate: None = None,
+    priority: int = 0,
 ) -> Callable: ...
 
 
@@ -53,6 +54,7 @@ def register_checksum_fn(
     class_or_tuple: None = None,
     *,
     custom_predicate: Predicate,
+    priority: int = 0,
 ) -> Callable: ...
 
 
@@ -60,6 +62,7 @@ def register_checksum_fn(
     class_or_tuple: Optional[ClassOrTuple] = None,
     *,
     custom_predicate: Optional[Predicate] = None,
+    priority: int = 0,
 ) -> Callable:
     """Decorator to add a checksum function.
     ```
@@ -75,6 +78,7 @@ def register_checksum_fn(
     return _CHECKSUM_REGISTRY.register_decorator(
         class_or_tuple,
         custom_predicate=custom_predicate,
+        priority=priority,
     )
 
 

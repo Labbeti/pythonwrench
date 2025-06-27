@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import inspect
 import logging
 import sys
 from numbers import Integral
+from types import FunctionType, MethodType
 from typing import (
     Any,
     Dict,
@@ -16,6 +18,7 @@ from typing import (
     Type,
     TypedDict,
     Union,
+    Callable,
 )
 
 import typing_extensions
@@ -27,6 +30,7 @@ from typing_extensions import (
     TypeVar,
     get_args,
     get_origin,
+    ParamSpec,
 )
 
 from pythonwrench.typing.classes import (
@@ -39,6 +43,7 @@ from pythonwrench.typing.classes import (
 )
 
 T = TypeVar("T")
+P = ParamSpec("P")
 
 logger = logging.getLogger(__name__)
 
@@ -315,3 +320,52 @@ def is_sequence_str(
         and isinstance(x, Sequence)
         and all(isinstance(xi, str) for xi in x)
     )
+
+
+def check_args_types(fn: Callable[P, T]) -> Callable[P, T]:
+    """Decorator to check argument types before call to a function.
+
+    ```
+    >>> import pythonwrench as pw
+
+    >>> @pw.check_args_types
+    >>> def f(a: int, b: str) -> str:
+    >>>     return a * b
+    >>> f(1, "a")  # pass check
+    >>> f(1, 2)  # raises TypeError from decorator
+    ```
+    """
+    if not isinstance(fn, (FunctionType, MethodType)):
+        msg = f"Invalid argument type {type(fn)}. (expected function or method)"
+        raise TypeError(msg)
+
+    parameters = inspect.signature(fn).parameters
+    annotations = {k: v.annotation for k, v in parameters.items()}
+    argnames = list(annotations.keys())
+
+    def _wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
+        num_positional = len(args)
+        given_kwargs = dict(zip(argnames[:num_positional], args)) | kwargs
+
+        msgs = []
+        for i, (k, v) in enumerate(given_kwargs.items()):
+            if isinstance_generic(v, annotations[k]):
+                continue
+
+            if i < num_positional:
+                msg = f" - invalid argument n°{i + 1} with value {v!r}; expected an instance of {annotations[k]}."
+            else:
+                msg = f" - invalid argument '{k}' with value {v!r}; expected an instance of {annotations[k]}."
+            msgs.append(msg)
+
+        if len(msgs) > 0:
+            msgs = [
+                f"{fn.__name__}() has {len(msgs)}/{len(given_kwargs)} invalid argument(s):",
+            ] + msgs
+            msg = "\n".join(msgs)
+            raise TypeError(msg)
+
+        result = fn(*args, **kwargs)
+        return result
+
+    return _wrapper
