@@ -122,3 +122,9 @@ class SupportsMul(Protocol):
 class SupportsOr(Protocol):
     def __or__(self, other, /):
         raise NotImplementedError
+
+
+@runtime_checkable
+class SupportsDiv(Protocol):
+    def __div__(self, other, /):
+        raise NotImplementedError
