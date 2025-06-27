@@ -26,7 +26,6 @@ maintainers = [
 ]
 dynamic = ["version"]
 dependencies = [
-    "coverage[toml]>=7.6.1",
     "typing-extensions>=4.10.0",
 ]
 
@@ -74,7 +73,7 @@ pythonwrench = { workspace = true }
 
 [dependency-groups]
 dev = [
-    "coverage[toml]",
+    "coverage[toml]>=7.6.1",
     "flake8",
     "ipykernel",
     "ipython",
