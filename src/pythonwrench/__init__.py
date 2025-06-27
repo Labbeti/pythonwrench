@@ -152,6 +152,7 @@ from .typing import (
     SupportsOr,
     T_BuiltinNumber,
     T_BuiltinScalar,
+    check_args_types,
     is_builtin_collection,
     is_builtin_number,
     is_builtin_obj,
@@ -167,7 +168,6 @@ from .typing import (
     is_sequence_str,
     is_typed_dict,
     isinstance_generic,
-    check_args_types,
 )
 from .warnings import deprecated_alias, deprecated_function, warn_once
 

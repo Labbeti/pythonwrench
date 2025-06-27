@@ -25,12 +25,12 @@ from typing_extensions import NotRequired
 
 from pythonwrench.typing import (
     NoneType,
+    check_args_types,
     is_dataclass_instance,
     is_iterable_str,
     is_namedtuple_instance,
     is_typed_dict,
     isinstance_generic,
-    check_args_types,
 )
 
 

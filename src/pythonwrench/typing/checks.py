@@ -8,6 +8,7 @@ from numbers import Integral
 from types import FunctionType, MethodType
 from typing import (
     Any,
+    Callable,
     Dict,
     Generator,
     Iterable,
@@ -18,19 +19,18 @@ from typing import (
     Type,
     TypedDict,
     Union,
-    Callable,
 )
 
 import typing_extensions
 from typing_extensions import (
     NotRequired,
+    ParamSpec,
     Required,
     TypeGuard,
     TypeIs,
     TypeVar,
     get_args,
     get_origin,
-    ParamSpec,
 )
 
 from pythonwrench.typing.classes import (

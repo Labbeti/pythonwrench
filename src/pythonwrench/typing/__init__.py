@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from .checks import (
+    check_args_types,
     is_builtin_collection,
     is_builtin_number,
     is_builtin_obj,
@@ -17,7 +18,6 @@ from .checks import (
     is_sequence_str,
     is_typed_dict,
     isinstance_generic,
-    check_args_types,
 )
 from .classes import (
     BuiltinCollection,
