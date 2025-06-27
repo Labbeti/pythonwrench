@@ -132,7 +132,7 @@ def _iterable_to_builtin(x: Iterable) -> Any:
 
 
 @overload
-def as_builtin(x: Counter[T]) -> Dict[T, int]: ...
+def as_builtin(x: Counter) -> Dict[Any, int]: ...
 
 
 @overload
