@@ -3,8 +3,8 @@ pythonwrench package
 
 .. automodule:: pythonwrench
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Subpackages
 -----------
