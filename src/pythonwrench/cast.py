@@ -126,7 +126,7 @@ def _mapping_to_builtin(x: Mapping) -> Any:
     return {as_builtin(k): as_builtin(v) for k, v in x.items()}
 
 
-@register_as_builtin_fn(Iterable, priority=-100)
+@register_as_builtin_fn(Iterable, priority=-200)
 def _iterable_to_builtin(x: Iterable) -> Any:
     return [as_builtin(xi) for xi in x]
 
