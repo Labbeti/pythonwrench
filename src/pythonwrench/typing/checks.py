@@ -48,11 +48,54 @@ P = ParamSpec("P")
 logger = logging.getLogger(__name__)
 
 
-def is_typed_dict(x: Any) -> TypeGuard[type]:
-    if sys.version_info.major == 3 and sys.version_info.minor < 9:
-        return x.__class__.__name__ == "_TypedDictMeta"
-    else:
-        return hasattr(x, "__orig_bases__") and TypedDict in x.__orig_bases__
+def check_args_types(fn: Callable[P, T]) -> Callable[P, T]:
+    """Decorator to check argument types before call to a function.
+
+    ```
+    >>> import pythonwrench as pw
+
+    >>> @pw.check_args_types
+    >>> def f(a: int, b: str) -> str:
+    >>>     return a * b
+    >>> f(1, "a")  # pass check
+    >>> f(1, 2)  # raises TypeError from decorator
+    ```
+    """
+    if not isinstance(fn, (FunctionType, MethodType)):
+        msg = f"Invalid argument type {type(fn)}. (expected function or method)"
+        raise TypeError(msg)
+
+    parameters = inspect.signature(fn).parameters
+    annotations = {k: v.annotation for k, v in parameters.items()}
+    argnames = list(annotations.keys())
+
+    def _wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
+        num_positional = len(args)
+        given_kwargs = dict(zip(argnames[:num_positional], args))
+        given_kwargs.update(kwargs)
+
+        msgs = []
+        for i, (k, v) in enumerate(given_kwargs.items()):
+            if isinstance_generic(v, annotations[k]):
+                continue
+
+            if i < num_positional:
+                msg = f" - invalid argument n°{i + 1} with value {v!r}; expected an instance of {annotations[k]}."
+            else:
+                msg = f" - invalid argument '{k}' with value {v!r}; expected an instance of {annotations[k]}."
+            msgs.append(msg)
+
+        if len(msgs) > 0:
+            msgs = [
+                f"{fn.__name__}() has {len(msgs)}/{len(given_kwargs)} invalid argument(s):",
+            ] + msgs
+            msg = "\n".join(msgs)
+            raise TypeError(msg)
+
+        result = fn(*args, **kwargs)
+        return result
+
+    return _wrapper
 
 
 def isinstance_generic(
@@ -187,14 +230,6 @@ def _isinstance_generic_typed_dict(x: Any, target_type: type) -> bool:
     return True
 
 
-def is_builtin_obj(x: Any) -> bool:
-    """Returns True if object is an instance of a builtin object.
-
-    Note: If the object is an instance of a custom subtype of a builtin object, this function returns False.
-    """
-    return x.__class__.__module__ == "builtins" and not isinstance(x, type)
-
-
 def is_builtin_collection(x: Any, *, strict: bool = False) -> TypeIs[BuiltinCollection]:
     """Returns True if x is an instance of a builtin collection type (list, tuple, dict, set, frozenset).
 
@@ -219,6 +254,14 @@ def is_builtin_number(x: Any, *, strict: bool = False) -> TypeIs[BuiltinNumber]:
     return isinstance(x, (int, float, bool, complex))
 
 
+def is_builtin_obj(x: Any) -> bool:
+    """Returns True if object is an instance of a builtin object.
+
+    Note: If the object is an instance of a custom subtype of a builtin object, this function returns False.
+    """
+    return x.__class__.__module__ == "builtins" and not isinstance(x, type)
+
+
 def is_builtin_scalar(x: Any, *, strict: bool = False) -> TypeIs[BuiltinScalar]:
     """Returns True if x is an instance of a builtin scalar type (int, float, bool, complex, NoneType, str, bytes).
 
@@ -237,11 +280,6 @@ def is_dataclass_instance(x: Any) -> TypeIs[DataclassInstance]:
     Unlike function `dataclasses.is_dataclass`, this function returns False for a dataclass type.
     """
     return isinstance_generic(x, DataclassInstance)
-
-
-def is_namedtuple_instance(x: Any) -> TypeIs[NamedTupleInstance]:
-    """Returns True if argument is a NamedTuple."""
-    return isinstance_generic(x, NamedTupleInstance)
 
 
 def is_iterable_bool(
@@ -310,6 +348,11 @@ def is_iterable_str(
     return isinstance_generic(x, Iterable[str])
 
 
+def is_namedtuple_instance(x: Any) -> TypeIs[NamedTupleInstance]:
+    """Returns True if argument is a NamedTuple."""
+    return isinstance_generic(x, NamedTupleInstance)
+
+
 def is_sequence_str(
     x: Any,
     *,
@@ -322,51 +365,8 @@ def is_sequence_str(
     )
 
 
-def check_args_types(fn: Callable[P, T]) -> Callable[P, T]:
-    """Decorator to check argument types before call to a function.
-
-    ```
-    >>> import pythonwrench as pw
-
-    >>> @pw.check_args_types
-    >>> def f(a: int, b: str) -> str:
-    >>>     return a * b
-    >>> f(1, "a")  # pass check
-    >>> f(1, 2)  # raises TypeError from decorator
-    ```
-    """
-    if not isinstance(fn, (FunctionType, MethodType)):
-        msg = f"Invalid argument type {type(fn)}. (expected function or method)"
-        raise TypeError(msg)
-
-    parameters = inspect.signature(fn).parameters
-    annotations = {k: v.annotation for k, v in parameters.items()}
-    argnames = list(annotations.keys())
-
-    def _wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
-        num_positional = len(args)
-        given_kwargs = dict(zip(argnames[:num_positional], args))
-        given_kwargs.update(kwargs)
-
-        msgs = []
-        for i, (k, v) in enumerate(given_kwargs.items()):
-            if isinstance_generic(v, annotations[k]):
-                continue
-
-            if i < num_positional:
-                msg = f" - invalid argument n°{i + 1} with value {v!r}; expected an instance of {annotations[k]}."
-            else:
-                msg = f" - invalid argument '{k}' with value {v!r}; expected an instance of {annotations[k]}."
-            msgs.append(msg)
-
-        if len(msgs) > 0:
-            msgs = [
-                f"{fn.__name__}() has {len(msgs)}/{len(given_kwargs)} invalid argument(s):",
-            ] + msgs
-            msg = "\n".join(msgs)
-            raise TypeError(msg)
-
-        result = fn(*args, **kwargs)
-        return result
-
-    return _wrapper
+def is_typed_dict(x: Any) -> TypeGuard[type]:
+    if sys.version_info.major == 3 and sys.version_info.minor < 9:
+        return x.__class__.__name__ == "_TypedDictMeta"
+    else:
+        return hasattr(x, "__orig_bases__") and TypedDict in x.__orig_bases__

@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.2.1] UNRELEASED
+## [0.3.0] 2025-06-27
 ### Added
 - `check_args_type` decorator.
 
