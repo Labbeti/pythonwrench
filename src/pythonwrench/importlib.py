@@ -10,6 +10,8 @@ from importlib.util import find_spec
 from types import ModuleType
 from typing import Any, Dict, List
 
+from pythonwrench.warnings import warn_once
+
 DEFAULT_SKIPPED = (
     "reimport_all",
     "get_ipython",
@@ -29,6 +31,12 @@ logger = logging.getLogger(__name__)
 
 def is_available_package(package: str) -> bool:
     """Returns True if package is installed in the current python environment."""
+    if "-" in package:
+        warn_once(
+            f"Found character '-' in package name '{package}'. (it will be replaced by '_')"
+        )
+        package = package.replace("-", "_")
+
     try:
         return find_spec(package) is not None
     except AttributeError:

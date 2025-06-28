@@ -22,6 +22,9 @@ class TestImportlib(TestCase):
 
         assert not is_editable_package("typing_extensions")
 
+        assert is_available_package("pre-commit")
+        assert is_available_package("pre_commit")
+
 
 if __name__ == "__main__":
     unittest.main()
