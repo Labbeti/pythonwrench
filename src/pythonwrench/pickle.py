@@ -21,7 +21,19 @@ def dump_pickle(
     to_builtins: bool = False,
     **pkl_dumps_kwds,
 ) -> bytes:
-    """Dump data to pickle format."""
+    """Dump content to PICKLE format into bytes and/or file.
+
+    Args:
+        data: Data to dump to PICKLE.
+        file: Optional filepath to save dumped data. Not used if None. defaults to None.
+        overwrite: If True, overwrite target filepath. defaults to True.
+        make_parents: Build intermediate directories to filepath. defaults to True.
+        to_builtins: If True, converts data to builtin equivalent before saving. defaults to False.
+        **pkl_dumps_kwds: Other args passed to `pickle.dumps`.
+
+    Returns:
+        Dumped content as bytes.
+    """
     if isinstance(file, (str, Path, os.PathLike)):
         file = _setup_output_fpath(file, overwrite, make_parents)
         with file.open("wb") as opened_file:

@@ -20,6 +20,8 @@ U = TypeVar("U")
 
 
 class Compose(Generic[T, U]):
+    """Compose callables to chain calls sequentially."""
+
     @overload
     def __init__(self) -> None: ...
 
@@ -100,6 +102,22 @@ def filter_and_call(fn: Callable[..., T], **kwargs: Any) -> T:
 
 
 def function_alias(alternative: Callable[P, U]) -> Callable[..., Callable[P, U]]:
+    """Decorator to wrap function aliases.
+
+    Usage:
+    ```
+    >>> def f(a: int, b: str) -> str:
+    >>>    return a * b
+
+    >>> @function_alias(f)
+    >>> def g(*args, **kwargs): ...
+
+    >>> f(2, "a")
+    ... "aa"
+    >>> g(3, "b")  # calls function f() internally.
+    ... "bbb"
+    ```
+    """
     return _decorator_factory(alternative)
 
 

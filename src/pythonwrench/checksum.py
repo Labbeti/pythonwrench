@@ -88,6 +88,10 @@ def checksum_any(
     isinstance_fn: Callable[[Any, Union[type, tuple]], bool] = isinstance,
     **kwargs,
 ) -> int:
+    """Compute checksum integer value from an arbitrary object.
+
+    Supports most builtin types. Checksum can be used to compare objects.
+    """
     return _CHECKSUM_REGISTRY.apply(x, isinstance_fn=isinstance_fn, **kwargs)
 
 

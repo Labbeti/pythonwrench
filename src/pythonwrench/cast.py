@@ -172,9 +172,13 @@ def as_builtin(x: Any) -> Any: ...
 
 
 def as_builtin(x: Any) -> Any:
-    """Convert an object to a python builtin equivalent.
+    """Convert an object to a sanitized python builtin equivalent.
 
     This function can be used to sanitize data before saving to a JSON, YAML or CSV file.
+
+    Additional objects to convert can be added dynamically with `pythonwrench.register_as_builtin_fn` function decorator.
+
+    Note: By default, tuple objects are converted to list.
 
     Args:
         x: Object to convert to built-in equivalent.

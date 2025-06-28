@@ -44,6 +44,8 @@ class Version:
     """Version utility class following Semantic Versioning (SemVer) spec.
 
     Version format is: MAJOR.MINOR.PATCH[-PRERELEASE][+BUILDMETADATA]
+
+    Based on https://semver.org/.
     """
 
     major: int

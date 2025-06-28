@@ -33,7 +33,7 @@ def randstr(
     *,
     letters: Iterable[str] = string.ascii_letters,
 ) -> str:
-    """Returns a randomly generated string."""
+    """Returns a randomly generated string of a random range length."""
     assert low_or_size >= 0
     if high is None:
         size = low_or_size
