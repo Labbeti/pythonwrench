@@ -8,7 +8,7 @@ readme = "README.md"
 requires-python = ">=3.8"
 keywords = ["python", "tools", "utilities"]
 license = {file = "LICENSE"}
-# license-files = ["LICENSE"]  # unsupported by python 3.8, but will be requires in 2026
+# license-files = ["LICENSE"]  # unsupported by python 3.8, but will be required in 2026
 classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
