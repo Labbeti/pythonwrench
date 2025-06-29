@@ -7,7 +7,8 @@ description = "Set of tools for Python that could be in the standard library."
 readme = "README.md"
 requires-python = ">=3.8"
 keywords = ["python", "tools", "utilities"]
-license-files = ["LICENSE"]
+license = {file = "LICENSE"}
+# license-files = ["LICENSE"]  # unsupported by python 3.8, but will be requires in 2026
 classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
