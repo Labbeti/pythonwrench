@@ -45,7 +45,7 @@ class CacheMeta(TypedDict):
     input: Optional[Tuple[Any, Any]]
 
 
-DEFAULT_CACHE_DPATH = Path.home().joinpath(".cache", "disk_cache")
+_DEFAULT_CACHE_DPATH = Path.home().joinpath(".cache", "disk_cache")
 
 
 logger = logging.getLogger(__name__)
@@ -295,7 +295,7 @@ def _disk_cache_impl(
 
 def get_cache_dpath(cache_dpath: Union[str, Path, None] = None) -> Path:
     if cache_dpath is None:
-        cache_dpath = DEFAULT_CACHE_DPATH
+        cache_dpath = _DEFAULT_CACHE_DPATH
     else:
         cache_dpath = Path(cache_dpath)
     return cache_dpath

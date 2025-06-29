@@ -10,7 +10,9 @@ from importlib.util import find_spec
 from types import ModuleType
 from typing import Any, Dict, List
 
-DEFAULT_SKIPPED = (
+from pythonwrench.warnings import warn_once
+
+_DEFAULT_SKIPPED = (
     "reimport_all",
     "get_ipython",
     "exit",
@@ -29,6 +31,12 @@ logger = logging.getLogger(__name__)
 
 def is_available_package(package: str) -> bool:
     """Returns True if package is installed in the current python environment."""
+    if "-" in package:
+        warn_once(
+            f"Found character '-' in package name '{package}'. (it will be replaced by '_')"
+        )
+        package = package.replace("-", "_")
+
     try:
         return find_spec(package) is not None
     except AttributeError:
@@ -40,6 +48,7 @@ def is_available_package(package: str) -> bool:
 
 
 def is_editable_package(package: str) -> bool:
+    """Returns True if package is installed in editable mode in the current python environment."""
     # TODO: check if this works with package containing - or _
     try:
         direct_url = Distribution.from_name(package).read_text("direct_url.json")
@@ -98,6 +107,7 @@ def reload_submodules(
     only_editable: bool = True,
     only_loaded: bool = False,
 ) -> List[ModuleType]:
+    """Reload all submodule recursively."""
     modules = (module,) + others
     candidates: Dict[ModuleType, None] = {}
     for module in modules:
@@ -114,7 +124,7 @@ def reload_submodules(
         try:
             importlib.reload(candidate)
         except ModuleNotFoundError as err:
-            msg = f"Did the module '{candidate.__name__}' has been renamed after starting execution?"
+            msg = f"ModuleNotFound: did this module '{candidate.__name__}' has been renamed after starting execution?"
             logger.warning(msg)
             raise err
 
@@ -122,6 +132,7 @@ def reload_submodules(
 
 
 def reload_editable_packages(*, verbose: int = 0) -> List[ModuleType]:
+    """Reload all submodules of editable packages already imported."""
     pkg_names = {name.split(".")[0] for name in sys.modules.keys()}
     editable_packages = [
         sys.modules[name] for name in pkg_names if is_editable_package(name)

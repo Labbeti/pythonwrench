@@ -22,6 +22,7 @@ class TestCast(TestCase):
             (Path("path/to/something"), str(Path("path/to/something"))),
             (["c", ("d",), {1, ()}], ["c", ["d"], [1, []]]),
             (CustomClass(), {"a": 0, "b": "", "added_prop": None}),
+            ({"a": (1, 2)}, {"a": [1, 2]}),
         ]
 
         @register_as_builtin_fn(CustomClass)

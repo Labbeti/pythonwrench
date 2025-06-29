@@ -44,7 +44,22 @@ def dump_csv(
     replace_newline_by: Optional[str] = "\\n",
     **csv_writer_kwds,
 ) -> str:
-    """Dump content to CSV format."""
+    """Dump content to CSV format into string and/or file.
+
+    Args:
+        data: Data to serialize. Can be a list of dicts, dicts of lists or list of lists.
+        file: File path or buffer to write serialized data.
+        overwrite: If True, overwrite target filepath. defaults to True.
+        make_parents: Build intermediate directories to filepath. defaults to True.
+        to_builtins: If True, converts data to builtin equivalent before saving. defaults to False.
+        header: Indicates if CSV must have header. If "auto", an header is added when a dict of list or list of dicts is passed. defaults to "auto".
+        align_content: If True, center content at the middle of each row for better visualization. defaults to False.
+        replace_newline_by: Replace newline character to avoid newline in CSV content. defaults to "\\n".
+        **csv_writer_kwds: Others optional arguments passed to CSV writer object.
+
+    Returns:
+        Dumped content as string.
+    """
     if isinstance(file, (str, Path, PathLike)):
         file = _setup_output_fpath(file, overwrite, make_parents)
         with file.open("w") as opened_file:

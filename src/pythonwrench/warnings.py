@@ -47,7 +47,7 @@ def deprecated_alias(
     msg_fmt: str = "Deprecated call to '{fn_name}', use '{alternative_name}' instead.",
     warn_fn: Callable[[str], Any] = partial(warn_once, category=DeprecationWarning),
 ) -> Callable[..., Callable[P, U]]:
-    """Decorator to wrap deprecated aliases."""
+    """Decorator to wrap deprecated function aliases."""
     alternative_name = alternative.__name__ if alternative is not None else "None"
 
     def pre_fn(fn, *args, **kwargs):

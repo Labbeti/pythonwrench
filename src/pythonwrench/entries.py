@@ -23,6 +23,7 @@ def get_package_repository_path() -> str:
 
 
 def get_install_info() -> Dict[str, Union[str, int]]:
+    """Returns current installation information. Meant for debugging."""
     install_info = {
         "pythonwrench": pythonwrench.__version__,
         "python": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
@@ -48,6 +49,7 @@ def print_tree(
     max_depth: int = sys.maxsize,
     followlinks: bool = False,
 ) -> None:
+    """Print directory tree."""
     num_dirs = 0
     num_files = 0
     for line in tree_iter(

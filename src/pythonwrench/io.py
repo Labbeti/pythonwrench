@@ -42,7 +42,7 @@ def _setup_output_fpath(
     make_parents: bool,
     absolute: bool = True,
 ) -> Union[Path, None, TextIOWrapper]:
-    """Resolve & expand path and create intermediate parents."""
+    """Resolve path, expand path and create intermediate parents."""
     if not isinstance(fpath, (str, Path, os.PathLike)):
         return fpath
 

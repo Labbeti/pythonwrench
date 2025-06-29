@@ -59,11 +59,26 @@ class NamedTupleInstance(Protocol):
 
 
 @runtime_checkable
-class SupportsIterLen(Protocol[T]):
-    def __iter__(self) -> Iterator[T]:
+class SupportsAdd(Protocol):
+    def __add__(self, other, /):
         raise NotImplementedError
 
-    def __len__(self) -> int:
+
+@runtime_checkable
+class SupportsAnd(Protocol):
+    def __and__(self, other, /):
+        raise NotImplementedError
+
+
+@runtime_checkable
+class SupportsBool(Protocol):
+    def __bool__(self) -> bool:
+        raise NotImplementedError
+
+
+@runtime_checkable
+class SupportsDiv(Protocol):
+    def __div__(self, other, /):
         raise NotImplementedError
 
 
@@ -89,26 +104,17 @@ class SupportsGetitemIterLen(Protocol[T]):
 
 
 @runtime_checkable
-class SupportsLen(Protocol):
+class SupportsIterLen(Protocol[T]):
+    def __iter__(self) -> Iterator[T]:
+        raise NotImplementedError
+
     def __len__(self) -> int:
         raise NotImplementedError
 
 
 @runtime_checkable
-class SupportsBool(Protocol):
-    def __bool__(self) -> bool:
-        raise NotImplementedError
-
-
-@runtime_checkable
-class SupportsAdd(Protocol):
-    def __add__(self, other, /):
-        raise NotImplementedError
-
-
-@runtime_checkable
-class SupportsAnd(Protocol):
-    def __and__(self, other, /):
+class SupportsLen(Protocol):
+    def __len__(self) -> int:
         raise NotImplementedError
 
 

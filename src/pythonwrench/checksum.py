@@ -12,6 +12,7 @@ from types import FunctionType, MethodType
 from typing import (
     Any,
     Callable,
+    Generator,
     Iterable,
     Mapping,
     Optional,
@@ -44,6 +45,7 @@ def register_checksum_fn(
     class_or_tuple: ClassOrTuple,
     *,
     custom_predicate: None = None,
+    priority: int = 0,
 ) -> Callable: ...
 
 
@@ -52,6 +54,7 @@ def register_checksum_fn(
     class_or_tuple: None = None,
     *,
     custom_predicate: Predicate,
+    priority: int = 0,
 ) -> Callable: ...
 
 
@@ -59,6 +62,7 @@ def register_checksum_fn(
     class_or_tuple: Optional[ClassOrTuple] = None,
     *,
     custom_predicate: Optional[Predicate] = None,
+    priority: int = 0,
 ) -> Callable:
     """Decorator to add a checksum function.
     ```
@@ -74,6 +78,7 @@ def register_checksum_fn(
     return _CHECKSUM_REGISTRY.register_decorator(
         class_or_tuple,
         custom_predicate=custom_predicate,
+        priority=priority,
     )
 
 
@@ -83,6 +88,10 @@ def checksum_any(
     isinstance_fn: Callable[[Any, Union[type, tuple]], bool] = isinstance,
     **kwargs,
 ) -> int:
+    """Compute checksum integer value from an arbitrary object.
+
+    Supports most builtin types. Checksum can be used to compare objects.
+    """
     return _CHECKSUM_REGISTRY.apply(x, isinstance_fn=isinstance_fn, **kwargs)
 
 
@@ -233,6 +242,12 @@ def checksum_range(x: range, **kwargs) -> int:
         get_fullname(x)
     )
     return _checksum_iterable([x.start, x.stop, x.step], **kwargs)
+
+
+@register_checksum_fn(Generator, priority=100)
+def checksum_generator(x: Generator, **kwargs) -> int:
+    msg = f"Cannot compute checksum for the generator object {type(x)=}, it will be consumed."
+    raise RuntimeError(msg)
 
 
 @register_checksum_fn(MethodType)

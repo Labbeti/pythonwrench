@@ -9,7 +9,7 @@ __author_email__ = "labbeti.pub@gmail.com"
 __license__ = "MIT"
 __maintainer__ = "Étienne Labbé (Labbeti)"
 __status__ = "Development"
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 
 # Re-import for language servers
@@ -145,13 +145,16 @@ from .typing import (
     SupportsAdd,
     SupportsAnd,
     SupportsBool,
+    SupportsDiv,
     SupportsGetitemIterLen,
     SupportsGetitemLen,
     SupportsIterLen,
+    SupportsLen,
     SupportsMul,
     SupportsOr,
     T_BuiltinNumber,
     T_BuiltinScalar,
+    check_args_types,
     is_builtin_collection,
     is_builtin_number,
     is_builtin_obj,

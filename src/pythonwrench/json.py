@@ -27,7 +27,7 @@ def dump_json(
 
     Args:
         data: Data to dump to JSON.
-        fpath: Optional filepath to save dumped data. Not used if None. defaults to None.
+        file: Optional filepath to save dumped data. Not used if None. defaults to None.
         overwrite: If True, overwrite target filepath. defaults to True.
         make_parents: Build intermediate directories to filepath. defaults to True.
         to_builtins: If True, converts data to builtin equivalent before saving. defaults to False.

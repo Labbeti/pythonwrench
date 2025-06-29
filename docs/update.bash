@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 # -*- coding: utf-8 -*-
 
 docs_dpath=`dirname $0`

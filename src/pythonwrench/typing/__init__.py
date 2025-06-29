@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from .checks import (
+    check_args_types,
     is_builtin_collection,
     is_builtin_number,
     is_builtin_obj,
@@ -29,9 +30,11 @@ from .classes import (
     SupportsAdd,
     SupportsAnd,
     SupportsBool,
+    SupportsDiv,
     SupportsGetitemIterLen,
     SupportsGetitemLen,
     SupportsIterLen,
+    SupportsLen,
     SupportsMul,
     SupportsOr,
     T_BuiltinNumber,

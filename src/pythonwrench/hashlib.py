@@ -18,6 +18,8 @@ logger = logging.getLogger(__name__)
 
 @runtime_checkable
 class Hasher(Protocol):
+    """Hasher protocol class."""
+
     digest_size: int
     block_size: int
     name: str

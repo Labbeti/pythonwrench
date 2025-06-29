@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0] 2025-06-29
+### Added
+- `check_args_type` decorator.
+
+### Modified
+- `as_builtin` now converts `collections.Counter` instances.
+
+### Fixed
+- `as_builtin` now converts correctly `Mapping` instances.
+- `register_checksum_fn` now accepts `priority` arg.
+
 ## [0.2.0] 2025-06-25
 ### Added
 - Python 3.8 support.

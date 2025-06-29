@@ -24,6 +24,7 @@ def get_argnames(fn: Callable) -> List[str]:
 
 
 def get_current_fn_name(*, default: T = "") -> Union[str, T]:
+    """Get caller function name."""
     try:
         return inspect.currentframe().f_back.f_code.co_name  # type: ignore
     except AttributeError:

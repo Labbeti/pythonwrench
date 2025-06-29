@@ -25,6 +25,7 @@ from typing_extensions import NotRequired
 
 from pythonwrench.typing import (
     NoneType,
+    check_args_types,
     is_dataclass_instance,
     is_iterable_str,
     is_namedtuple_instance,
@@ -44,7 +45,7 @@ class ExampleDict2(TypedDict):
     c: NotRequired[float]
 
 
-class TestTypeChecks(TestCase):
+class TestChecks(TestCase):
     def test_is_iterable_str_1(self) -> None:
         inputs = [
             ("a", True, False),
@@ -271,6 +272,22 @@ class TestIsInstanceGuard(TestCase):
 
         with self.assertRaises(TypeError):
             assert not isinstance_generic(1, Generator[int, None, None])
+
+
+class TestCheckArgsType(TestCase):
+    def test_example_1(self) -> None:
+        @check_args_types
+        def f(a: int, b: str = "") -> str:
+            return str(a) + b
+
+        _ = f(1)
+        _ = f(1, "a")
+
+        with self.assertRaises(TypeError):
+            _ = f("a", "a")  # type: ignore
+
+        with self.assertRaises(TypeError):
+            _ = f(2, 4)  # type: ignore
 
 
 if __name__ == "__main__":

@@ -1679,8 +1679,6 @@ wheels = [
 name = "pythonwrench"
 source = { editable = "." }
 dependencies = [
-    { name = "coverage", version = "7.6.1", source = { registry = "https://pypi.org/simple" }, extra = ["toml"], marker = "python_full_version < '3.9'" },
-    { name = "coverage", version = "7.9.1", source = { registry = "https://pypi.org/simple" }, extra = ["toml"], marker = "python_full_version >= '3.9'" },
     { name = "typing-extensions", version = "4.13.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
     { name = "typing-extensions", version = "4.14.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
 ]
@@ -1714,14 +1712,11 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [
-    { name = "coverage", extras = ["toml"], specifier = ">=7.6.1" },
-    { name = "typing-extensions", specifier = ">=4.10.0" },
-]
+requires-dist = [{ name = "typing-extensions", specifier = ">=4.10.0" }]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "coverage", extras = ["toml"] },
+    { name = "coverage", extras = ["toml"], specifier = ">=7.6.1" },
     { name = "flake8" },
     { name = "ipykernel" },
     { name = "ipython" },

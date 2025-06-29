@@ -69,7 +69,8 @@ def get_key_fn(
     *,
     match_fn: Callable[[PatternLike, str], Any] = re.search,
 ) -> Callable[[str], int]:
-    """
+    """Generate key_fn to sorted list of string using multiple patterns.
+
     Usage:
     ```
     >>> lst = ["a", "abc", "aa", "abcd"]

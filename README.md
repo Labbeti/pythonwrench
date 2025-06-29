@@ -82,6 +82,8 @@ Easely converts common python structures like list of dicts to dict of lists :
 
 ### Typing
 
+Check generic types with ìsinstance_generic` :
+
 ```python
 >>> import pythonwrench as pw
 >>>
@@ -95,6 +97,7 @@ Easely converts common python structures like list of dicts to dict of lists :
 ... False
 ```
 
+... or check specific methods with protocols classes beginning with `Supports`
 ```python
 >>> import pythonwrench as pw
 >>>
@@ -103,6 +106,19 @@ Easely converts common python structures like list of dicts to dict of lists :
 ... True
 >>> isinstance({"a": 1, "b": 2}, pw.SupportsIterLen)
 ... True
+```
+
+Finally, you can also force argument type checking with `check_args_types` function :
+
+```python
+>>> import pythonwrench as pw
+
+>>> @pw.check_args_types
+>>> def f(a: int, b: str) -> str:
+>>>     return a * b
+
+>>> f(1, "a")  # pass check
+>>> f(1, 2)  # raises TypeError from decorator
 ```
 
 ### Disk caching (memoize)
@@ -129,6 +145,9 @@ Easely converts common python structures like list of dicts to dict of lists :
 >>> version = pw.Version("0.5.1-beta+linux")
 >>> version.to_tuple()
 ... (0, 5, 1, "beta", "linux")
+
+>>> Version("1.3.1") < Version("1.4.0")
+... True
 ```
 
 ### Serialization
