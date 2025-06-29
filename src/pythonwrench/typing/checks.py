@@ -57,6 +57,7 @@ def check_args_types(fn: Callable[P, T]) -> Callable[P, T]:
     >>> @pw.check_args_types
     >>> def f(a: int, b: str) -> str:
     >>>     return a * b
+
     >>> f(1, "a")  # pass check
     >>> f(1, 2)  # raises TypeError from decorator
     ```
