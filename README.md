@@ -145,6 +145,9 @@ Finally, you can also force argument type checking with `check_args_types` funct
 >>> version = pw.Version("0.5.1-beta+linux")
 >>> version.to_tuple()
 ... (0, 5, 1, "beta", "linux")
+
+>>> Version("1.3.1") < Version("1.4.0")
+... True
 ```
 
 ### Serialization
