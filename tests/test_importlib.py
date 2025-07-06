@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
+import warnings
 from unittest import TestCase
 
 import pythonwrench as pw
@@ -22,8 +23,12 @@ class TestImportlib(TestCase):
 
         assert not is_editable_package("typing_extensions")
 
-        assert is_available_package("pre-commit")
         assert is_available_package("pre_commit")
+
+        # ignore the UserWarning
+        warnings.filterwarnings("ignore", category=UserWarning)
+        assert is_available_package("pre-commit")
+        warnings.filterwarnings("default", category=UserWarning)
 
 
 if __name__ == "__main__":

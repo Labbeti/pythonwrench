@@ -106,7 +106,7 @@ from .importlib import (
     search_submodules,
 )
 from .inspect import get_argnames, get_current_fn_name, get_fullname
-from .json import dump_json, load_json
+from .json import dump_json, dumps_json, load_json, loads_json, read_json, save_json
 from .logging import (
     VERBOSE_DEBUG,
     VERBOSE_ERROR,
@@ -125,7 +125,14 @@ from .logging import (
 )
 from .math import argmax, argmin, argsort, clamp, clip
 from .os import get_num_cpus_available, safe_rmdir, tree_iter
-from .pickle import dump_pickle, load_pickle
+from .pickle import (
+    dump_pickle,
+    dumps_pickle,
+    load_pickle,
+    loads_pickle,
+    read_pickle,
+    save_pickle,
+)
 from .random import randstr
 from .re import (
     PatternLike,

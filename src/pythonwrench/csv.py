@@ -66,8 +66,6 @@ def dump_csv(
     """
     content = dumps_csv(
         data,
-        overwrite=overwrite,
-        make_parents=make_parents,
         to_builtins=to_builtins,
         header=header,
         align_content=align_content,
@@ -94,8 +92,6 @@ def dumps_csv(
     data: Union[Iterable[Mapping[str, Any]], Mapping[str, Iterable[Any]], Iterable],
     /,
     *,
-    overwrite: bool = True,
-    make_parents: bool = True,
     to_builtins: bool = False,
     header: Union[bool, Literal["auto"]] = "auto",
     align_content: bool = False,
@@ -121,8 +117,6 @@ def dumps_csv(
         _serialize_csv(
             data,
             buffer,
-            overwrite=overwrite,
-            make_parents=make_parents,
             to_builtins=to_builtins,
             header=header,
             align_content=align_content,
@@ -159,6 +153,7 @@ def save_csv(
         **csv_writer_kwds: Others optional arguments passed to CSV writer object.
     """
     if isinstance(file, (str, Path, PathLike)):
+        file = _setup_output_fpath(file, overwrite=overwrite, make_parents=make_parents)
         file = open(file, "w")
         close = True
     elif isinstance(file, TextIOBase):
@@ -170,8 +165,6 @@ def save_csv(
     _serialize_csv(
         data,
         file,
-        overwrite=overwrite,
-        make_parents=make_parents,
         to_builtins=to_builtins,
         header=header,
         align_content=align_content,
@@ -290,21 +283,6 @@ def load_csv(
     file: Union[str, Path, TextIOBase],
     /,
     *,
-    orient: Literal["dict"],
-    header: bool = True,
-    comment_start: Optional[str] = None,
-    strip_content: bool = False,
-    # CSV reader kwargs
-    delimiter: Optional[str] = None,
-    **csv_reader_kwds,
-) -> Dict[str, List[Any]]: ...
-
-
-@overload
-def load_csv(
-    file: Union[str, Path, TextIOBase],
-    /,
-    *,
     orient: Literal["list"] = "list",
     header: bool = True,
     comment_start: Optional[str] = None,
@@ -313,6 +291,21 @@ def load_csv(
     delimiter: Optional[str] = None,
     **csv_reader_kwds,
 ) -> List[Dict[str, Any]]: ...
+
+
+@overload
+def load_csv(
+    file: Union[str, Path, TextIOBase],
+    /,
+    *,
+    orient: Literal["dict"],
+    header: bool = True,
+    comment_start: Optional[str] = None,
+    strip_content: bool = False,
+    # CSV reader kwargs
+    delimiter: Optional[str] = None,
+    **csv_reader_kwds,
+) -> Dict[str, List[Any]]: ...
 
 
 def load_csv(
@@ -368,21 +361,6 @@ def loads_csv(
     content: str,
     /,
     *,
-    orient: Literal["dict"],
-    header: bool = True,
-    comment_start: Optional[str] = None,
-    strip_content: bool = False,
-    # CSV reader kwargs
-    delimiter: Optional[str] = ",",
-    **csv_reader_kwds,
-) -> Dict[str, List[Any]]: ...
-
-
-@overload
-def loads_csv(
-    content: str,
-    /,
-    *,
     orient: Literal["list"] = "list",
     header: bool = True,
     comment_start: Optional[str] = None,
@@ -391,6 +369,21 @@ def loads_csv(
     delimiter: Optional[str] = ",",
     **csv_reader_kwds,
 ) -> List[Dict[str, Any]]: ...
+
+
+@overload
+def loads_csv(
+    content: str,
+    /,
+    *,
+    orient: Literal["dict"],
+    header: bool = True,
+    comment_start: Optional[str] = None,
+    strip_content: bool = False,
+    # CSV reader kwargs
+    delimiter: Optional[str] = ",",
+    **csv_reader_kwds,
+) -> Dict[str, List[Any]]: ...
 
 
 def loads_csv(
