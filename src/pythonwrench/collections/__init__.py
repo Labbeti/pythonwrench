@@ -5,6 +5,7 @@ from .collections import (
     contained,
     dict_list_to_list_dict,
     dump_dict,
+    duplicate_list,
     filter_iterable,
     find,
     flat_dict_of_dict,

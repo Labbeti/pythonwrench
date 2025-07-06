@@ -34,6 +34,25 @@ def str_to_bool(
     raise ValueError(f"Invalid argument '{x}'. (expected one of {values})")
 
 
+def str_to_none(
+    x: str,
+    *,
+    case_sensitive: bool = False,
+    none_values: Union[str, Iterable[str]] = DEFAULT_NONE_VALUES,
+) -> None:
+    """Convert string values to None safely. Intended for argparse boolean arguments.
+
+    - None values: 'None', 'null'
+    - Other raises ValueError.
+    """
+    none_values = _sanitize_values(none_values)
+    if _str_in(x, none_values, case_sensitive):
+        return None
+
+    values = tuple(none_values)
+    raise ValueError(f"Invalid argument '{x}'. (expected one of {values})")
+
+
 def str_to_optional_bool(
     x: str,
     *,

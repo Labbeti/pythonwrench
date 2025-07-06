@@ -49,7 +49,7 @@ def print_tree(
     max_depth: int = sys.maxsize,
     followlinks: bool = False,
 ) -> None:
-    """Print directory tree."""
+    """Print directory tree to stdout."""
     num_dirs = 0
     num_files = 0
     for line in tree_iter(

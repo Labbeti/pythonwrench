@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.1] UNRELEASED
+### Added
+- `duplicate_list` function to duplicate elements in a list.
+
+### Fixed
+- `disk_cache_decorator` typing.
+
 ## [0.3.0] 2025-06-29
 ### Added
 - `check_args_type` decorator.

@@ -32,9 +32,8 @@ logger = logging.getLogger(__name__)
 def is_available_package(package: str) -> bool:
     """Returns True if package is installed in the current python environment."""
     if "-" in package:
-        warn_once(
-            f"Found character '-' in package name '{package}'. (it will be replaced by '_')"
-        )
+        msg = f"Found character '-' in package name '{package}'. (it will be replaced by '_')"
+        warn_once(msg)
         package = package.replace("-", "_")
 
     try:

@@ -18,6 +18,7 @@ from typing import (
     TypeVar,
     Union,
     get_args,
+    overload,
 )
 
 from typing_extensions import ParamSpec
@@ -79,8 +80,7 @@ def disk_cache_call(
     >>> outputs = pw.disk_cache_call(heavy_processing)  # second time outputs is loaded from disk
     ```
     """
-    wrapped_fn = disk_cache_decorator(
-        fn,
+    wrapped_fn = _disk_cache_impl(
         cache_dpath=cache_dpath,
         cache_force=cache_force,
         cache_verbose=cache_verbose,
@@ -92,7 +92,41 @@ def disk_cache_call(
         cache_enable=cache_enable,
         cache_store_mode=cache_store_mode,
     )
-    return wrapped_fn(*args, **kwargs)
+    return wrapped_fn(fn)(*args, **kwargs)
+
+
+@overload
+def disk_cache_decorator(
+    fn: None = None,
+    *,
+    cache_dpath: Union[str, Path, None] = None,
+    cache_force: bool = False,
+    cache_verbose: int = 0,
+    cache_checksum_fn: ChecksumFn = checksum_any,
+    cache_saving_backend: Optional[SavingBackend] = "pickle",
+    cache_fname_fmt: Optional[str] = None,
+    cache_dump_fn: Optional[Callable[[Any, Path], Any]] = None,
+    cache_load_fn: Optional[Callable[[Path], Any]] = None,
+    cache_enable: bool = True,
+    cache_store_mode: StoreMode = "outputs_metadata",
+) -> Callable[[Callable[P, T]], Callable[P, T]]: ...
+
+
+@overload
+def disk_cache_decorator(
+    fn: Callable[P, T],
+    *,
+    cache_dpath: Union[str, Path, None] = None,
+    cache_force: bool = False,
+    cache_verbose: int = 0,
+    cache_checksum_fn: ChecksumFn = checksum_any,
+    cache_saving_backend: Optional[SavingBackend] = "pickle",
+    cache_fname_fmt: Optional[str] = None,
+    cache_dump_fn: Optional[Callable[[Any, Path], Any]] = None,
+    cache_load_fn: Optional[Callable[[Path], Any]] = None,
+    cache_enable: bool = True,
+    cache_store_mode: StoreMode = "outputs_metadata",
+) -> Callable[P, T]: ...
 
 
 def disk_cache_decorator(

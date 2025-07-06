@@ -41,6 +41,7 @@ from . import warnings as warnings
 from .abc import Singleton
 from .argparse import (
     str_to_bool,
+    str_to_none,
     str_to_optional_bool,
     str_to_optional_float,
     str_to_optional_int,
@@ -54,6 +55,7 @@ from .collections import (
     contained,
     dict_list_to_list_dict,
     dump_dict,
+    duplicate_list,
     filter_iterable,
     find,
     flat_dict_of_dict,
@@ -93,6 +95,7 @@ from .functools import (
     filter_and_call,
     function_alias,
     identity,
+    repeat_fn,
 )
 from .hashlib import hash_file
 from .importlib import (

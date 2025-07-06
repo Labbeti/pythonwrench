@@ -14,6 +14,7 @@ from pythonwrench.collections import (
     contained,
     dict_list_to_list_dict,
     dump_dict,
+    duplicate_list,
     find,
     flat_dict_of_dict,
     flat_list_of_list,
@@ -180,6 +181,13 @@ class TestFlatList(TestCase):
         assert len(lst) == len(unflat)
         assert lst == unflat
 
+    def test_example_2(self) -> None:
+        lst = ["a", "b", "c", "d", "e"]
+        sizes = [1, 0, 2, 1, 3]
+        result = duplicate_list(lst, sizes)
+        expected = ["a", "c", "c", "d", "e", "e", "e"]
+        assert result == expected
+
 
 class TestGetKeyFn(TestCase):
     def test_example_1(self) -> None:
@@ -308,7 +316,7 @@ class TestReduce(TestCase):
             assert reduce_add([])
 
         with self.assertRaises(ValueError):
-            assert reduce_add()
+            assert reduce_add()  # type: ignore
 
         assert reduce_add(args, args) == [1, 2, 3, 1, 2, 3]
         assert reduce_add(args, args, start=[4]) == [4, 1, 2, 3, 1, 2, 3]
