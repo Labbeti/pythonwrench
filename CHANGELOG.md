@@ -5,9 +5,11 @@ All notable changes to this project will be documented in this file.
 ## [0.3.1] UNRELEASED
 ### Added
 - `duplicate_list` function to duplicate elements in a list.
+- `loads`, `save`, `read` functions for CSV, JSON and PICKLE.
 
 ### Fixed
 - `disk_cache_decorator` typing.
+- `priority` argument in `register` method of `_FunctionRegistry` class.
 
 ## [0.3.0] 2025-06-29
 ### Added
