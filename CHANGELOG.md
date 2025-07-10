@@ -7,6 +7,9 @@ All notable changes to this project will be documented in this file.
 - `duplicate_list` function to duplicate elements in a list.
 - `loads`, `save`, `read` functions for CSV, JSON and PICKLE.
 
+### Modified
+- `deprecated_function` decorator can be used without parenthesis.
+
 ### Fixed
 - `disk_cache_decorator` typing.
 - `priority` argument in `register` method of `_FunctionRegistry` class.
