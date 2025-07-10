@@ -57,14 +57,41 @@ def deprecated_alias(
     return _decorator_factory(alternative, pre_fn=pre_fn)
 
 
+@overload
 def deprecated_function(
+    fn: None = None,
+    /,
+    *,
     msg_fmt: str = "Deprecated call to '{fn_name}'.",
     warn_fn: Callable[[str], Any] = partial(warn_once, category=DeprecationWarning),
-) -> Callable[[Callable[P, U]], Callable[P, U]]:
+) -> Callable[[Callable[P, U]], Callable[P, U]]: ...
+
+
+@overload
+def deprecated_function(
+    fn: Callable[P, U],
+    /,
+    *,
+    msg_fmt: str = "Deprecated call to '{fn_name}'.",
+    warn_fn: Callable[[str], Any] = partial(warn_once, category=DeprecationWarning),
+) -> Callable[P, U]: ...
+
+
+def deprecated_function(
+    fn: Optional[Callable[P, U]] = None,
+    /,
+    *,
+    msg_fmt: str = "Deprecated call to '{fn_name}'.",
+    warn_fn: Callable[[str], Any] = partial(warn_once, category=DeprecationWarning),
+) -> Callable:
     """Decorator to wrap deprecated functions."""
 
     def pre_fn(fn, *args, **kwargs):
-        msg = msg_fmt.format(fn_name=fn.__name__)
+        msg = msg_fmt.format(fn_name=fn.__qualname__)
         warn_fn(msg)
 
-    return _decorator_factory(None, pre_fn=pre_fn)
+    decorator = _decorator_factory(None, pre_fn=pre_fn)
+    if fn is None:
+        return decorator
+    else:
+        return decorator(fn)

@@ -37,7 +37,7 @@ def _decorator_factory(
     *,
     pre_fn: Callable[..., Any] = return_none,
     post_fn: Callable[..., Any] = return_none,
-) -> Callable[..., Callable[P, U]]:
+) -> Callable[[Callable[P, U]], Callable[P, U]]:
     """Deprecated decorator for function aliases."""
 
     def wrapper_factory(fn: Callable[P, U]) -> Callable[P, U]:
