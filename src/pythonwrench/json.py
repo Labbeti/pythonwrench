@@ -125,7 +125,12 @@ def save_json(
 
 
 def _serialize_json(
-    data: Any, buffer: TextIOBase, /, *, to_builtins: bool = False, **json_dumps_kwds
+    data: Any,
+    buffer: TextIOBase,
+    /,
+    *,
+    to_builtins: bool = False,
+    **json_dumps_kwds,
 ) -> Any:
     if to_builtins:
         data = as_builtin(data)
