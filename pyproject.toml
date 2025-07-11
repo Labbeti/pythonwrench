@@ -41,6 +41,9 @@ Tracker = "https://github.com/Labbeti/pythonwrench/issues"
 pythonwrench-info = "pythonwrench.entries:print_install_info"
 pythonwrench-tree = "pythonwrench.entries:main_tree"
 pythonwrench-safe-rmdir = "pythonwrench.entries:main_safe_rmdir"
+pw-info = "pythonwrench.entries:print_install_info"
+pw-tree = "pythonwrench.entries:main_tree"
+pw-safe-rmdir = "pythonwrench.entries:main_safe_rmdir"
 
 [build-system]
 requires = ["setuptools >= 61.0"]
