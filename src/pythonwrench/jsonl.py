@@ -10,12 +10,22 @@ from typing import Any, Optional, Union
 from pythonwrench.cast import as_builtin
 from pythonwrench.functools import function_alias
 from pythonwrench.io import _setup_output_fpath
+from pythonwrench.json import (
+    load_json,
+    loads_json,
+    read_json,
+    dump_json,
+    dumps_json,
+    save_json,
+    _serialize_json,
+)
+from pythonwrench.warnings import warn_once
 
-# -- Dump / Save / Serialize content to JSON --
 
+# -- Dump / Save / Serialize content to JSONL --
 
-def dump_json(
-    data: Any,
+def dump_jsonl(
+    data: list,
     file: Union[str, Path, None, TextIOBase] = None,
     /,
     *,
@@ -23,19 +33,17 @@ def dump_json(
     make_parents: bool = True,
     to_builtins: bool = False,
     # JSON dump kwargs
-    indent: Optional[int] = 4,
     ensure_ascii: bool = False,
     **json_dumps_kwds,
 ) -> str:
-    """Dump content to JSON format into a string and/or file.
+    """Dump content to JSONL format into a string and/or file.
 
     Args:
-        data: Data to dump to JSON.
+        data: Data to dump to JSONL.
         file: Optional filepath to save dumped data. Not used if None. defaults to None.
         overwrite: If True, overwrite target filepath. defaults to True.
         make_parents: Build intermediate directories to filepath. defaults to True.
         to_builtins: If True, converts data to builtin equivalent before saving. defaults to False.
-        indent: JSON indentation size in spaces. defaults to 4.
         ensure_ascii: Ensure only ASCII characters. defaults to False.
         **json_dump_kwds: Other args passed to `json.dumps`.
 
@@ -45,7 +53,6 @@ def dump_json(
     content = dumps_json(
         data,
         to_builtins=to_builtins,
-        indent=indent,
         ensure_ascii=ensure_ascii,
         **json_dumps_kwds,
     )
@@ -65,22 +72,20 @@ def dump_json(
     return content
 
 
-def dumps_json(
-    data: Any,
+def dumps_jsonl(
+    data: list,
     /,
     *,
     to_builtins: bool = False,
     # JSON dump kwargs
-    indent: Optional[int] = 4,
     ensure_ascii: bool = False,
     **json_dumps_kwds,
 ) -> str:
     with StringIO() as buffer:
-        _serialize_json(
+        _serialize_jsonl(
             data,
             buffer,
             to_builtins=to_builtins,
-            indent=indent,
             ensure_ascii=ensure_ascii,
             **json_dumps_kwds,
         )
@@ -88,8 +93,8 @@ def dumps_json(
     return content
 
 
-def save_json(
-    data: Any,
+def save_jsonl(
+    data: list,
     file: Union[str, Path, PathLike, TextIOBase],
     /,
     *,
@@ -97,7 +102,6 @@ def save_json(
     make_parents: bool = True,
     to_builtins: bool = False,
     # JSON dump kwargs
-    indent: Optional[int] = 4,
     ensure_ascii: bool = False,
     **json_dumps_kwds,
 ) -> None:
@@ -111,11 +115,10 @@ def save_json(
         msg = f"Invalid argument type {type(file)}. (expected one of str, Path, PathLike, TextIOBase)"
         raise TypeError(msg)
 
-    _serialize_json(
+    _serialize_jsonl(
         data,
         file,
         to_builtins=to_builtins,
-        indent=indent,
         ensure_ascii=ensure_ascii,
         **json_dumps_kwds,
     )
@@ -124,8 +127,8 @@ def save_json(
         file.close()
 
 
-def _serialize_json(
-    data: Any,
+def _serialize_jsonl(
+    data: list,
     buffer: TextIOBase,
     /,
     *,
@@ -134,37 +137,52 @@ def _serialize_json(
 ) -> None:
     if to_builtins:
         data = as_builtin(data)
-    return json.dump(data, buffer, **json_dumps_kwds)
+
+    indent = json_dumps_kwds.get("indent", None)
+    if indent is not None:
+        warn_once(f"Invalid argument {indent=}. It will be replaced by indent=None")
+        json_dumps_kwds["indent"] = None
+
+    for data_i in data:
+        _serialize_json(data_i, buffer, to_builtins=False, **json_dumps_kwds)
+        buffer.write("\n")
 
 
-# -- Load / Read / Parse JSON content --
+# -- Load / Read / Parse JSONL content --
 
-
-def load_json(
+def load_jsonl(
     file: Union[str, Path, PathLike, TextIOBase],
     /,
     **json_loads_kwds,
-) -> Any:
+) -> list:
     if isinstance(file, (str, Path, PathLike)):
         file = open(file, "r")
         close = True
     else:
         close = False
 
-    data = _parse_json(file, **json_loads_kwds)
+    data = _parse_jsonl(file, **json_loads_kwds)
     if close:
         file.close()
     return data
 
 
-def loads_json(content: str, /, **json_loads_kwds) -> Any:
+def loads_jsonl(content: str, /, **json_loads_kwds) -> list:
     with StringIO(content) as buffer:
-        return _parse_json(buffer, **json_loads_kwds)
+        return _parse_jsonl(buffer, **json_loads_kwds)
 
 
 @function_alias(load_json)
-def read_json(*args, **kwargs): ...
+def read_jsonl(*args, **kwargs): ...
 
 
-def _parse_json(buffer: TextIOBase, **json_loads_kwds) -> Any:
-    return json.load(buffer, **json_loads_kwds)
+def _parse_jsonl(buffer: TextIOBase, **json_loads_kwds) -> list:
+    data_lst = []
+    while True:
+        content = buffer.readline()
+        if content == "":
+            break
+        content = content.removesuffix("\n")
+        data = loads_json(content, **json_loads_kwds)
+        data_lst.append(data)
+    return data_lst

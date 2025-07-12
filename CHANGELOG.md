@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - `duplicate_list` function to duplicate elements in a list.
 - `loads`, `save`, `read` functions for CSV, JSON and PICKLE.
+- JSONL file format support.
 
 ### Modified
 - `deprecated_function` decorator can be used without parenthesis.
