@@ -11,18 +11,18 @@ from pythonwrench.cast import as_builtin
 from pythonwrench.functools import function_alias
 from pythonwrench.io import _setup_output_fpath
 from pythonwrench.json import (
+    _serialize_json,
+    dump_json,
+    dumps_json,
     load_json,
     loads_json,
     read_json,
-    dump_json,
-    dumps_json,
     save_json,
-    _serialize_json,
 )
 from pythonwrench.warnings import warn_once
 
-
 # -- Dump / Save / Serialize content to JSONL --
+
 
 def dump_jsonl(
     data: list,
@@ -149,6 +149,7 @@ def _serialize_jsonl(
 
 
 # -- Load / Read / Parse JSONL content --
+
 
 def load_jsonl(
     file: Union[str, Path, PathLike, TextIOBase],
