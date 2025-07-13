@@ -33,6 +33,10 @@ def parse_to(
     false_values: Union[str, Iterable[str]] = DEFAULT_FALSE_VALUES,
     none_values: Union[str, Iterable[str]] = DEFAULT_NONE_VALUES,
 ) -> Callable[[str], T]:
+    """Returns a callable that convert string value to target type safely.
+
+    Intended for argparse boolean arguments.
+    """
     return partial(
         str_to_type,
         target_type=target_type,
@@ -52,6 +56,13 @@ def str_to_type(
     false_values: Union[str, Iterable[str]] = DEFAULT_FALSE_VALUES,
     none_values: Union[str, Iterable[str]] = DEFAULT_NONE_VALUES,
 ) -> T:
+    """Convert string values to target type safely. Intended for argparse boolean arguments.
+
+    - True values: 'True', 'T', 'yes', 'y', '1'.
+    - False values: 'False', 'F', 'no', 'n', '0'.
+    - None values: 'None', 'null'
+    - Other raises ValueError.
+    """
     result = _str_to_type_impl(
         x,
         target_type,
