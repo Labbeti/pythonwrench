@@ -40,12 +40,14 @@ from . import warnings as warnings
 # Global library imports
 from .abc import Singleton
 from .argparse import (
+    parse_to,
     str_to_bool,
     str_to_none,
     str_to_optional_bool,
     str_to_optional_float,
     str_to_optional_int,
     str_to_optional_str,
+    str_to_type,
 )
 from .cast import as_builtin
 from .checksum import checksum_any, register_checksum_fn
@@ -107,6 +109,14 @@ from .importlib import (
 )
 from .inspect import get_argnames, get_current_fn_name, get_fullname
 from .json import dump_json, dumps_json, load_json, loads_json, read_json, save_json
+from .jsonl import (
+    dump_jsonl,
+    dumps_jsonl,
+    load_jsonl,
+    loads_jsonl,
+    read_jsonl,
+    save_jsonl,
+)
 from .logging import (
     VERBOSE_DEBUG,
     VERBOSE_ERROR,

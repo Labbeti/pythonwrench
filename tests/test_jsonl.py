@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
-import tempfile
 import unittest
-from pathlib import Path
 from unittest import TestCase
 
 from pythonwrench.jsonl import dumps_jsonl, loads_jsonl

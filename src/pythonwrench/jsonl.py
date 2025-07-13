@@ -1,23 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import json
 from io import StringIO, TextIOBase
 from os import PathLike
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Union
 
 from pythonwrench.cast import as_builtin
 from pythonwrench.functools import function_alias
 from pythonwrench.io import _setup_output_fpath
 from pythonwrench.json import (
     _serialize_json,
-    dump_json,
     dumps_json,
     load_json,
     loads_json,
-    read_json,
-    save_json,
 )
 from pythonwrench.warnings import warn_once
 

@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 - `duplicate_list` function to duplicate elements in a list.
 - `loads`, `save`, `read` functions for CSV, JSON and PICKLE.
 - JSONL file format support.
+- `str_to_type` and `parse_to` functions to convert any argparse argument to builtin value.
 
 ### Modified
 - `deprecated_function` decorator can be used without parenthesis.
