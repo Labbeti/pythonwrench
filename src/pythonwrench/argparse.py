@@ -176,7 +176,7 @@ def _str_to_type_impl(
     true_values: Union[str, Iterable[str]] = DEFAULT_TRUE_VALUES,
     false_values: Union[str, Iterable[str]] = DEFAULT_FALSE_VALUES,
     none_values: Union[str, Iterable[str]] = DEFAULT_NONE_VALUES,
-) -> T | Exception:
+) -> Union[T, Exception]:
     if target_type in (str, int, float, None, NoneType, bool):
         return _str_to_scalar_impl(
             x,
@@ -251,7 +251,7 @@ def _str_to_bool_impl(
     case_sensitive: bool = False,
     true_values: Union[str, Iterable[str]] = DEFAULT_TRUE_VALUES,
     false_values: Union[str, Iterable[str]] = DEFAULT_FALSE_VALUES,
-) -> bool | Exception:
+) -> Union[bool, Exception]:
     true_values = _sanitize_values(true_values)
     if _str_in(x, true_values, case_sensitive):
         return True
@@ -270,7 +270,7 @@ def _str_to_none_impl(
     *,
     case_sensitive: bool = False,
     none_values: Union[str, Iterable[str]] = DEFAULT_NONE_VALUES,
-) -> None | Exception:
+) -> Union[None, Exception]:
     """Convert string values to None safely. Intended for argparse boolean arguments.
 
     - None values: 'None', 'null'
