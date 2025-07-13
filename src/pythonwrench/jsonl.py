@@ -15,6 +15,7 @@ from pythonwrench.json import (
     load_json,
     loads_json,
 )
+from pythonwrench.semver import Version
 from pythonwrench.warnings import warn_once
 
 # -- Dump / Save / Serialize content to JSONL --
@@ -179,7 +180,19 @@ def _parse_jsonl(buffer: TextIOBase, **json_loads_kwds) -> list:
         content = buffer.readline()
         if content == "":
             break
-        content = content.removesuffix("\n")
+        content = _removesuffix(content, "\n")
         data = loads_json(content, **json_loads_kwds)
         data_lst.append(data)
     return data_lst
+
+
+def _removesuffix(x: str, suffix: str) -> str:
+    """Equivalent to str.removesuffix for python < 3.9.0."""
+    if Version.python() >= Version(3, 9, 0):
+        return x.removesuffix(suffix)
+
+    size = len(suffix)
+    if x[size:] != suffix:
+        return x
+    else:
+        return x[:size]
