@@ -188,12 +188,22 @@ def _str_to_type_impl(
         )
 
     origin = get_origin(target_type)
-    if target_type.__name__ == "Optional":
+    if getattr(target_type, "__name__", None) == "Optional":
         args = (None,) + get_args(target_type)
-    elif origin.__name__ in ("Union", "UnionType"):
+    elif origin == Union or origin.__name__ in ("Union", "UnionType"):
         args = get_args(target_type)
     else:
-        raise ValueError(f"Invalid argument {target_type=}. (unsupported type)")
+        msg = f"Invalid argument {target_type=}. (unsupported type)"
+        raise ValueError(msg)
+
+    # str is always at the end
+    def key_fn(xi: Any) -> int:
+        if xi == str:
+            return 1
+        else:
+            return 0
+
+    args = sorted(args, key=key_fn)
 
     for arg in args:
         result = _str_to_type_impl(
