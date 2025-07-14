@@ -159,6 +159,24 @@ class Version:
     def from_tuple(cls, version_tuple: VersionTupleLike) -> "Version":
         return Version(version_tuple)
 
+    @classmethod
+    def python(cls, releaselevel_in_metadata: bool = False) -> "Version":
+        """Create an instance of Version with Python version.
+
+        Note: Python 'micro' value is mapped to 'patch'.
+        """
+        if releaselevel_in_metadata:
+            buildmetadata = sys.version_info.releaselevel
+        else:
+            buildmetadata = None
+
+        return Version(
+            major=sys.version_info.major,
+            minor=sys.version_info.minor,
+            patch=sys.version_info.micro,
+            buildmetadata=buildmetadata,
+        )
+
     @property
     def micro(self) -> int:
         """Getter alias of 'patch'."""
@@ -271,8 +289,10 @@ class Version:
         # note: use self.__class__ to avoid error cause by 'pytest -v test' collect
         elif not isinstance(other, (Version, self.__class__)):
             msg = f"Invalid argument type {type(other)}. (expected an instance of one of {(dict, tuple, str, Version)})"
+            # TODO: rm debug
             msg += "\n"
             msg += f"Debugging info: {other.__class__=}; {Version=}; {self.__class__=}; {id(other.__class__)=}; {id(Version)=}; {id(self.__class__)=}"
+            msg += "\n"
             msg += f"Debugging info: {other=}; {Version=}; {self=}"
             raise TypeError(msg)
 
@@ -326,24 +346,6 @@ class Version:
 
     def __ge__(self, other: VersionLike) -> bool:
         return not (self < other)
-
-    @classmethod
-    def python(cls, releaselevel_in_metadata: bool = False) -> "Version":
-        """Create an instance of Version with Python version.
-
-        Note: Python 'micro' value is mapped to 'patch'.
-        """
-        if releaselevel_in_metadata:
-            buildmetadata = sys.version_info.releaselevel
-        else:
-            buildmetadata = None
-
-        return Version(
-            major=sys.version_info.major,
-            minor=sys.version_info.minor,
-            patch=sys.version_info.micro,
-            buildmetadata=buildmetadata,
-        )
 
 
 def _parse_version_str(version_str: str) -> VersionDict:

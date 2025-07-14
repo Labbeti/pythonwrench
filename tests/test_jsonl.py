@@ -11,7 +11,6 @@ class TestJSONL(TestCase):
     def test_example_1(self) -> None:
         data = [{"a": 1, "b": 2}, {"c": 3, "d": 4}]
         content = dumps_jsonl(data)
-        print(f"{content=}")
         assert loads_jsonl(content) == data
 
 

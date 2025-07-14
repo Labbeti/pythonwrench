@@ -52,12 +52,14 @@ def print_tree(
     """Print directory tree to stdout."""
     num_dirs = 0
     num_files = 0
-    for line in tree_iter(
+
+    iterable = tree_iter(
         root=root,
         exclude=exclude,
         max_depth=max_depth,
         followlinks=followlinks,
-    ):
+    )
+    for line in iterable:
         print(f"{line}")
 
         if line.endswith("/"):

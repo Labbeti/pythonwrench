@@ -188,7 +188,7 @@ def _parse_jsonl(buffer: TextIOBase, **json_loads_kwds) -> list:
 
 def _removesuffix(x: str, suffix: str) -> str:
     """Equivalent to str.removesuffix for python < 3.9.0."""
-    if Version.python() >= Version(3, 9, 0):
+    if Version.python() >= Version("3.9.0"):
         return x.removesuffix(suffix)
 
     size = len(suffix)
