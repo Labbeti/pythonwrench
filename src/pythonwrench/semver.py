@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import logging
 import re
 import sys
 from dataclasses import asdict, dataclass
@@ -10,14 +11,16 @@ from typing_extensions import NotRequired, TypeAlias
 
 from pythonwrench.typing import NoneType, isinstance_generic
 
+PreRelease: TypeAlias = Union[int, str, None, List[Union[int, str]]]
+BuildMetadata: TypeAlias = Union[int, str, None, List[Union[int, str]]]
+
 # Pattern of https://semver.org/
 _VERSION_PATTERN = r"^(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$"
 _VERSION_FORMAT = r"{major}.{minor}.{patch}"
 _VERSION_KEYS = ("major", "minor", "patch", "prerelease", "buildmetadata")
 
 
-PreRelease: TypeAlias = Union[int, str, None, List[Union[int, str]]]
-BuildMetadata: TypeAlias = Union[int, str, None, List[Union[int, str]]]
+logger = logging.getLogger(__name__)
 
 
 class VersionDict(TypedDict):
@@ -267,6 +270,9 @@ class Version:
             other = Version(other)
         # note: use self.__class__ to avoid error cause by 'pytest -v test' collect
         elif not isinstance(other, (Version, self.__class__)):
+            logger.debug(
+                f"Debugging info: {other.__class__=}; {Version=}; {self.__class__=}; {id(other.__class__)=}; {id(Version)=}; {id(self.__class__)=}"
+            )
             msg = f"Invalid argument type {type(other)}. (expected an instance of one of {(dict, tuple, str, Version)})"
             raise TypeError(msg)
 
