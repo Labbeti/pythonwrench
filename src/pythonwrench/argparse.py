@@ -69,6 +69,7 @@ def str_to_type(
         case_sensitive=case_sensitive,
         true_values=true_values,
         false_values=false_values,
+        none_values=none_values,
     )
     if isinstance(result, Exception):
         raise result
@@ -109,7 +110,9 @@ def str_to_none(
     - None values: 'None', 'null'
     - Other raises ValueError.
     """
-    return str_to_type(x, None, case_sensitive=case_sensitive, none_values=none_values)
+    return str_to_type(
+        x, NoneType, case_sensitive=case_sensitive, none_values=none_values
+    )
 
 
 def str_to_optional_bool(
@@ -190,7 +193,7 @@ def _str_to_type_impl(
     origin = get_origin(target_type)
     if getattr(target_type, "__name__", None) == "Optional":
         args = (None,) + get_args(target_type)
-    elif origin == Union or origin.__name__ in ("Union", "UnionType"):
+    elif origin == Union or origin.__name__ in ("Union", "UnionType"):  # type: ignore
         args = get_args(target_type)
     else:
         msg = f"Invalid argument {target_type=}. (unsupported type)"
@@ -198,7 +201,7 @@ def _str_to_type_impl(
 
     # str is always at the end
     def key_fn(xi: Any) -> int:
-        if xi == str:
+        if xi is str:
             return 1
         else:
             return 0
@@ -208,7 +211,7 @@ def _str_to_type_impl(
     for arg in args:
         result = _str_to_type_impl(
             x,
-            arg,
+            arg,  # type: ignore
             case_sensitive=case_sensitive,
             true_values=true_values,
             false_values=false_values,
