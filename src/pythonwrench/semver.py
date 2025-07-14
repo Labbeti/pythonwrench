@@ -273,6 +273,7 @@ class Version:
             msg = f"Invalid argument type {type(other)}. (expected an instance of one of {(dict, tuple, str, Version)})"
             msg += "\n"
             msg += f"Debugging info: {other.__class__=}; {Version=}; {self.__class__=}; {id(other.__class__)=}; {id(Version)=}; {id(self.__class__)=}"
+            msg += f"Debugging info: {other=}; {Version=}; {self=}"
             raise TypeError(msg)
 
         self_tuple = self.to_tuple(exclude_none=False)
