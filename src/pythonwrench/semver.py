@@ -144,21 +144,6 @@ class Version:
         self.buildmetadata = buildmetadata  # type: ignore
 
     @classmethod
-    def python(cls, releaselevel_in_metadata: bool = False) -> "Version":
-        """Create an instance of Version with Python version.
-
-        Note: Python 'micro' value is mapped to 'patch'.
-        """
-        return Version(
-            major=sys.version_info.major,
-            minor=sys.version_info.minor,
-            patch=sys.version_info.micro,
-            buildmetadata=sys.version_info.releaselevel
-            if releaselevel_in_metadata
-            else None,
-        )
-
-    @classmethod
     def from_dict(cls, version_dict: VersionDictLike) -> "Version":
         return Version(version_dict)
 
@@ -335,6 +320,24 @@ class Version:
 
     def __ge__(self, other: VersionLike) -> bool:
         return not (self < other)
+
+    @classmethod
+    def python(cls, releaselevel_in_metadata: bool = False) -> "Version":
+        """Create an instance of Version with Python version.
+
+        Note: Python 'micro' value is mapped to 'patch'.
+        """
+        if releaselevel_in_metadata:
+            buildmetadata = sys.version_info.releaselevel
+        else:
+            buildmetadata = None
+
+        return Version(
+            major=sys.version_info.major,
+            minor=sys.version_info.minor,
+            patch=sys.version_info.micro,
+            buildmetadata=buildmetadata,
+        )
 
 
 def _parse_version_str(version_str: str) -> VersionDict:
