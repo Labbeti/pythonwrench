@@ -266,7 +266,7 @@ class Version:
         if isinstance(other, (dict, tuple, str)):
             other = Version(other)
         # note: use self.__class__ to avoid error cause by 'pytest -v test' collect
-        elif not isinstance(other, self.__class__):
+        elif not isinstance(other, (Version, self.__class__)):
             return False
 
         return (
@@ -281,7 +281,7 @@ class Version:
         if isinstance(other, (dict, tuple, str)):
             other = Version(other)
         # note: use self.__class__ to avoid error cause by 'pytest -v test' collect
-        elif not isinstance(other, self.__class__):
+        elif not isinstance(other, (Version, self.__class__)):
             msg = f"Invalid argument type {type(other)}. (expected an instance of one of {(dict, tuple, str, Version)})"
             raise TypeError(msg)
 
