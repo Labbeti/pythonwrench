@@ -7,7 +7,7 @@ import sys
 from dataclasses import asdict, dataclass
 from typing import Any, Iterable, List, Mapping, Tuple, TypedDict, Union, overload
 
-from typing_extensions import NotRequired, TypeAlias
+from typing_extensions import NotRequired, Self, TypeAlias
 
 from pythonwrench.typing import NoneType, isinstance_generic
 
@@ -60,7 +60,7 @@ class Version:
     @overload
     def __init__(
         self,
-        version: "Version",
+        version: Self,
         /,
     ) -> None: ...
 
@@ -147,20 +147,20 @@ class Version:
         self.buildmetadata = buildmetadata  # type: ignore
 
     @classmethod
-    def from_dict(cls, version_dict: VersionDictLike) -> "Version":
-        return Version(version_dict)
+    def from_dict(cls, version_dict: VersionDictLike) -> Self:
+        return cls(version_dict)
 
     @classmethod
-    def from_str(cls, version_str: str) -> "Version":
+    def from_str(cls, version_str: str) -> Self:
         version_dict = _parse_version_str(version_str)
-        return Version(**version_dict)
+        return cls(**version_dict)
 
     @classmethod
-    def from_tuple(cls, version_tuple: VersionTupleLike) -> "Version":
-        return Version(version_tuple)
+    def from_tuple(cls, version_tuple: VersionTupleLike) -> Self:
+        return cls(version_tuple)
 
     @classmethod
-    def python(cls, releaselevel_in_metadata: bool = False) -> "Version":
+    def python(cls, releaselevel_in_metadata: bool = False) -> Self:
         """Create an instance of Version with Python version.
 
         Note: Python 'micro' value is mapped to 'patch'.
@@ -170,7 +170,7 @@ class Version:
         else:
             buildmetadata = None
 
-        return Version(
+        return cls(
             major=sys.version_info.major,
             minor=sys.version_info.minor,
             patch=sys.version_info.micro,
