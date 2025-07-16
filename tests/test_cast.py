@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
+from collections import Counter
 from pathlib import Path
 from unittest import TestCase
 
@@ -23,6 +24,7 @@ class TestCast(TestCase):
             (["c", ("d",), {1, ()}], ["c", ["d"], [1, []]]),
             (CustomClass(), {"a": 0, "b": "", "added_prop": None}),
             ({"a": (1, 2)}, {"a": [1, 2]}),
+            (Counter(a=2, b=1, c=3), {"a": 2, "b": 1, "c": 3}),
         ]
 
         @register_as_builtin_fn(CustomClass)
