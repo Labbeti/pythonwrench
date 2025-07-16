@@ -18,20 +18,15 @@ from typing import (
     Optional,
     TypeVar,
     Union,
-    get_args,
     overload,
 )
 
 from pythonwrench._core import ClassOrTuple, Predicate, _FunctionRegistry
 from pythonwrench.inspect import get_fullname
 from pythonwrench.typing import (
-    BuiltinNumber,
-    BuiltinScalar,
     DataclassInstance,
     NamedTupleInstance,
     NoneType,
-    is_builtin_number,
-    is_builtin_scalar,
 )
 
 T = TypeVar("T")
