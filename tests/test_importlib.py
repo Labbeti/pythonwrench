@@ -37,7 +37,7 @@ class TestImportlib(TestCase):
 
 class TestPackaging(TestCase):
     def test_requires_packages(self) -> None:
-        @requires_packages("torch")
+        @requires_packages("typing_extensions")
         def f(x: int) -> int:
             return x
 
