@@ -203,7 +203,6 @@ def requires_packages(
                 msg = (
                     f"Cannot use/import objects because the following optionals dependencies are missing:"
                     f"{prefix}{missing_str}\n"
-                    f"Please install them using `pip install torchwrench[extras]`."
                 )
                 raise ImportError(msg)
 
