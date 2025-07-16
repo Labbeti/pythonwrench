@@ -127,38 +127,6 @@ def checksum_int(x: int, **kwargs) -> int:
 
 
 # Intermediate functions
-@register_checksum_fn(None, custom_predicate=is_builtin_scalar)
-def checksum_builtin_scalar(x: BuiltinScalar, **kwargs) -> int:
-    if is_builtin_number(x):
-        return checksum_builtin_number(x, **kwargs)
-    elif isinstance(x, bytes):
-        return checksum_bytes(x, **kwargs)
-    elif x is None:
-        return checksum_none(x, **kwargs)
-    elif isinstance(x, str):
-        return checksum_str(x, **kwargs)
-    else:
-        msg = f"Invalid argument type {type(x)}. (expected one of {get_args(BuiltinScalar)})"
-        raise TypeError(msg)
-
-
-@register_checksum_fn(None, custom_predicate=is_builtin_number)
-def checksum_builtin_number(x: BuiltinNumber, **kwargs) -> int:
-    """Compute a simple checksum of a builtin scalar number."""
-    # Note: instance check must follow this order: bool, int, float, complex, because isinstance(True, int) returns True !
-    if isinstance(x, bool):
-        return checksum_bool(x, **kwargs)
-    elif isinstance(x, int):
-        return checksum_int(x, **kwargs)
-    elif isinstance(x, float):
-        return checksum_float(x, **kwargs)
-    elif isinstance(x, complex):
-        return checksum_complex(x, **kwargs)
-    else:
-        msg = f"Invalid argument type {type(x)}. (expected one of {get_args(BuiltinNumber)})"
-        raise TypeError(msg)
-
-
 @register_checksum_fn(bytearray)
 def checksum_bytearray(x: bytearray, **kwargs) -> int:
     kwargs["accumulator"] = kwargs.get("accumulator", 0) + _cached_checksum_str(
