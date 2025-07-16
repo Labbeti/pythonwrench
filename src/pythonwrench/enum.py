@@ -2,9 +2,8 @@
 # -*- coding: utf-8 -*-
 
 from enum import Enum
-from typing import Type, TypeVar
 
-T_StrEnum = TypeVar("T_StrEnum", bound="StrEnum")
+from typing_extensions import Self
 
 
 class StrEnum(str, Enum):
@@ -15,10 +14,10 @@ class StrEnum(str, Enum):
 
     @classmethod
     def from_str(
-        cls: Type[T_StrEnum],
+        cls,
         value: str,
         case_sensitive: bool = False,
-    ) -> T_StrEnum:
+    ) -> Self:
         members = cls.__members__.keys()
         for member in members:
             if member == value or (
