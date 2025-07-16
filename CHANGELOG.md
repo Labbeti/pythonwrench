@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - `loads`, `save`, `read` functions for CSV, JSON and PICKLE.
 - JSONL file format support.
 - `str_to_type` and `parse_to` functions to convert any argparse argument to builtin value.
+- `requires_packages` decorator to avoid calling a function that requires an optional dependency.
 
 ### Modified
 - `deprecated_function` decorator can be used without parenthesis.

@@ -152,8 +152,7 @@ class Version:
 
     @classmethod
     def from_str(cls, version_str: str) -> Self:
-        version_dict = _parse_version_str(version_str)
-        return cls(**version_dict)
+        return cls(version_str)
 
     @classmethod
     def from_tuple(cls, version_tuple: VersionTupleLike) -> Self:
