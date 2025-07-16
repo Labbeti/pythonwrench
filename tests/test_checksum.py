@@ -17,6 +17,7 @@ class TestChecksum(TestCase):
             list(range(10)),
             tuple(range(10)),
             set(range(10)),
+            frozenset(range(10)),
             range(10),
             [],
             (),
