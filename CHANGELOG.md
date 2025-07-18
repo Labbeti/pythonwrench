@@ -16,6 +16,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - `disk_cache_decorator` typing.
 - `priority` argument in `register` method of `_FunctionRegistry` class.
+- `get_argnames` returns when function contains local variables.
 
 ## [0.3.0] 2025-06-29
 ### Added

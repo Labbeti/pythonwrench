@@ -7,12 +7,20 @@ from typing import Iterable, Literal, Mapping
 from unittest import TestCase
 
 from pythonwrench import inspect
-from pythonwrench.inspect import get_fullname
+from pythonwrench.inspect import get_argnames, get_fullname
 
 
 class DummyClass:
-    def f(self):
-        return 0
+    def __init__(self, value: int = 0) -> None:
+        attr = str(value)
+
+        super().__init__()
+        self.value = value
+        self.attr = attr
+
+    def f(self, x: int = 0) -> int:
+        result = self.value + x
+        return result
 
 
 class TestInspect(TestCase):
@@ -42,6 +50,11 @@ class TestInspect(TestCase):
                 get_fullname(Iterable[Literal[1]])
                 == "typing.Iterable[typing.Literal[builtins.int(...)]]"
             )
+
+    def test_example_3(self) -> None:
+        assert get_argnames(get_argnames) == ["fn"]
+        assert get_argnames(DummyClass) == ["value"]
+        assert get_argnames(DummyClass().f) == ["x"]
 
 
 if __name__ == "__main__":
