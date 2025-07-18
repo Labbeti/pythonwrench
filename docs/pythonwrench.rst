@@ -3,8 +3,8 @@ pythonwrench package
 
 .. automodule:: pythonwrench
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 Subpackages
 -----------
@@ -38,6 +38,7 @@ Submodules
    pythonwrench.inspect
    pythonwrench.io
    pythonwrench.json
+   pythonwrench.jsonl
    pythonwrench.logging
    pythonwrench.math
    pythonwrench.os

@@ -56,6 +56,7 @@ def reduce_add(
 
 
 def reduce_add(*args, start=None):
+    """Reduce elements using "add" operator (+)."""
     return _reduce(*args, start=start, op_fn=operator.add, type_=SupportsAdd)
 
 
@@ -85,6 +86,7 @@ def reduce_and(
 
 
 def reduce_and(*args, start=None):
+    """Reduce elements using "and" operator (&)."""
     return _reduce(*args, start=start, op_fn=operator.and_, type_=SupportsAnd)
 
 
@@ -114,6 +116,7 @@ def reduce_mul(
 
 
 def reduce_mul(*args, start=None):
+    """Reduce elements using "mul" operator (*)."""
     return _reduce(*args, start=start, op_fn=operator.mul, type_=SupportsMul)
 
 
@@ -143,6 +146,7 @@ def reduce_or(
 
 
 def reduce_or(*args, start=None):
+    """Reduce elements using "or" operator (|)."""
     return _reduce(*args, start=start, op_fn=operator.or_, type_=SupportsOr)
 
 
@@ -204,6 +208,7 @@ def sum(
 
 
 def sum(*args, start: Any = 0):
+    """Compute sum of elements."""
     return reduce_add(*args, start=start)
 
 
@@ -233,6 +238,7 @@ def prod(
 
 
 def prod(*args, start: Any = 1):
+    """Compute product of elements."""
     return reduce_mul(*args, start=start)
 
 

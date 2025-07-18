@@ -3,8 +3,8 @@ pythonwrench.typing package
 
 .. automodule:: pythonwrench.typing
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 Submodules
 ----------

@@ -1,14 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import logging
 import re
 import sys
 from dataclasses import asdict, dataclass
 from typing import Any, Iterable, List, Mapping, Tuple, TypedDict, Union, overload
 
-from typing_extensions import NotRequired, TypeAlias
+from typing_extensions import NotRequired, Self, TypeAlias
 
 from pythonwrench.typing import NoneType, isinstance_generic
+
+PreRelease: TypeAlias = Union[int, str, None, List[Union[int, str]]]
+BuildMetadata: TypeAlias = Union[int, str, None, List[Union[int, str]]]
 
 # Pattern of https://semver.org/
 _VERSION_PATTERN = r"^(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$"
@@ -16,8 +20,7 @@ _VERSION_FORMAT = r"{major}.{minor}.{patch}"
 _VERSION_KEYS = ("major", "minor", "patch", "prerelease", "buildmetadata")
 
 
-PreRelease: TypeAlias = Union[int, str, None, List[Union[int, str]]]
-BuildMetadata: TypeAlias = Union[int, str, None, List[Union[int, str]]]
+logger = logging.getLogger(__name__)
 
 
 class VersionDict(TypedDict):
@@ -57,7 +60,7 @@ class Version:
     @overload
     def __init__(
         self,
-        version: "Version",
+        version: Self,
         /,
     ) -> None: ...
 
@@ -144,32 +147,34 @@ class Version:
         self.buildmetadata = buildmetadata  # type: ignore
 
     @classmethod
-    def python(cls, releaselevel_in_metadata: bool = False) -> "Version":
+    def from_dict(cls, version_dict: VersionDictLike) -> Self:
+        return cls(version_dict)
+
+    @classmethod
+    def from_str(cls, version_str: str) -> Self:
+        return cls(version_str)
+
+    @classmethod
+    def from_tuple(cls, version_tuple: VersionTupleLike) -> Self:
+        return cls(version_tuple)
+
+    @classmethod
+    def python(cls, releaselevel_in_metadata: bool = False) -> Self:
         """Create an instance of Version with Python version.
 
         Note: Python 'micro' value is mapped to 'patch'.
         """
-        return Version(
+        if releaselevel_in_metadata:
+            buildmetadata = sys.version_info.releaselevel
+        else:
+            buildmetadata = None
+
+        return cls(
             major=sys.version_info.major,
             minor=sys.version_info.minor,
             patch=sys.version_info.micro,
-            buildmetadata=sys.version_info.releaselevel
-            if releaselevel_in_metadata
-            else None,
+            buildmetadata=buildmetadata,
         )
-
-    @classmethod
-    def from_dict(cls, version_dict: VersionDictLike) -> "Version":
-        return Version(version_dict)
-
-    @classmethod
-    def from_str(cls, version_str: str) -> "Version":
-        version_dict = _parse_version_str(version_str)
-        return Version(**version_dict)
-
-    @classmethod
-    def from_tuple(cls, version_tuple: VersionTupleLike) -> "Version":
-        return Version(version_tuple)
 
     @property
     def micro(self) -> int:
@@ -266,7 +271,7 @@ class Version:
         if isinstance(other, (dict, tuple, str)):
             other = Version(other)
         # note: use self.__class__ to avoid error cause by 'pytest -v test' collect
-        elif not isinstance(other, self.__class__):
+        elif not isinstance(other, (Version, self.__class__)):
             return False
 
         return (
@@ -281,7 +286,7 @@ class Version:
         if isinstance(other, (dict, tuple, str)):
             other = Version(other)
         # note: use self.__class__ to avoid error cause by 'pytest -v test' collect
-        elif not isinstance(other, self.__class__):
+        elif not isinstance(other, (Version, self.__class__)):
             msg = f"Invalid argument type {type(other)}. (expected an instance of one of {(dict, tuple, str, Version)})"
             raise TypeError(msg)
 

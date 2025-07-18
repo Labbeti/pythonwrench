@@ -9,7 +9,7 @@ __author_email__ = "labbeti.pub@gmail.com"
 __license__ = "MIT"
 __maintainer__ = "Étienne Labbé (Labbeti)"
 __status__ = "Development"
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 
 # Re-import for language servers
@@ -40,11 +40,14 @@ from . import warnings as warnings
 # Global library imports
 from .abc import Singleton
 from .argparse import (
+    parse_to,
     str_to_bool,
+    str_to_none,
     str_to_optional_bool,
     str_to_optional_float,
     str_to_optional_int,
     str_to_optional_str,
+    str_to_type,
 )
 from .cast import as_builtin
 from .checksum import checksum_any, register_checksum_fn
@@ -54,6 +57,7 @@ from .collections import (
     contained,
     dict_list_to_list_dict,
     dump_dict,
+    duplicate_list,
     filter_iterable,
     find,
     flat_dict_of_dict,
@@ -81,7 +85,7 @@ from .collections import (
     union_lists,
     unzip,
 )
-from .csv import dump_csv, load_csv
+from .csv import dump_csv, dumps_csv, load_csv, loads_csv, read_csv, save_csv
 from .dataclasses import get_defaults_values
 from .datetime import get_now, get_now_iso8601
 from .difflib import find_closest_in_list, sequence_matcher_ratio
@@ -93,6 +97,7 @@ from .functools import (
     filter_and_call,
     function_alias,
     identity,
+    repeat_fn,
 )
 from .hashlib import hash_file
 from .importlib import (
@@ -103,7 +108,15 @@ from .importlib import (
     search_submodules,
 )
 from .inspect import get_argnames, get_current_fn_name, get_fullname
-from .json import dump_json, load_json
+from .json import dump_json, dumps_json, load_json, loads_json, read_json, save_json
+from .jsonl import (
+    dump_jsonl,
+    dumps_jsonl,
+    load_jsonl,
+    loads_jsonl,
+    read_jsonl,
+    save_jsonl,
+)
 from .logging import (
     VERBOSE_DEBUG,
     VERBOSE_ERROR,
@@ -122,7 +135,14 @@ from .logging import (
 )
 from .math import argmax, argmin, argsort, clamp, clip
 from .os import get_num_cpus_available, safe_rmdir, tree_iter
-from .pickle import dump_pickle, load_pickle
+from .pickle import (
+    dump_pickle,
+    dumps_pickle,
+    load_pickle,
+    loads_pickle,
+    read_pickle,
+    save_pickle,
+)
 from .random import randstr
 from .re import (
     PatternLike,

@@ -9,16 +9,26 @@ T = TypeVar("T")
 
 def get_argnames(fn: Callable) -> List[str]:
     """Get arguments names of a method, function or callable object."""
-    if inspect.ismethod(fn):
-        # If method, remove 'self' arg
-        argnames = fn.__code__.co_varnames[1:]
-    elif inspect.isfunction(fn):
-        argnames = fn.__code__.co_varnames
-    elif inspect.isclass(fn):
-        argnames = fn.__init__.__code__.co_varnames[1:]
-    else:
-        argnames = fn.__call__.__code__.co_varnames  # type: ignore
+    if inspect.isfunction(fn):
+        code = fn.__code__
+        start = 0
 
+    elif inspect.ismethod(fn):
+        code = fn.__code__
+        start = 1  # If method, remove 'self' arg
+
+    elif inspect.isclass(fn):
+        # If init, remove 'self' arg
+        code = fn.__init__.__code__
+        start = 1  # If init, remove 'self' arg
+
+    else:
+        code = fn.__call__.__code__
+        start = 0
+
+    argnames = code.co_varnames
+    end = code.co_argcount
+    argnames = argnames[start:end]
     argnames = list(argnames)
     return argnames
 

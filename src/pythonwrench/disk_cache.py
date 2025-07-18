@@ -18,6 +18,7 @@ from typing import (
     TypeVar,
     Union,
     get_args,
+    overload,
 )
 
 from typing_extensions import ParamSpec
@@ -59,7 +60,7 @@ def disk_cache_call(
     cache_verbose: int = 0,
     cache_checksum_fn: ChecksumFn = checksum_any,
     cache_saving_backend: Optional[SavingBackend] = "pickle",
-    cache_fname_fmt: Optional[str] = None,
+    cache_fname_fmt: str = "{fn_name}_{csum}{suffix}",
     cache_dump_fn: Optional[Callable[[Any, Path], Any]] = None,
     cache_load_fn: Optional[Callable[[Path], Any]] = None,
     cache_enable: bool = True,
@@ -79,8 +80,7 @@ def disk_cache_call(
     >>> outputs = pw.disk_cache_call(heavy_processing)  # second time outputs is loaded from disk
     ```
     """
-    wrapped_fn = disk_cache_decorator(
-        fn,
+    wrapped_fn = _disk_cache_impl(
         cache_dpath=cache_dpath,
         cache_force=cache_force,
         cache_verbose=cache_verbose,
@@ -92,7 +92,41 @@ def disk_cache_call(
         cache_enable=cache_enable,
         cache_store_mode=cache_store_mode,
     )
-    return wrapped_fn(*args, **kwargs)
+    return wrapped_fn(fn)(*args, **kwargs)
+
+
+@overload
+def disk_cache_decorator(
+    fn: None = None,
+    *,
+    cache_dpath: Union[str, Path, None] = None,
+    cache_force: bool = False,
+    cache_verbose: int = 0,
+    cache_checksum_fn: ChecksumFn = checksum_any,
+    cache_saving_backend: Optional[SavingBackend] = "pickle",
+    cache_fname_fmt: str = "{fn_name}_{csum}{suffix}",
+    cache_dump_fn: Optional[Callable[[Any, Path], Any]] = None,
+    cache_load_fn: Optional[Callable[[Path], Any]] = None,
+    cache_enable: bool = True,
+    cache_store_mode: StoreMode = "outputs_metadata",
+) -> Callable[[Callable[P, T]], Callable[P, T]]: ...
+
+
+@overload
+def disk_cache_decorator(
+    fn: Callable[P, T],
+    *,
+    cache_dpath: Union[str, Path, None] = None,
+    cache_force: bool = False,
+    cache_verbose: int = 0,
+    cache_checksum_fn: ChecksumFn = checksum_any,
+    cache_saving_backend: Optional[SavingBackend] = "pickle",
+    cache_fname_fmt: str = "{fn_name}_{csum}{suffix}",
+    cache_dump_fn: Optional[Callable[[Any, Path], Any]] = None,
+    cache_load_fn: Optional[Callable[[Path], Any]] = None,
+    cache_enable: bool = True,
+    cache_store_mode: StoreMode = "outputs_metadata",
+) -> Callable[P, T]: ...
 
 
 def disk_cache_decorator(
@@ -103,7 +137,7 @@ def disk_cache_decorator(
     cache_verbose: int = 0,
     cache_checksum_fn: ChecksumFn = checksum_any,
     cache_saving_backend: Optional[SavingBackend] = "pickle",
-    cache_fname_fmt: Optional[str] = None,
+    cache_fname_fmt: str = "{fn_name}_{csum}{suffix}",
     cache_dump_fn: Optional[Callable[[Any, Path], Any]] = None,
     cache_load_fn: Optional[Callable[[Path], Any]] = None,
     cache_enable: bool = True,
@@ -148,23 +182,27 @@ def _disk_cache_impl(
     cache_verbose: int = 0,
     cache_checksum_fn: ChecksumFn = checksum_any,
     cache_saving_backend: Optional[SavingBackend] = "pickle",
-    cache_fname_fmt: Optional[str] = None,
+    cache_fname_fmt: str = "{fn_name}_{csum}{suffix}",
     cache_dump_fn: Optional[Callable[[Any, Path], Any]] = None,
     cache_load_fn: Optional[Callable[[Path], Any]] = None,
     cache_enable: bool = True,
     cache_store_mode: StoreMode = "outputs_metadata",
 ) -> Callable[[Callable[P, T]], Callable[P, T]]:
+    # for backward compatibility
+    if cache_fname_fmt is None:
+        cache_fname_fmt = "{fn_name}_{csum}{suffix}"
+
     if cache_saving_backend == "pickle":
         from pythonwrench.pickle import dump_pickle, load_pickle
 
-        cache_fname_fmt = "{fn_name}_{csum}.pickle"
+        suffix = ".pickle"
         cache_dump_fn = dump_pickle
         cache_load_fn = load_pickle
 
     elif cache_saving_backend == "json":
         from pythonwrench.json import dump_json, load_json
 
-        cache_fname_fmt = "{fn_name}_{csum}.json"
+        suffix = ".json"
         cache_dump_fn = dump_json
         cache_load_fn = load_json
 
@@ -175,7 +213,7 @@ def _disk_cache_impl(
             msg = f"Invalid combinaison of arguments {cache_saving_backend=} with {cache_store_mode=}."
             raise ValueError(msg)
 
-        cache_fname_fmt = "{fn_name}_{csum}.csv"
+        suffix = ".csv"
         cache_dump_fn = dump_csv
         cache_load_fn = load_csv
 
@@ -183,6 +221,8 @@ def _disk_cache_impl(
         if cache_fname_fmt is None or cache_dump_fn is None or cache_load_fn is None:
             msg = f"If {cache_saving_backend=}, arguments cache_fname_fmt, cache_dump_fn and cache_load_fn cannot be None. (found {cache_fname_fmt=}, {cache_dump_fn=} {cache_load_fn=})"
             raise ValueError(msg)
+
+        suffix = ""
     else:
         msg = f"Invalid argument {cache_saving_backend=}. (expected one of {get_args(SavingBackend)})"
         raise ValueError(msg)
@@ -207,7 +247,9 @@ def _disk_cache_impl(
         def _disk_cache_wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
             checksum_args = fn, args, kwargs
             csum = cache_checksum_fn(checksum_args)
-            cache_fname = cache_fname_fmt.format(fn_name=fn_name, csum=csum)
+            cache_fname = cache_fname_fmt.format(
+                fn_name=fn_name, csum=csum, suffix=suffix
+            )
             cache_fpath = cache_fn_dpath.joinpath(cache_fname)
 
             if not cache_enable:

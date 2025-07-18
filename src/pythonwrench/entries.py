@@ -49,15 +49,17 @@ def print_tree(
     max_depth: int = sys.maxsize,
     followlinks: bool = False,
 ) -> None:
-    """Print directory tree."""
+    """Print directory tree to stdout."""
     num_dirs = 0
     num_files = 0
-    for line in tree_iter(
+
+    iterable = tree_iter(
         root=root,
         exclude=exclude,
         max_depth=max_depth,
         followlinks=followlinks,
-    ):
+    )
+    for line in iterable:
         print(f"{line}")
 
         if line.endswith("/"):
@@ -124,9 +126,8 @@ def print_safe_rmdir(
         verbose=verbose,
     )
     if dry_run:
-        print(
-            f"Dry run mode enabled. Here is the list of directories to delete ({len(deleted)}/{len(reviewed)}):"
-        )
+        msg = f"Dry run mode enabled. Here is the list of directories to delete ({len(deleted)}/{len(reviewed)}):"
+        print(msg)
         for path in deleted:
             print(f" - {path}")
 

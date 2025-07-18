@@ -2,23 +2,24 @@
 # -*- coding: utf-8 -*-
 
 from enum import Enum
-from typing import Type, TypeVar
 
-T_StrEnum = TypeVar("T_StrEnum", bound="StrEnum")
+from typing_extensions import Self
 
 
 class StrEnum(str, Enum):
     """StrEnum is the same as Enum, but its members are also strings and can be used in most of the same places that a string can be used.
+
+    Note: when used as keys of dicts, enums are considered different from strings keys.
 
     This class has the same objective than https://docs.python.org/3/library/enum.html#enum.StrEnum, which was introduced in Python 3.11.
     """
 
     @classmethod
     def from_str(
-        cls: Type[T_StrEnum],
+        cls,
         value: str,
         case_sensitive: bool = False,
-    ) -> T_StrEnum:
+    ) -> Self:
         members = cls.__members__.keys()
         for member in members:
             if member == value or (
@@ -33,8 +34,9 @@ class StrEnum(str, Enum):
     def _generate_next_value_(name, start, count, last_values) -> str:
         return name
 
-    def __str__(self) -> str:
-        return self.name
+    @property
+    def value(self) -> str:
+        return self._value_
 
     def __eq__(self, other: object) -> bool:
         other = other.value if isinstance(other, Enum) else str(other)
@@ -42,3 +44,6 @@ class StrEnum(str, Enum):
 
     def __hash__(self) -> int:
         return hash(self.value)
+
+    def __str__(self) -> str:
+        return self.name

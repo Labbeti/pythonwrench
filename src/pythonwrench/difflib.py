@@ -7,6 +7,7 @@ from typing import Callable, Iterable, Optional
 
 
 def sequence_matcher_ratio(a: str, b: str) -> float:
+    """Compute distance ratio of two strings."""
     return SequenceMatcher(None, a, b).ratio()
 
 
@@ -16,6 +17,7 @@ def find_closest_in_list(
     sim_fn: Callable[[str, str], float] = sequence_matcher_ratio,
     higher_is_closer: bool = True,
 ) -> Optional[str]:
+    """Find closest element in a list based on matches ratio."""
     best_sim = -int(higher_is_closer) * math.inf
     closest = None
 

@@ -8,6 +8,7 @@ readme = "README.md"
 requires-python = ">=3.8"
 keywords = ["python", "tools", "utilities"]
 license = {file = "LICENSE"}
+# license-files = ["LICENSE"]  # unsupported by python 3.8, but will be required in 2026
 classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
@@ -40,6 +41,9 @@ Tracker = "https://github.com/Labbeti/pythonwrench/issues"
 pythonwrench-info = "pythonwrench.entries:print_install_info"
 pythonwrench-tree = "pythonwrench.entries:main_tree"
 pythonwrench-safe-rmdir = "pythonwrench.entries:main_safe_rmdir"
+pyw-info = "pythonwrench.entries:print_install_info"
+pyw-tree = "pythonwrench.entries:main_tree"
+pyw-safe-rmdir = "pythonwrench.entries:main_safe_rmdir"
 
 [build-system]
 requires = ["setuptools >= 61.0"]

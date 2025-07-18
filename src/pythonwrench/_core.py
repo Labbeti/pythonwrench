@@ -37,7 +37,7 @@ def _decorator_factory(
     *,
     pre_fn: Callable[..., Any] = return_none,
     post_fn: Callable[..., Any] = return_none,
-) -> Callable[..., Callable[P, U]]:
+) -> Callable[[Callable[P, U]], Callable[P, U]]:
     """Deprecated decorator for function aliases."""
 
     def wrapper_factory(fn: Callable[P, U]) -> Callable[P, U]:
@@ -77,7 +77,9 @@ class _FunctionRegistry(Generic[T_Output]):
         priority: int = 0,
     ) -> Callable[[T], T_Output]:
         return self.register_decorator(
-            class_or_tuple, custom_predicate=custom_predicate
+            class_or_tuple,
+            custom_predicate=custom_predicate,
+            priority=priority,
         )(fn)
 
     def register_decorator(
