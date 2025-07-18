@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.3.1] UNRELEASED
+## [0.4.0] 2025-07-18
 ### Added
 - `duplicate_list` function to duplicate elements in a list.
 - `loads`, `save`, `read` functions for CSV, JSON and PICKLE.
