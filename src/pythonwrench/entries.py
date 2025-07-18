@@ -126,9 +126,8 @@ def print_safe_rmdir(
         verbose=verbose,
     )
     if dry_run:
-        print(
-            f"Dry run mode enabled. Here is the list of directories to delete ({len(deleted)}/{len(reviewed)}):"
-        )
+        msg = f"Dry run mode enabled. Here is the list of directories to delete ({len(deleted)}/{len(reviewed)}):"
+        print(msg)
         for path in deleted:
             print(f" - {path}")
 
