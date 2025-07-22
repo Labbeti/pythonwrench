@@ -74,17 +74,17 @@ def contained(
 @overload
 def dict_list_to_list_dict(
     dic: Mapping[T, Iterable[U]],
-    key_mode: Literal["same", "intersect"],
-    default_val: Any = None,
-) -> List[Dict[T, U]]: ...
+    key_mode: Literal["union"] = "union",
+    default_val: W = None,
+) -> List[Dict[T, Union[U, W]]]: ...
 
 
 @overload
 def dict_list_to_list_dict(
     dic: Mapping[T, Iterable[U]],
-    key_mode: Literal["union"] = "union",
-    default_val: W = None,
-) -> List[Dict[T, Union[U, W]]]: ...
+    key_mode: Literal["same", "intersect"],
+    default_val: Any = None,
+) -> List[Dict[T, U]]: ...
 
 
 def dict_list_to_list_dict(
