@@ -169,6 +169,12 @@ class Placeholder:
     def __getitem__(self, *args, **kwargs) -> Any:
         return self
 
+    def __eq__(self, other) -> Any:
+        return self == other
+
+    def __ne__(self, other) -> Any:
+        return self != other
+
 
 def requires_packages(
     arg0: Union[Iterable[str], str],
