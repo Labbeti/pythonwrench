@@ -170,6 +170,7 @@ from .typing import (
     SupportsAnd,
     SupportsBool,
     SupportsDiv,
+    SupportsGetitem,
     SupportsGetitemIterLen,
     SupportsGetitemLen,
     SupportsIterLen,

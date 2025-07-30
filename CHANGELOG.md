@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.1] UNRELEASED
+### Added
+- `SupportsGetitem` protocol.
+
 ## [0.4.0] 2025-07-18
 ### Added
 - `duplicate_list` function to duplicate elements in a list.

@@ -83,6 +83,12 @@ class SupportsDiv(Protocol):
 
 
 @runtime_checkable
+class SupportsGetitem(Protocol[T]):
+    def __getitem__(self, idx, /) -> T:
+        raise NotImplementedError
+
+
+@runtime_checkable
 class SupportsGetitemLen(Protocol[T]):
     def __getitem__(self, idx, /) -> T:
         raise NotImplementedError
