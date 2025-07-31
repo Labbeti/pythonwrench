@@ -6,6 +6,9 @@ All notable changes to this project will be documented in this file.
 ### Added
 - `SupportsGetitem` protocol.
 
+### Fixed
+- `T_Index` typevar for protocol that specify `__getitem__` method.
+
 ## [0.4.0] 2025-07-18
 ### Added
 - `duplicate_list` function to duplicate elements in a list.

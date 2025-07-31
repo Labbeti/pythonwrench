@@ -22,6 +22,8 @@ BuiltinNumber: TypeAlias = Union[bool, int, float, complex]
 BuiltinScalar: TypeAlias = Union[bool, int, float, complex, NoneType, str, bytes]
 
 T = TypeVar("T", covariant=True)
+T_Index = TypeVar("T_Index", covariant=False, contravariant=True, default=int)
+
 T_BuiltinNumber = TypeVar(
     "T_BuiltinNumber",
     bound=BuiltinNumber,
@@ -83,14 +85,14 @@ class SupportsDiv(Protocol):
 
 
 @runtime_checkable
-class SupportsGetitem(Protocol[T]):
-    def __getitem__(self, idx, /) -> T:
+class SupportsGetitem(Protocol[T, T_Index]):
+    def __getitem__(self, idx: T_Index, /) -> T:
         raise NotImplementedError
 
 
 @runtime_checkable
-class SupportsGetitemLen(Protocol[T]):
-    def __getitem__(self, idx, /) -> T:
+class SupportsGetitemLen(Protocol[T, T_Index]):
+    def __getitem__(self, idx: T_Index, /) -> T:
         raise NotImplementedError
 
     def __len__(self) -> int:
@@ -98,8 +100,8 @@ class SupportsGetitemLen(Protocol[T]):
 
 
 @runtime_checkable
-class SupportsGetitemIterLen(Protocol[T]):
-    def __getitem__(self, idx, /) -> T:
+class SupportsGetitemIterLen(Protocol[T, T_Index]):
+    def __getitem__(self, idx: T_Index, /) -> T:
         raise NotImplementedError
 
     def __iter__(self) -> Iterator[T]:
