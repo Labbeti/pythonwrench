@@ -35,7 +35,7 @@ def parse_to(
 ) -> Callable[[str], T]:
     """Returns a callable that convert string value to target type safely.
 
-    Intended for argparse boolean arguments.
+    Intended for argparse arguments.
     """
     return partial(
         str_to_type,
@@ -56,7 +56,7 @@ def str_to_type(
     false_values: Union[str, Iterable[str]] = DEFAULT_FALSE_VALUES,
     none_values: Union[str, Iterable[str]] = DEFAULT_NONE_VALUES,
 ) -> T:
-    """Convert string values to target type safely. Intended for argparse boolean arguments.
+    """Convert string values to target type safely. Intended for argparse arguments.
 
     - True values: 'True', 'T', 'yes', 'y', '1'.
     - False values: 'False', 'F', 'no', 'n', '0'.
@@ -84,7 +84,7 @@ def str_to_bool(
     true_values: Union[str, Iterable[str]] = DEFAULT_TRUE_VALUES,
     false_values: Union[str, Iterable[str]] = DEFAULT_FALSE_VALUES,
 ) -> bool:
-    """Convert string values to bool safely. Intended for argparse boolean arguments.
+    """Convert string values to bool safely. Intended for argparse arguments.
 
     - True values: 'True', 'T', 'yes', 'y', '1'.
     - False values: 'False', 'F', 'no', 'n', '0'.
@@ -105,7 +105,7 @@ def str_to_none(
     case_sensitive: bool = False,
     none_values: Union[str, Iterable[str]] = DEFAULT_NONE_VALUES,
 ) -> None:
-    """Convert string values to None safely. Intended for argparse boolean arguments.
+    """Convert string values to None safely. Intended for argparse arguments.
 
     - None values: 'None', 'null'
     - Other raises ValueError.
@@ -123,7 +123,7 @@ def str_to_optional_bool(
     false_values: Union[str, Iterable[str]] = DEFAULT_FALSE_VALUES,
     none_values: Union[str, Iterable[str]] = DEFAULT_NONE_VALUES,
 ) -> Optional[bool]:
-    """Convert string values to optional bool safely. Intended for argparse boolean arguments.
+    """Convert string values to optional bool safely. Intended for argparse arguments.
 
     - True values: 'True', 'T', 'yes', 'y', '1'.
     - False values: 'False', 'F', 'no', 'n', '0'.
@@ -141,7 +141,7 @@ def str_to_optional_float(
     case_sensitive: bool = False,
     none_values: Union[str, Iterable[str]] = DEFAULT_NONE_VALUES,
 ) -> Optional[float]:
-    """Convert string values to optional float safely. Intended for argparse boolean arguments."""
+    """Convert string values to optional float safely. Intended for argparse arguments."""
     return str_to_type(
         x, Optional[float], case_sensitive=case_sensitive, none_values=none_values
     )
@@ -153,7 +153,7 @@ def str_to_optional_int(
     case_sensitive: bool = False,
     none_values: Union[str, Iterable[str]] = DEFAULT_NONE_VALUES,
 ) -> Optional[int]:
-    """Convert string values to optional int safely. Intended for argparse boolean arguments."""
+    """Convert string values to optional int safely. Intended for argparse arguments."""
     return str_to_type(
         x, Optional[int], case_sensitive=case_sensitive, none_values=none_values
     )
@@ -165,7 +165,7 @@ def str_to_optional_str(
     case_sensitive: bool = False,
     none_values: Union[str, Iterable[str]] = DEFAULT_NONE_VALUES,
 ) -> Optional[str]:
-    """Convert string values to optional str safely. Intended for argparse boolean arguments."""
+    """Convert string values to optional str safely. Intended for argparse arguments."""
     return str_to_type(
         x, Optional[str], case_sensitive=case_sensitive, none_values=none_values
     )
@@ -284,7 +284,7 @@ def _str_to_none_impl(
     case_sensitive: bool = False,
     none_values: Union[str, Iterable[str]] = DEFAULT_NONE_VALUES,
 ) -> Union[None, Exception]:
-    """Convert string values to None safely. Intended for argparse boolean arguments.
+    """Convert string values to None safely. Intended for argparse arguments.
 
     - None values: 'None', 'null'
     - Other raises ValueError.
