@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - `SupportsGetitem` protocol.
 - All `SuppportGetitem`-based protocols now accept a second generic to specify idx type.
+- `seed` option to `randstr` function.
 
 ### Modified
 - `checksum_any` computation with `set` and `frozenset` objects no longer require to sort elements.
