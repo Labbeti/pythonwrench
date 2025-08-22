@@ -13,6 +13,7 @@ def randstr(
     /,
     *,
     letters: Iterable[str] = string.ascii_letters,
+    seed: Optional[int] = None,
 ) -> str: ...
 
 
@@ -23,6 +24,7 @@ def randstr(
     /,
     *,
     letters: Iterable[str] = string.ascii_letters,
+    seed: Optional[int] = None,
 ) -> str: ...
 
 
