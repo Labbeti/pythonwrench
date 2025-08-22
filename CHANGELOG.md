@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 ## [0.4.1] UNRELEASED
 ### Added
 - `SupportsGetitem` protocol.
+- All `SuppportGetitem`-based protocols now accept a second generic to specify idx type.
+
+### Modified
+- `checksum_any` computation with `set` and `frozenset` objects no longer require to sort elements.
 
 ### Fixed
 - `T_Index` typevar for protocol that specify `__getitem__` method.
