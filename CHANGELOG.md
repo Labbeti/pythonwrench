@@ -5,14 +5,14 @@ All notable changes to this project will be documented in this file.
 ## [0.4.1] UNRELEASED
 ### Added
 - `SupportsGetitem` protocol.
-- All `SuppportGetitem`-based protocols now accept a second generic to specify idx type.
+- All `SupportGetitem`-based protocols now accept a second generic to specify idx type.
 - `seed` option to `randstr` function.
 
 ### Modified
 - `checksum_any` computation with `set` and `frozenset` objects no longer require to sort elements.
 
 ### Fixed
-- `T_Index` typevar for protocol that specify `__getitem__` method.
+- Default value for `T_Index` typevar for protocol that specify `__getitem__` method.
 - `reload_editable_submodules` when no editable submodule is imported.
 
 ## [0.4.0] 2025-07-18
