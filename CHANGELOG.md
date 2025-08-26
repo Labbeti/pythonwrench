@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - `T_Index` typevar for protocol that specify `__getitem__` method.
+- `reload_editable_submodules` when no editable submodule is imported.
 
 ## [0.4.0] 2025-07-18
 ### Added
