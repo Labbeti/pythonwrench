@@ -9,22 +9,26 @@ from typing import (
     Generic,
     Literal,
     Optional,
+    Protocol,
     Tuple,
-    TypeVar,
     Union,
     get_args,
 )
 
-from typing_extensions import ParamSpec
+from typing_extensions import ParamSpec, TypeVar
 
 P = ParamSpec("P")
 T = TypeVar("T")
 U = TypeVar("U")
 T_Output = TypeVar("T_Output")
+T_Any = TypeVar("T_Any", contravariant=True, default=Any)
 
 UnkMode = Literal["identity", "error"]
 ClassOrTuple = Union[type, Tuple[type, ...]]
-Predicate = Callable[[Any], bool]
+
+
+class Predicate(Protocol[T_Any]):
+    def __call__(self, x: T_Any) -> bool: ...
 
 
 def return_none(*args, **kwargs) -> None:

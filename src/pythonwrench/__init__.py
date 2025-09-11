@@ -9,17 +9,20 @@ __author_email__ = "labbeti.pub@gmail.com"
 __license__ = "MIT"
 __maintainer__ = "Étienne Labbé (Labbeti)"
 __status__ = "Development"
-__version__ = "0.4.0"
+__version__ = "0.4.1"
 
 
 # Re-import for language servers
 from . import abc as abc
 from . import argparse as argparse
+from . import cast as cast
+from . import checksum as checksum
 from . import collections as collections
 from . import csv as csv
 from . import dataclasses as dataclasses
 from . import datetime as datetime
 from . import difflib as difflib
+from . import disk_cache as disk_cache
 from . import entries as entries
 from . import enum as enum
 from . import functools as functools
@@ -28,6 +31,7 @@ from . import importlib as importlib
 from . import inspect as inspect
 from . import io as io
 from . import json as json
+from . import jsonl as jsonl
 from . import logging as logging
 from . import math as math
 from . import os as os
@@ -166,6 +170,7 @@ from .typing import (
     SupportsAnd,
     SupportsBool,
     SupportsDiv,
+    SupportsGetitem,
     SupportsGetitemIterLen,
     SupportsGetitemLen,
     SupportsIterLen,

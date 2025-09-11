@@ -21,7 +21,10 @@ BuiltinCollection: TypeAlias = Union[list, tuple, dict, set, frozenset]
 BuiltinNumber: TypeAlias = Union[bool, int, float, complex]
 BuiltinScalar: TypeAlias = Union[bool, int, float, complex, NoneType, str, bytes]
 
-T = TypeVar("T", covariant=True)
+_T_Item = TypeVar("_T_Item", covariant=True)
+_T_Index = TypeVar("_T_Index", contravariant=True, default=int)
+_T_Other = TypeVar("_T_Other", contravariant=True, default=Any)
+
 T_BuiltinNumber = TypeVar(
     "T_BuiltinNumber",
     bound=BuiltinNumber,
@@ -59,14 +62,14 @@ class NamedTupleInstance(Protocol):
 
 
 @runtime_checkable
-class SupportsAdd(Protocol):
-    def __add__(self, other, /):
+class SupportsAdd(Protocol[_T_Other]):
+    def __add__(self, other: _T_Other, /):
         raise NotImplementedError
 
 
 @runtime_checkable
-class SupportsAnd(Protocol):
-    def __and__(self, other, /):
+class SupportsAnd(Protocol[_T_Other]):
+    def __and__(self, other: _T_Other, /):
         raise NotImplementedError
 
 
@@ -77,14 +80,20 @@ class SupportsBool(Protocol):
 
 
 @runtime_checkable
-class SupportsDiv(Protocol):
-    def __div__(self, other, /):
+class SupportsDiv(Protocol[_T_Other]):
+    def __div__(self, other: _T_Other, /):
         raise NotImplementedError
 
 
 @runtime_checkable
-class SupportsGetitemLen(Protocol[T]):
-    def __getitem__(self, idx, /) -> T:
+class SupportsGetitem(Protocol[_T_Item, _T_Index]):
+    def __getitem__(self, idx: _T_Index, /) -> _T_Item:
+        raise NotImplementedError
+
+
+@runtime_checkable
+class SupportsGetitemLen(Protocol[_T_Item, _T_Index]):
+    def __getitem__(self, idx: _T_Index, /) -> _T_Item:
         raise NotImplementedError
 
     def __len__(self) -> int:
@@ -92,11 +101,11 @@ class SupportsGetitemLen(Protocol[T]):
 
 
 @runtime_checkable
-class SupportsGetitemIterLen(Protocol[T]):
-    def __getitem__(self, idx, /) -> T:
+class SupportsGetitemIterLen(Protocol[_T_Item, _T_Index]):
+    def __getitem__(self, idx: _T_Index, /) -> _T_Item:
         raise NotImplementedError
 
-    def __iter__(self) -> Iterator[T]:
+    def __iter__(self) -> Iterator[_T_Item]:
         raise NotImplementedError
 
     def __len__(self) -> int:
@@ -104,8 +113,8 @@ class SupportsGetitemIterLen(Protocol[T]):
 
 
 @runtime_checkable
-class SupportsIterLen(Protocol[T]):
-    def __iter__(self) -> Iterator[T]:
+class SupportsIterLen(Protocol[_T_Item]):
+    def __iter__(self) -> Iterator[_T_Item]:
         raise NotImplementedError
 
     def __len__(self) -> int:
@@ -119,12 +128,12 @@ class SupportsLen(Protocol):
 
 
 @runtime_checkable
-class SupportsMul(Protocol):
-    def __mul__(self, other, /):
+class SupportsMul(Protocol[_T_Other]):
+    def __mul__(self, other: _T_Other, /):
         raise NotImplementedError
 
 
 @runtime_checkable
-class SupportsOr(Protocol):
-    def __or__(self, other, /):
+class SupportsOr(Protocol[_T_Other]):
+    def __or__(self, other: _T_Other, /):
         raise NotImplementedError

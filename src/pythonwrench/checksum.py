@@ -196,7 +196,9 @@ def checksum_set(x: Union[set, frozenset], **kwargs) -> int:
     kwargs["accumulator"] = kwargs.get("accumulator", 0) + _cached_checksum_str(
         get_fullname(x)
     )
-    return _checksum_iterable(sorted(x), **kwargs)
+    # Simply use sum here, order does not matter
+    csum = sum(checksum_any(xi, **kwargs) for xi in x)
+    return csum
 
 
 @register_checksum_fn(range)

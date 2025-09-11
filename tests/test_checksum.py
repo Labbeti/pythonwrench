@@ -51,6 +51,12 @@ class TestChecksum(TestCase):
         assert x0 != x1
         assert checksum_any(x0) != checksum_any(x1)
 
+    def test_sets(self) -> None:
+        s1 = {1, 2}
+        s2 = {2, 1}
+        assert s1 == s2
+        assert checksum_any(s1) == checksum_any(s2)
+
 
 if __name__ == "__main__":
     unittest.main()

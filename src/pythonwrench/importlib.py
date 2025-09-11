@@ -107,14 +107,12 @@ def search_submodules(
 
 
 def reload_submodules(
-    module: ModuleType,
-    *others: ModuleType,
+    *modules: ModuleType,
     verbose: int = 0,
     only_editable: bool = True,
     only_loaded: bool = False,
 ) -> List[ModuleType]:
     """Reload all submodule recursively."""
-    modules = (module,) + others
     candidates: Dict[ModuleType, None] = {}
     for module in modules:
         submodules = search_submodules(
@@ -168,6 +166,12 @@ class Placeholder:
 
     def __getitem__(self, *args, **kwargs) -> Any:
         return self
+
+    def __eq__(self, other) -> Any:
+        return self == other
+
+    def __ne__(self, other) -> Any:
+        return self != other
 
 
 def requires_packages(

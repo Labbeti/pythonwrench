@@ -4,15 +4,18 @@ pythonwrench's documentation
 
 Set of tools for Python that could be in the standard library.
 
+See the API doc here:
+
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :name: maintoc
 
    modules
 
+Here is some key features:
 
 Collections
-#######################
+############################
 
 Provides functions to facilitate iterables processing, like `unzip` :
 
@@ -65,7 +68,7 @@ or dict of dicts :
 
 
 Typing
-#######################
+############################
 
 Check generic types with ìsinstance_generic` :
 
@@ -110,7 +113,7 @@ Finally, you can also force argument type checking with `check_args_types` funct
 
 
 Disk caching (memoize)
-#######################
+############################
 
 .. :caption: Load an item.
 
@@ -127,7 +130,8 @@ Disk caching (memoize)
     data2 = heavy_processing()  # second call result is loaded from disk directly
 
 
-### Semantic versionning parsing
+Semantic versionning parsing
+############################
 
 .. :caption: Load an item.
 
@@ -143,7 +147,7 @@ Disk caching (memoize)
 
 
 Serialization
-#######################
+############################
 
 .. :caption: Load an item.
 
@@ -158,7 +162,7 @@ Serialization
 
 
 Contact
-#######################
+############################
 
 Maintainer:
 - [Étienne Labbé](https://labbeti.github.io/) "Labbeti": labbeti.pub@gmail.com

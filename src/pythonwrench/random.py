@@ -13,6 +13,7 @@ def randstr(
     /,
     *,
     letters: Iterable[str] = string.ascii_letters,
+    seed: Optional[int] = None,
 ) -> str: ...
 
 
@@ -23,6 +24,7 @@ def randstr(
     /,
     *,
     letters: Iterable[str] = string.ascii_letters,
+    seed: Optional[int] = None,
 ) -> str: ...
 
 
@@ -32,14 +34,23 @@ def randstr(
     /,
     *,
     letters: Iterable[str] = string.ascii_letters,
+    seed: Optional[int] = None,
 ) -> str:
     """Returns a randomly generated string of a random range length."""
     assert low_or_size >= 0
+
+    initial_state = random.getstate()
     if high is None:
         size = low_or_size
+        random.seed(seed)
     else:
         assert low_or_size < high
+        random.seed(seed)
         size = random.randint(low_or_size, high - 1)
 
     letters = list(letters)
-    return "".join(random.choice(letters) for _ in range(size))
+    result = "".join(random.choice(letters) for _ in range(size))
+
+    if seed is not None:
+        random.setstate(initial_state)
+    return result
