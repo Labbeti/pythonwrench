@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.4.1] UNRELEASED
+## [0.4.1] 2025-09-11
 ### Added
 - `SupportsGetitem` protocol.
 - All `SupportGetitem`-based protocols now accept a second generic to specify idx type.
