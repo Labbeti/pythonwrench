@@ -25,6 +25,7 @@ from .classes import (
     BuiltinScalar,
     DataclassInstance,
     EllipsisType,
+    ListOrTuple,
     NamedTupleInstance,
     NoneType,
     SupportsAdd,
