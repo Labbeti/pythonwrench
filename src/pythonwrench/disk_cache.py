@@ -79,6 +79,21 @@ def disk_cache_call(
     >>> outputs = pw.disk_cache_call(heavy_processing)  # first time function is called
     >>> outputs = pw.disk_cache_call(heavy_processing)  # second time outputs is loaded from disk
     ```
+
+    Args:
+        fn: Function to store its output. By default, it must be a callable that returns a pickable object.
+        *args: Positional arguments passed to the function.
+        **kwargs: Keywords arguments passed to the function.
+        cache_dpath: Cache directory path. defaults to `~/.cache/disk_cache`.
+        cache_force: Force function call and overwrite cache. defaults to False.
+        cache_verbose: Set verbose logging level. Higher means more verbose. defaults to 0.
+        cache_checksum_fn: Checksum function to identify input arguments. defaults to `pythonwrench.checksum_any`.
+        cache_saving_backend: Optional saving backend. Can be one of ('csv', 'json', 'pickle'). defaults to 'pickle'.
+        cache_fname_fmt: Cache filename format. defaults to "{fn_name}_{csum}{suffix}".
+        cache_dump_fn: Dump/save function to store outputs and overwrite saving backend. defaults to None.
+        cache_load_fn: Load function to store outputs and overwrite saving backend. defaults to None.
+        cache_enable: Enable disk cache. If False, the function has no effect. defaults to True.
+        cache_store_mode: Disk cache storage mode. By default, it store function output and saved date into the cache file. defaults to "outputs_metadata".
     """
     wrapped_fn = _disk_cache_impl(
         cache_dpath=cache_dpath,
@@ -156,6 +171,19 @@ def disk_cache_decorator(
     >>> outputs = heavy_processing()  # first time function is called
     >>> outputs = heavy_processing()  # second time outputs is loaded from disk
     ```
+
+    Args:
+        fn: Function to store its output. By default, it must be a callable that returns a pickable object.
+        cache_dpath: Cache directory path. defaults to `~/.cache/disk_cache`.
+        cache_force: Force function call and overwrite cache. defaults to False.
+        cache_verbose: Set verbose logging level. Higher means more verbose. defaults to 0.
+        cache_checksum_fn: Checksum function to identify input arguments. defaults to `pythonwrench.checksum_any`.
+        cache_saving_backend: Optional saving backend. Can be one of ('csv', 'json', 'pickle'). defaults to 'pickle'.
+        cache_fname_fmt: Cache filename format. defaults to "{fn_name}_{csum}{suffix}".
+        cache_dump_fn: Dump/save function to store outputs and overwrite saving backend. defaults to None.
+        cache_load_fn: Load function to store outputs and overwrite saving backend. defaults to None.
+        cache_enable: Enable disk cache. If False, the function has no effect. defaults to True.
+        cache_store_mode: Disk cache storage mode. By default, it store function output and saved date into the cache file. defaults to "outputs_metadata".
     """
     impl_fn = _disk_cache_impl(
         cache_dpath=cache_dpath,
@@ -336,6 +364,7 @@ def _disk_cache_impl(
 
 
 def get_cache_dpath(cache_dpath: Union[str, Path, None] = None) -> Path:
+    """Returns defaults disk cache directory path, which is `~/.cache/disk_cache`."""
     if cache_dpath is None:
         cache_dpath = _DEFAULT_CACHE_DPATH
     else:
@@ -348,6 +377,7 @@ def remove_fn_cache(
     *,
     cache_dpath: Union[str, Path, None] = None,
 ) -> None:
+    """Removes all caches for a specific function."""
     cache_fn_dpath = _get_fn_cache_dpath(fn, cache_dpath=cache_dpath)
     if cache_fn_dpath.is_dir():
         shutil.rmtree(cache_fn_dpath)
