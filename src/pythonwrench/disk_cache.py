@@ -67,18 +67,9 @@ def disk_cache_call(
     cache_store_mode: StoreMode = "outputs_metadata",
     **kwargs,
 ) -> T:
-    """Call function and store output in a cache file.
+    r"""Call function and store output in a cache file.
 
     Cache file is identified by the checksum of the function arguments, and stored by default in `~/.cache/disk_cache/<Function_name>/` directory.
-
-    ```python
-    >>> import pythonwrench as pw
-    >>> def heavy_processing():
-    >>>     # Lot of stuff here
-    >>>     ...
-    >>> outputs = pw.disk_cache_call(heavy_processing)  # first time function is called
-    >>> outputs = pw.disk_cache_call(heavy_processing)  # second time outputs is loaded from disk
-    ```
 
     Args:
         fn: Function to store its output. By default, it must be a callable that returns a pickable object.
@@ -94,6 +85,15 @@ def disk_cache_call(
         cache_load_fn: Load function to store outputs and overwrite saving backend. defaults to None.
         cache_enable: Enable disk cache. If False, the function has no effect. defaults to True.
         cache_store_mode: Disk cache storage mode. By default, it store function output and saved date into the cache file. defaults to "outputs_metadata".
+
+    ```python
+    >>> import pythonwrench as pw
+    >>> def heavy_processing():
+    >>>     # Lot of stuff here
+    >>>     ...
+    >>> outputs = pw.disk_cache_call(heavy_processing)  # first time function is called
+    >>> outputs = pw.disk_cache_call(heavy_processing)  # second time outputs is loaded from disk
+    ```
     """
     wrapped_fn = _disk_cache_impl(
         cache_dpath=cache_dpath,
