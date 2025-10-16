@@ -45,6 +45,9 @@ pyw-info = "pythonwrench.entries:print_install_info"
 pyw-tree = "pythonwrench.entries:main_tree"
 pyw-safe-rmdir = "pythonwrench.entries:main_safe_rmdir"
 
+[project.optional-dependencies]
+dev = []
+
 [build-system]
 requires = ["setuptools >= 61.0"]
 build-backend = "setuptools.build_meta"
@@ -87,6 +90,7 @@ dev = [
     "ruff>=0.12.0",
     "setuptools",
     "sphinx",
+    "sphinx-immaterial>=0.11.14",
     "sphinx-press-theme",
     "twine",
 ]
