@@ -7,9 +7,9 @@ from os import PathLike
 from pathlib import Path
 from typing import Any, Optional, Union
 
+from pythonwrench._core import _setup_output_fpath
 from pythonwrench.cast import as_builtin
 from pythonwrench.functools import function_alias
-from pythonwrench.io import _setup_output_fpath
 
 # -- Dump / Save / Serialize content to JSON --
 
@@ -27,7 +27,7 @@ def dump_json(
     ensure_ascii: bool = False,
     **json_dumps_kwds,
 ) -> str:
-    """Dump content to JSON format into a string and/or file.
+    r"""Dump content to JSON format into a string and/or file.
 
     Args:
         data: Data to dump to JSON.
@@ -37,7 +37,7 @@ def dump_json(
         to_builtins: If True, converts data to builtin equivalent before saving. defaults to False.
         indent: JSON indentation size in spaces. defaults to 4.
         ensure_ascii: Ensure only ASCII characters. defaults to False.
-        **json_dump_kwds: Other args passed to `json.dumps`.
+        \*\*json_dump_kwds: Other args passed to `json.dumps`.
 
     Returns:
         Dumped content as string.

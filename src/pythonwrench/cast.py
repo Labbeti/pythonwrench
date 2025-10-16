@@ -63,16 +63,15 @@ def register_as_builtin_fn(
     priority: int = 0,
 ) -> Callable:
     """Decorator to add an as_builtin function.
-    ```
-    >>> import numpy as np
 
+    Example
+    -------
+    >>> import numpy as np
     >>> @register_as_builtin_fn(np.ndarray)
     >>> def my_checksum_for_numpy(x: np.ndarray):
     >>>     return x.tolist()
-
     >>> pw.as_builtin([np.array([1, 2]), [3, 4]])
     ... [[1, 2], [3, 4]]
-    ```
     """
     return _AS_BUILTIN_REGISTRY.register_decorator(
         class_or_tuple,

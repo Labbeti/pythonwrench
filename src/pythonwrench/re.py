@@ -52,7 +52,7 @@ def match_patterns(
     Args:
         x: String to check.
         include: Acceptable pattern(s) for x. If None, match all patterns with '.*'. defaults to '.*'.
-        exclude Forbidden pattern(s) for x. If None, match no patterns with value (). defaults to ().
+        exclude: Forbidden pattern(s) for x. If None, match no patterns with value (). defaults to ().
         match_fn: Match function use to compare a pattern with argument x. defaults to re.search.
     """
     if include is None:
@@ -71,13 +71,12 @@ def get_key_fn(
 ) -> Callable[[str], int]:
     """Generate key_fn to sorted list of string using multiple patterns.
 
-    Usage:
-    ```
+    Example
+    -------
     >>> lst = ["a", "abc", "aa", "abcd"]
     >>> patterns = ["^ab"]  # sort list with elements starting with 'ab' first
     >>> list(sorted(lst, key=get_key_fn(patterns)))
     ... ["abc", "abcd", "a", "aa"]
-    ```
     """
     patterns = compile_patterns(patterns)
     key_fn = partial(

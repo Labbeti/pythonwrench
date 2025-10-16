@@ -7,14 +7,15 @@ from typing import Any, ClassVar, Dict, Type
 class Singleton(type):
     """Singleton metaclass.
 
-    To use it, just inherit from metaclass:
-    ```
+    To use it, just inherit from metaclass.
+
+    Example
+    -------
     >>> class MyClass(metaclass=Singleton):
     >>>     pass
     >>> a1 = MyClass()
     >>> a2 = MyClass()
     >>> # a1 and a2 are exactly the same instance, i.e. id(a1) == id(a2)
-    ```
     """
 
     _instances: ClassVar[Dict[Type, Any]] = {}

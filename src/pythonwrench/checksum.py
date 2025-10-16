@@ -60,15 +60,14 @@ def register_checksum_fn(
     priority: int = 0,
 ) -> Callable:
     """Decorator to add a checksum function.
-    ```
-    >>> import numpy as np
 
+    Example
+    -------
+    >>> import numpy as np
     >>> @register_checksum_fn(np.ndarray)
     >>> def my_checksum_for_numpy(x: np.ndarray):
     >>>     return int(x.sum())
-
     >>> pw.checksum_any(np.array([1, 2]))  # calls my_checksum_for_numpy internally, even if array in nested inside a list, dict, etc.
-    ```
     """
     return _CHECKSUM_REGISTRY.register_decorator(
         class_or_tuple,

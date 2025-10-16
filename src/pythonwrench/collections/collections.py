@@ -95,20 +95,16 @@ def dict_list_to_list_dict(
     """Convert dict of lists with same sizes to list of dicts.
 
     Example 1
-    ----------
-    ```
+    ---------
     >>> dic = {"a": [1, 2], "b": [3, 4]}
     >>> dict_list_to_list_dict(dic)
     ... [{"a": 1, "b": 3}, {"a": 2, "b": 4}]
-    ```
 
     Example 2
-    ----------
-    ```
+    ---------
     >>> dic = {"a": [1, 2, 3], "b": [4], "c": [5, 6]}
     >>> dict_list_to_list_dict(dic, key_mode="union", default=-1)
     ... [{"a": 1, "b": 4, "c": 5}, {"a": 2, "b": -1, "c": 6}, {"a": 3, "b": -1, "c": -1}]
-    ```
     """
     if len(dic) == 0:
         return []
@@ -151,11 +147,9 @@ def dump_dict(
 
     Example 1:
     ----------
-    ```
     >>> d = {"a": 1, "b": 2}
     >>> dump_dict(d)
     ... 'a=1, b=2'
-    ```
     """
     if dic is None:
         dic = {}
@@ -360,7 +354,6 @@ def flat_dict_of_dict(
 
     Example 1
     ---------
-    ```
     >>> dic = {
     ...     "a": 1,
     ...     "b": {
@@ -370,15 +363,12 @@ def flat_dict_of_dict(
     ... }
     >>> flat_dict_of_dict(dic)
     ... {"a": 1, "b.a": 2, "b.b": 10}
-    ```
 
     Example 2
     ---------
-    ```
     >>> dic = {"a": ["hello", "world"], "b": 3}
     >>> flat_dict_of_dict(dic, flat_iterables=True)
     ... {"a.0": "hello", "a.1": "world", "b": 3}
-    ```
 
     Args:
         nested_dic: Nested mapping containing sub-mappings or iterables.
@@ -508,10 +498,11 @@ def list_dict_to_dict_list(
 
     Args:
         lst: The list of dict to merge.
-        key_mode: Can be "same" or "intersect".
-            If "same", all the dictionaries must contains the same keys otherwise a ValueError will be raised.
-            If "intersect", only the intersection of all keys will be used in output.
-            If "union", the output dict will contains the union of all keys, and the missing value will use the argument default_val.
+        key_mode: Can be "same" or "intersect". \
+            - If "same", all the dictionaries must contains the same keys otherwise a ValueError will be raised. \
+            - If "intersect", only the intersection of all keys will be used in output. \
+            - If "union", the output dict will contains the union of all keys, and the missing value will use the argument default_val. \
+            - If an iterable of elements, use them as keys for output dict.
         default_val: Default value of an element when key_mode is "union". defaults to None.
         default_val_fn: Function to return the default value according to a specific key. defaults to None.
         list_fn: Optional function to build the values. defaults to identity.
@@ -622,7 +613,6 @@ def unflat_dict_of_dict(dic: Mapping[str, Any], *, sep: str = ".") -> Dict[str, 
 
     Example 1
     ----------
-    ```
     >>> dic = {
         "a.a": 1,
         "b.a": 2,
@@ -631,7 +621,6 @@ def unflat_dict_of_dict(dic: Mapping[str, Any], *, sep: str = ".") -> Dict[str, 
     }
     >>> unflat_dict_of_dict(dic)
     ... {"a": {"a": 1}, "b": {"a": 2, "b": 3}, "c": 4}
-    ```
     """
     output = {}
     for k, v in dic.items():
@@ -671,6 +660,7 @@ def unflat_list_of_list(
 
 
 def union_dicts(dicts: Iterable[Dict[K, V]]) -> Dict[K, V]:
+    """Performs union of dictionaries."""
     if Version.python() >= Version("3.9.0"):
         return reduce_or(*dicts)
 
@@ -721,19 +711,24 @@ def unzip(
 ) -> Tuple[List[T], List[U], List[V], List[W], List[X]]: ...
 
 
+@overload
+def unzip(
+    lst: Iterable[Tuple[T, ...]],
+) -> Tuple[List[T], ...]: ...
+
+
 def unzip(lst):
     """Invert function of builtin zip().
 
-    .. code-block:: python
-        :caption:  Example
-
-        >>> lst1 = [1, 2, 3, 4]
-        >>> lst2 = [5, 6, 7, 8]
-        >>> lst_zipped = list(zip(lst1, lst2))
-        >>> lst_zipped
-        ... [(1, 5), (2, 6), (3, 7), (4, 8)]
-        >>> unzip(lst_zipped)
-        ... [1, 2, 3, 4], [5, 6, 7, 8]
+    Example
+    -------
+    >>> lst1 = [1, 2, 3, 4]
+    >>> lst2 = [5, 6, 7, 8]
+    >>> zipped_list = list(zip(lst1, lst2))
+    >>> zipped_list
+    ... [(1, 5), (2, 6), (3, 7), (4, 8)]
+    >>> unzip(zipped_list)
+    ... [1, 2, 3, 4], [5, 6, 7, 8]
     """
     return tuple(map(list, zip(*lst)))
 
@@ -741,8 +736,8 @@ def unzip(lst):
 def duplicate_list(lst: List[T], sizes: List[int]) -> List[T]:
     """Duplicate elements elements of a list with the corresponding sizes.
 
-    Example 1
-    ----------
+    Example
+    -------
     >>> lst = ["a", "b", "c", "d", "e"]
     >>> sizes = [1, 0, 2, 1, 3]
     >>> duplicate_list(lst, sizes)

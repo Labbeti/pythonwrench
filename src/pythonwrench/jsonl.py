@@ -6,9 +6,9 @@ from os import PathLike
 from pathlib import Path
 from typing import Union
 
+from pythonwrench._core import _setup_output_fpath
 from pythonwrench.cast import as_builtin
 from pythonwrench.functools import function_alias
-from pythonwrench.io import _setup_output_fpath
 from pythonwrench.json import (
     _serialize_json,
     dumps_json,
@@ -33,7 +33,7 @@ def dump_jsonl(
     ensure_ascii: bool = False,
     **json_dumps_kwds,
 ) -> str:
-    """Dump content to JSONL format into a string and/or file.
+    r"""Dump content to JSONL format into a string and/or file.
 
     Args:
         data: Data to dump to JSONL.
@@ -42,7 +42,7 @@ def dump_jsonl(
         make_parents: Build intermediate directories to filepath. defaults to True.
         to_builtins: If True, converts data to builtin equivalent before saving. defaults to False.
         ensure_ascii: Ensure only ASCII characters. defaults to False.
-        **json_dump_kwds: Other args passed to `json.dumps`.
+        \*\*json_dump_kwds: Other args passed to `json.dumps`.
 
     Returns:
         Dumped content as string.

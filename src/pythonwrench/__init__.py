@@ -9,7 +9,7 @@ __author_email__ = "labbeti.pub@gmail.com"
 __license__ = "MIT"
 __maintainer__ = "Étienne Labbé (Labbeti)"
 __status__ = "Development"
-__version__ = "0.4.1"
+__version__ = "0.4.2"
 
 
 # Re-import for language servers
@@ -29,7 +29,6 @@ from . import functools as functools
 from . import hashlib as hashlib
 from . import importlib as importlib
 from . import inspect as inspect
-from . import io as io
 from . import json as json
 from . import jsonl as jsonl
 from . import logging as logging
