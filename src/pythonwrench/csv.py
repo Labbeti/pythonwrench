@@ -21,10 +21,10 @@ from typing import (
     overload,
 )
 
+from pythonwrench._core import _setup_output_fpath
 from pythonwrench.cast import as_builtin
 from pythonwrench.collections import dict_list_to_list_dict, list_dict_to_dict_list
 from pythonwrench.functools import function_alias
-from pythonwrench.io import _setup_output_fpath
 from pythonwrench.typing import isinstance_generic
 
 T = TypeVar("T")

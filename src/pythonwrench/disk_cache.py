@@ -37,7 +37,7 @@ SavingBackend = Literal["csv", "json", "pickle"]
 StoreMode = Literal["outputs_only", "outputs_metadata", "outputs_metadata_inputs"]
 
 
-class CacheMeta(TypedDict):
+class _CacheMeta(TypedDict):
     datetime: str
     duration: float
     checksum: int
@@ -50,64 +50,6 @@ _DEFAULT_CACHE_DPATH = Path.home().joinpath(".cache", "disk_cache")
 
 
 logger = logging.getLogger(__name__)
-
-
-def disk_cache_call(
-    fn: Callable[..., T],
-    *args,
-    cache_dpath: Union[str, Path, None] = None,
-    cache_force: bool = False,
-    cache_verbose: int = 0,
-    cache_checksum_fn: ChecksumFn = checksum_any,
-    cache_saving_backend: Optional[SavingBackend] = "pickle",
-    cache_fname_fmt: str = "{fn_name}_{csum}{suffix}",
-    cache_dump_fn: Optional[Callable[[Any, Path], Any]] = None,
-    cache_load_fn: Optional[Callable[[Path], Any]] = None,
-    cache_enable: bool = True,
-    cache_store_mode: StoreMode = "outputs_metadata",
-    **kwargs,
-) -> T:
-    r"""Call function and store output in a cache file.
-
-    Cache file is identified by the checksum of the function arguments, and stored by default in '~/.cache/disk_cache/<Function_name>/' directory.
-
-    Example
-    -------
-    >>> import pythonwrench as pw
-    >>> def heavy_processing():
-    >>>     # Lot of stuff here
-    >>>     ...
-    >>> outputs = pw.disk_cache_call(heavy_processing)  # first time function is called
-    >>> outputs = pw.disk_cache_call(heavy_processing)  # second time outputs is loaded from disk
-
-    Args:
-        fn: Function to store its output. By default, it must be a callable that returns a pickable object.
-        cache_dpath: Cache directory path. defaults to '~/.cache/disk_cache'.
-        cache_force: Force function call and overwrite cache. defaults to False.
-        cache_verbose: Set verbose logging level. Higher means more verbose. defaults to 0.
-        cache_checksum_fn: Checksum function to identify input arguments. defaults to ``pythonwrench.checksum_any``.
-        cache_saving_backend: Optional saving backend. Can be one of ('csv', 'json', 'pickle'). defaults to 'pickle'.
-        cache_fname_fmt: Cache filename format. defaults to '{fn_name}_{csum}{suffix}'.
-        cache_dump_fn: Dump/save function to store outputs and overwrite saving backend. defaults to None.
-        cache_load_fn: Load function to store outputs and overwrite saving backend. defaults to None.
-        cache_enable: Enable disk cache. If False, the function has no effect. defaults to True.
-        cache_store_mode: Disk cache storage mode. By default, it store function output and saved date into the cache file. defaults to 'outputs_metadata'.
-        \*args: Positional arguments passed to the function.
-        \*\*kwargs: Keywords arguments passed to the function.
-    """
-    wrapped_fn = _disk_cache_impl(
-        cache_dpath=cache_dpath,
-        cache_force=cache_force,
-        cache_verbose=cache_verbose,
-        cache_checksum_fn=cache_checksum_fn,
-        cache_saving_backend=cache_saving_backend,
-        cache_fname_fmt=cache_fname_fmt,
-        cache_dump_fn=cache_dump_fn,
-        cache_load_fn=cache_load_fn,
-        cache_enable=cache_enable,
-        cache_store_mode=cache_store_mode,
-    )
-    return wrapped_fn(fn)(*args, **kwargs)
 
 
 @overload
@@ -201,6 +143,64 @@ def disk_cache_decorator(
         return impl_fn(fn)
     else:
         return impl_fn
+
+
+def disk_cache_call(
+    fn: Callable[..., T],
+    *args,
+    cache_dpath: Union[str, Path, None] = None,
+    cache_force: bool = False,
+    cache_verbose: int = 0,
+    cache_checksum_fn: ChecksumFn = checksum_any,
+    cache_saving_backend: Optional[SavingBackend] = "pickle",
+    cache_fname_fmt: str = "{fn_name}_{csum}{suffix}",
+    cache_dump_fn: Optional[Callable[[Any, Path], Any]] = None,
+    cache_load_fn: Optional[Callable[[Path], Any]] = None,
+    cache_enable: bool = True,
+    cache_store_mode: StoreMode = "outputs_metadata",
+    **kwargs,
+) -> T:
+    r"""Call function and store output in a cache file.
+
+    Cache file is identified by the checksum of the function arguments, and stored by default in '~/.cache/disk_cache/<Function_name>/' directory.
+
+    Example
+    -------
+    >>> import pythonwrench as pw
+    >>> def heavy_processing():
+    >>>     # Lot of stuff here
+    >>>     ...
+    >>> outputs = pw.disk_cache_call(heavy_processing)  # first time function is called
+    >>> outputs = pw.disk_cache_call(heavy_processing)  # second time outputs is loaded from disk
+
+    Args:
+        fn: Function to store its output. By default, it must be a callable that returns a pickable object.
+        cache_dpath: Cache directory path. defaults to '~/.cache/disk_cache'.
+        cache_force: Force function call and overwrite cache. defaults to False.
+        cache_verbose: Set verbose logging level. Higher means more verbose. defaults to 0.
+        cache_checksum_fn: Checksum function to identify input arguments. defaults to ``pythonwrench.checksum_any``.
+        cache_saving_backend: Optional saving backend. Can be one of ('csv', 'json', 'pickle'). defaults to 'pickle'.
+        cache_fname_fmt: Cache filename format. defaults to '{fn_name}_{csum}{suffix}'.
+        cache_dump_fn: Dump/save function to store outputs and overwrite saving backend. defaults to None.
+        cache_load_fn: Load function to store outputs and overwrite saving backend. defaults to None.
+        cache_enable: Enable disk cache. If False, the function has no effect. defaults to True.
+        cache_store_mode: Disk cache storage mode. By default, it store function output and saved date into the cache file. defaults to 'outputs_metadata'.
+        \*args: Positional arguments passed to the function.
+        \*\*kwargs: Keywords arguments passed to the function.
+    """
+    wrapped_fn = _disk_cache_impl(
+        cache_dpath=cache_dpath,
+        cache_force=cache_force,
+        cache_verbose=cache_verbose,
+        cache_checksum_fn=cache_checksum_fn,
+        cache_saving_backend=cache_saving_backend,
+        cache_fname_fmt=cache_fname_fmt,
+        cache_dump_fn=cache_dump_fn,
+        cache_load_fn=cache_load_fn,
+        cache_enable=cache_enable,
+        cache_store_mode=cache_store_mode,
+    )
+    return wrapped_fn(fn)(*args, **kwargs)
 
 
 def _disk_cache_impl(

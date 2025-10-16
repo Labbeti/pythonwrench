@@ -7,9 +7,9 @@ from os import PathLike
 from pathlib import Path
 from typing import Any, Optional, Union
 
+from pythonwrench._core import _setup_output_fpath
 from pythonwrench.cast import as_builtin
 from pythonwrench.functools import function_alias
-from pythonwrench.io import _setup_output_fpath
 
 # -- Dump / Save / Serialize content to JSON --
 
