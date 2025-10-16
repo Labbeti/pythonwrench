@@ -181,12 +181,10 @@ def requires_packages(
 ) -> Callable[[Callable[P, T]], Callable[P, T]]:
     """Decorator to wrap a function and raises an error if the function is called.
 
-    ```
     >>> @requires_packages("pandas")
     >>> def f(x):
     >>>     return x
     >>> f(1)  # raises ImportError if pandas is not installed
-    ```
     """
     if isinstance(arg0, str):
         packages = [arg0] + list(args)

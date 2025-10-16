@@ -51,16 +51,12 @@ logger = logging.getLogger(__name__)
 def check_args_types(fn: Callable[P, T]) -> Callable[P, T]:
     """Decorator to check argument types before call to a function.
 
-    ```
     >>> import pythonwrench as pw
-
     >>> @pw.check_args_types
     >>> def f(a: int, b: str) -> str:
     >>>     return a * b
-
     >>> f(1, "a")  # pass check
     >>> f(1, 2)  # raises TypeError from decorator
-    ```
     """
     if not isinstance(fn, (FunctionType, MethodType)):
         msg = f"Invalid argument type {type(fn)}. (expected function or method)"
@@ -107,11 +103,9 @@ def isinstance_generic(
 
     Example 1::
     -----------
-    ```
     >>> isinstance_generic({"a": 1, "b": 2}, dict[str, int])  # True
     >>> isinstance_generic({"a": 1, "b": 2}, dict[str, str])  # False
     >>> isinstance_generic({"a": 1, "b": 2}, dict)  # True
-    ```
     """
     if isinstance(obj, type):
         return False

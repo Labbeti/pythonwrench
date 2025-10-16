@@ -96,19 +96,15 @@ def dict_list_to_list_dict(
 
     Example 1
     ----------
-    ```
     >>> dic = {"a": [1, 2], "b": [3, 4]}
     >>> dict_list_to_list_dict(dic)
     ... [{"a": 1, "b": 3}, {"a": 2, "b": 4}]
-    ```
 
     Example 2
     ----------
-    ```
     >>> dic = {"a": [1, 2, 3], "b": [4], "c": [5, 6]}
     >>> dict_list_to_list_dict(dic, key_mode="union", default=-1)
     ... [{"a": 1, "b": 4, "c": 5}, {"a": 2, "b": -1, "c": 6}, {"a": 3, "b": -1, "c": -1}]
-    ```
     """
     if len(dic) == 0:
         return []
@@ -151,11 +147,9 @@ def dump_dict(
 
     Example 1:
     ----------
-    ```
     >>> d = {"a": 1, "b": 2}
     >>> dump_dict(d)
     ... 'a=1, b=2'
-    ```
     """
     if dic is None:
         dic = {}
@@ -360,7 +354,6 @@ def flat_dict_of_dict(
 
     Example 1
     ---------
-    ```
     >>> dic = {
     ...     "a": 1,
     ...     "b": {
@@ -370,15 +363,12 @@ def flat_dict_of_dict(
     ... }
     >>> flat_dict_of_dict(dic)
     ... {"a": 1, "b.a": 2, "b.b": 10}
-    ```
 
     Example 2
     ---------
-    ```
     >>> dic = {"a": ["hello", "world"], "b": 3}
     >>> flat_dict_of_dict(dic, flat_iterables=True)
     ... {"a.0": "hello", "a.1": "world", "b": 3}
-    ```
 
     Args:
         nested_dic: Nested mapping containing sub-mappings or iterables.
@@ -622,7 +612,6 @@ def unflat_dict_of_dict(dic: Mapping[str, Any], *, sep: str = ".") -> Dict[str, 
 
     Example 1
     ----------
-    ```
     >>> dic = {
         "a.a": 1,
         "b.a": 2,
@@ -631,7 +620,6 @@ def unflat_dict_of_dict(dic: Mapping[str, Any], *, sep: str = ".") -> Dict[str, 
     }
     >>> unflat_dict_of_dict(dic)
     ... {"a": {"a": 1}, "b": {"a": 2, "b": 3}, "c": 4}
-    ```
     """
     output = {}
     for k, v in dic.items():

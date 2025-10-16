@@ -72,12 +72,10 @@ def get_key_fn(
     """Generate key_fn to sorted list of string using multiple patterns.
 
     Usage:
-    ```
     >>> lst = ["a", "abc", "aa", "abcd"]
     >>> patterns = ["^ab"]  # sort list with elements starting with 'ab' first
     >>> list(sorted(lst, key=get_key_fn(patterns)))
     ... ["abc", "abcd", "a", "aa"]
-    ```
     """
     patterns = compile_patterns(patterns)
     key_fn = partial(
