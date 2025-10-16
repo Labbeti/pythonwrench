@@ -49,7 +49,7 @@ extensions = [
     # "sphinx_immaterial.apidoc.format_signatures",
     # "sphinxcontrib.napoleon",
     "sphinx.ext.autodoc",
-    "sphinx.ext.napoleon",
+    # "sphinx.ext.napoleon",
     "sphinx.ext.intersphinx",
     "sphinx.ext.todo",
     "sphinx.ext.coverage",

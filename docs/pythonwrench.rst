@@ -36,7 +36,6 @@ Submodules
    pythonwrench.hashlib
    pythonwrench.importlib
    pythonwrench.inspect
-   pythonwrench.io
    pythonwrench.json
    pythonwrench.jsonl
    pythonwrench.logging
