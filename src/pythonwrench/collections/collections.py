@@ -710,6 +710,12 @@ def unzip(
 ) -> Tuple[List[T], List[U], List[V], List[W], List[X]]: ...
 
 
+@overload
+def unzip(
+    lst: Iterable[Tuple[T, ...]],
+) -> Tuple[List[T], ...]: ...
+
+
 def unzip(lst):
     """Invert function of builtin zip().
 
@@ -717,10 +723,10 @@ def unzip(lst):
     -------
     >>> lst1 = [1, 2, 3, 4]
     >>> lst2 = [5, 6, 7, 8]
-    >>> lst_zipped = list(zip(lst1, lst2))
-    >>> lst_zipped
+    >>> zipped_list = list(zip(lst1, lst2))
+    >>> zipped_list
     ... [(1, 5), (2, 6), (3, 7), (4, 8)]
-    >>> unzip(lst_zipped)
+    >>> unzip(zipped_list)
     ... [1, 2, 3, 4], [5, 6, 7, 8]
     """
     return tuple(map(list, zip(*lst)))
