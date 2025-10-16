@@ -47,6 +47,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx_immaterial",
     "sphinx_immaterial.apidoc.format_signatures",
+    "sphinxcontrib.napoleon",
 ]
 
 # Add any paths that contain templates here, relative to this directory.

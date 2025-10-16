@@ -2,3 +2,4 @@
 
 sphinx-immaterial>=0.11.14
 sphinx-press-theme>=0.8.0
+sphinxcontrib-napoleon>=0.7
