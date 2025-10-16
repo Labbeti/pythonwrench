@@ -1,5 +1,3 @@
-.. _pw-modules-page-ref
-
 pythonwrench
 ============
 
