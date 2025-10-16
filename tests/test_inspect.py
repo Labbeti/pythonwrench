@@ -59,6 +59,23 @@ class TestInspect(TestCase):
     def test_example_4(self) -> None:
         assert get_current_fn_name() == "test_example_4"
 
+    def test_example_5(self) -> None:
+        def f(x: int, y: str) -> str:
+            return x * y
+
+        assert get_argnames(f) == ["x", "y"]
+
+    def test_example_6(self) -> None:
+        class A:
+            def __init__(self, a, /, b, c=2, *, d=3) -> None:
+                super().__init__()
+                self.a = a
+                self.b = b
+                self.c = c
+                self.d = d
+
+        assert get_argnames(A) == ["a", "b", "c", "d"]
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -14,7 +14,7 @@ from typing import (
 from typing_extensions import ParamSpec
 
 from pythonwrench._core import _decorator_factory, return_none  # noqa: F401
-from pythonwrench.inspect import get_argnames
+from pythonwrench.inspect import _get_code_and_start, get_argnames
 from pythonwrench.typing import isinstance_generic
 
 T = TypeVar("T")
@@ -111,12 +111,29 @@ compose = Compose  # type: ignore
 
 
 def filter_and_call(fn: Callable[..., T], **kwargs: Any) -> T:
-    """Filter kwargs with function arg names and call function."""
+    """Call object only with the valid keyword arguments. Non-valid arguments are ignored.
+
+    Examples
+    --------
+    >>> def f(x, y):
+    >>>     return x + y
+    >>> filter_and_call(f, y=2, x=1)
+    ... 3
+    >>> filter_and_call(f, y=2, x=1, z=0)  # z is ignored
+    ... 3
+    """
     argnames = get_argnames(fn)
-    kwargs_filtered = {
-        name: value for name, value in kwargs.items() if name in argnames
+    code, start = _get_code_and_start(fn)
+
+    pos_argnames = argnames[: code.co_posonlyargcount]
+    other_argnames = argnames[code.co_posonlyargcount :]
+
+    posonly_args = [value for name, value in kwargs.items() if name in pos_argnames]
+    other_kwds = {
+        name: value for name, value in kwargs.items() if name in other_argnames
     }
-    return fn(**kwargs_filtered)
+    result = fn(*posonly_args, **other_kwds)
+    return result
 
 
 def function_alias(alternative: Callable[P, U]) -> Callable[..., Callable[P, U]]:

@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.4.2] UNRELEASED
 ### Fixed
-- `get_argnames` function when containing keywords arguments.
+- `get_argnames` and `filter_and_call` functions when argument `fn` contains arguments with default values.
 
 ## [0.4.1] 2025-09-11
 ### Added

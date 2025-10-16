@@ -4,22 +4,28 @@
 import unittest
 from unittest import TestCase
 
-from pythonwrench.functools import get_argnames
+from pythonwrench.functools import filter_and_call, get_argnames
 
 
 class TestFunctools(TestCase):
-    def test_get_argnames_example_1(self) -> None:
-        def f(x: int, y: str) -> str:
-            return x * y
-
-        assert get_argnames(f) == ["x", "y"]
-
-    def test_get_argnames_example_2(self) -> None:
+    def test_example_1(self) -> None:
         class A:
-            def __init__(self, x, /, y, *, z=2) -> None:
+            def __init__(self, a, /, b, c=2, *, d=3) -> None:
                 super().__init__()
+                self.a = a
+                self.b = b
+                self.c = c
+                self.d = d
 
-        assert get_argnames(A) == ["x", "y", "z"]
+        assert get_argnames(A) == ["a", "b", "c", "d"]
+        assert filter_and_call(A, a=1, b=2, c=0).c == 0
+        assert filter_and_call(A, a=1, b=2, non_existent=0).c == 2
+
+    def test_example_2(self) -> None:
+        def f(x, y):
+            return x + y
+
+        assert filter_and_call(f, y=2, x=1, z=0) == 3
 
 
 if __name__ == "__main__":

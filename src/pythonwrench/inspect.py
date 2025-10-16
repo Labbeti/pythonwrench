@@ -2,34 +2,20 @@
 # -*- coding: utf-8 -*-
 
 import inspect
-from typing import Any, Callable, List, TypeVar, Union, get_args
+from types import CodeType
+from typing import Any, Callable, List, Tuple, TypeVar, Union, get_args
 
 T = TypeVar("T")
 
 
 def get_argnames(fn: Callable) -> List[str]:
-    """Get arguments names of a method, function or callable object."""
-    if inspect.isfunction(fn):
-        code = fn.__code__
-        start = 0
-
-    elif inspect.ismethod(fn):
-        code = fn.__code__
-        start = 1  # If method, remove 'self' arg
-
-    elif inspect.isclass(fn):
-        # If init, remove 'self' arg
-        code = fn.__init__.__code__
-        start = 1  # If init, remove 'self' arg
-
+    """Get arguments names of a method, function or callable object. This function does not return the 'self' argument for methods."""
+    spec = inspect.getfullargspec(fn)
+    all_args = spec.args + spec.kwonlyargs
+    if inspect.ismethod(fn) or inspect.isclass(fn):
+        return all_args[1:]
     else:
-        code = fn.__call__.__code__
-        start = 0
-
-    argnames = code.co_varnames
-    argnames = argnames[start:]
-    argnames = list(argnames)
-    return argnames
+        return all_args
 
 
 def get_current_fn_name(*, default: T = "") -> Union[str, T]:
@@ -82,3 +68,21 @@ def get_fullname(x: Any, *, inst_suffix: str = "(...)") -> str:
         name = f"{name}[{argsnames_str}]"
 
     return name
+
+
+def _get_code_and_start(fn: Callable) -> Tuple[CodeType, int]:
+    if inspect.isfunction(fn):
+        code = fn.__code__
+        start = 0
+    elif inspect.ismethod(fn):
+        code = fn.__code__
+        start = 1  # If method, remove 'self' arg
+    elif inspect.isclass(fn):
+        # If init, remove 'self' arg
+        code = fn.__init__.__code__
+        start = 1  # If init, remove 'self' arg
+    else:
+        code = fn.__call__.__code__
+        start = 0
+
+    return code, start
