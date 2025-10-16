@@ -1,5 +1,5 @@
 pythonwrench
-==========
+============
 
 .. toctree::
    :maxdepth: 4

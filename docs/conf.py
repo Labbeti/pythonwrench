@@ -39,15 +39,24 @@ release = f"{pythonwrench.__status__}-{pythonwrench.__version__}"
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    # "sphinx.ext.autodoc",
+    # "sphinx.ext.viewcode",
+    # "sphinx.ext.todo",
+    # "sphinx.ext.autosummary",
+    # "sphinx.ext.coverage",
+    # "sphinx.ext.intersphinx",
+    # "sphinx_immaterial",
+    # "sphinx_immaterial.apidoc.format_signatures",
+    # "sphinxcontrib.napoleon",
     "sphinx.ext.autodoc",
-    "sphinx.ext.viewcode",
-    "sphinx.ext.todo",
-    "sphinx.ext.autosummary",
-    "sphinx.ext.coverage",
+    "sphinx.ext.napoleon",
     "sphinx.ext.intersphinx",
+    "sphinx.ext.todo",
+    "sphinx.ext.coverage",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.githubpages",
     "sphinx_immaterial",
-    "sphinx_immaterial.apidoc.format_signatures",
-    "sphinxcontrib.napoleon",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -59,6 +68,9 @@ templates_path = ["_templates"]
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
 language = "en"
+
+# The name of the Pygments (syntax highlighting) style to use.
+pygments_style = "sphinx"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -73,18 +85,19 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 #
 html_theme = "sphinx_immaterial"
 
-html_theme_options = {
-    "external_links": [
-        ("Github", "https://github.com/Labbeti/pythonwrench"),
-        ("PyPI", "https://pypi.org/project/pythonwrench/"),
-    ],
-}
+# html_theme_options = {
+#     "external_links": [
+#         ("Github", "https://github.com/Labbeti/pythonwrench"),
+#         ("PyPI", "https://pypi.org/project/pythonwrench/"),
+#     ],
+# }
+html_theme_options = {}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-# html_static_path = ["_static"]
-html_static_path = []
+html_static_path = ["_static"]
+# html_static_path = []
 
 
 # -- Extension configuration -------------------------------------------------
@@ -93,9 +106,9 @@ html_static_path = []
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
 
-add_module_names = False
-
 intersphinx_mapping = {
     "python": ("https://docs.python.org/", None),
 }
-maximum_signature_line_length = 68
+
+# add_module_names = False
+# maximum_signature_line_length = 68
