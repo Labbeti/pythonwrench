@@ -51,6 +51,8 @@ logger = logging.getLogger(__name__)
 def check_args_types(fn: Callable[P, T]) -> Callable[P, T]:
     """Decorator to check argument types before call to a function.
 
+    Example
+    -------
     >>> import pythonwrench as pw
     >>> @pw.check_args_types
     >>> def f(a: int, b: str) -> str:
@@ -101,11 +103,17 @@ def isinstance_generic(
 ) -> TypeIs[T]:
     """Improved isinstance(...) function that supports parametrized Union, TypedDict, Literal, Mapping or Iterable.
 
-    Example 1::
-    -----------
-    >>> isinstance_generic({"a": 1, "b": 2}, dict[str, int])  # True
-    >>> isinstance_generic({"a": 1, "b": 2}, dict[str, str])  # False
-    >>> isinstance_generic({"a": 1, "b": 2}, dict)  # True
+    Example 1
+    ---------
+    >>> isinstance_generic({"a": 1, "b": 2}, dict)
+    ... True
+    >>> isinstance_generic({"a": 1, "b": 2}, dict[str, int])
+    ... True
+    >>> isinstance_generic({"a": 1, "b": 2}, dict[str, str])
+    ... False
+    >>> from typing import Literal
+    >>> isinstance_generic({"a": 1, "b": 2}, dict[str, Literal[1, 2]])
+    ... True
     """
     if isinstance(obj, type):
         return False

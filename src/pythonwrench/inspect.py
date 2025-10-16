@@ -48,8 +48,8 @@ def get_fullname(x: Any, *, inst_suffix: str = "(...)") -> str:
         obj: Object to scan.
         inst_suffix: Suffix appended to the classname in case the object is an instance of a class.
 
-    Example 1
-    ----------
+    Examples
+    --------
     >>> get_fullname([0, 1, 2])
     ... 'builtins.list(...)'
     >>> get_fullname(1.0)

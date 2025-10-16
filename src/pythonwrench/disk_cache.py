@@ -162,6 +162,8 @@ def disk_cache_decorator(
 
     Cache file is identified by the checksum of the function arguments, and stored by default in `"~/.cache/disk_cache/<Function_name>/"` directory.
 
+    Example
+    -------
     >>> import pythonwrench as pw
     >>> @pw.disk_cache_decorator
     >>> def heavy_processing():

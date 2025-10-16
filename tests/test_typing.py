@@ -102,6 +102,13 @@ class TestChecks(TestCase):
 
 
 class TestIsInstanceGuard(TestCase):
+    def test_docstring_examples(self) -> None:
+        assert isinstance_generic({"a": 1, "b": 2}, dict)
+        assert isinstance_generic({"a": 1, "b": 2}, Dict)
+        assert isinstance_generic({"a": 1, "b": 2}, Dict[str, int])
+        assert not isinstance_generic({"a": 1, "b": 2}, Dict[str, str])
+        assert isinstance_generic({"a": 1, "b": 2}, Dict[str, Literal[1, 2]])
+
     def test_example_1_int(self) -> None:
         x = 1
 

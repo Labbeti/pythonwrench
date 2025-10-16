@@ -95,13 +95,13 @@ def dict_list_to_list_dict(
     """Convert dict of lists with same sizes to list of dicts.
 
     Example 1
-    ----------
+    ---------
     >>> dic = {"a": [1, 2], "b": [3, 4]}
     >>> dict_list_to_list_dict(dic)
     ... [{"a": 1, "b": 3}, {"a": 2, "b": 4}]
 
     Example 2
-    ----------
+    ---------
     >>> dic = {"a": [1, 2, 3], "b": [4], "c": [5, 6]}
     >>> dict_list_to_list_dict(dic, key_mode="union", default=-1)
     ... [{"a": 1, "b": 4, "c": 5}, {"a": 2, "b": -1, "c": 6}, {"a": 3, "b": -1, "c": -1}]
@@ -659,6 +659,7 @@ def unflat_list_of_list(
 
 
 def union_dicts(dicts: Iterable[Dict[K, V]]) -> Dict[K, V]:
+    """Performs union of dictionaries."""
     if Version.python() >= Version("3.9.0"):
         return reduce_or(*dicts)
 
@@ -712,16 +713,15 @@ def unzip(
 def unzip(lst):
     """Invert function of builtin zip().
 
-    .. code-block:: python
-        :caption:  Example
-
-        >>> lst1 = [1, 2, 3, 4]
-        >>> lst2 = [5, 6, 7, 8]
-        >>> lst_zipped = list(zip(lst1, lst2))
-        >>> lst_zipped
-        ... [(1, 5), (2, 6), (3, 7), (4, 8)]
-        >>> unzip(lst_zipped)
-        ... [1, 2, 3, 4], [5, 6, 7, 8]
+    Example
+    -------
+    >>> lst1 = [1, 2, 3, 4]
+    >>> lst2 = [5, 6, 7, 8]
+    >>> lst_zipped = list(zip(lst1, lst2))
+    >>> lst_zipped
+    ... [(1, 5), (2, 6), (3, 7), (4, 8)]
+    >>> unzip(lst_zipped)
+    ... [1, 2, 3, 4], [5, 6, 7, 8]
     """
     return tuple(map(list, zip(*lst)))
 
@@ -729,8 +729,8 @@ def unzip(lst):
 def duplicate_list(lst: List[T], sizes: List[int]) -> List[T]:
     """Duplicate elements elements of a list with the corresponding sizes.
 
-    Example 1
-    ----------
+    Example
+    -------
     >>> lst = ["a", "b", "c", "d", "e"]
     >>> sizes = [1, 0, 2, 1, 3]
     >>> duplicate_list(lst, sizes)

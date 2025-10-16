@@ -181,6 +181,8 @@ def requires_packages(
 ) -> Callable[[Callable[P, T]], Callable[P, T]]:
     """Decorator to wrap a function and raises an error if the function is called.
 
+    Example
+    -------
     >>> @requires_packages("pandas")
     >>> def f(x):
     >>>     return x

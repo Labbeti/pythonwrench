@@ -64,6 +64,8 @@ def register_as_builtin_fn(
 ) -> Callable:
     """Decorator to add an as_builtin function.
 
+    Example
+    -------
     >>> import numpy as np
     >>> @register_as_builtin_fn(np.ndarray)
     >>> def my_checksum_for_numpy(x: np.ndarray):

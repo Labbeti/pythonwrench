@@ -7,7 +7,10 @@ from typing import Any, ClassVar, Dict, Type
 class Singleton(type):
     """Singleton metaclass.
 
-    To use it, just inherit from metaclass:
+    To use it, just inherit from metaclass.
+
+    Example
+    -------
     >>> class MyClass(metaclass=Singleton):
     >>>     pass
     >>> a1 = MyClass()

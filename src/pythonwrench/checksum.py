@@ -61,6 +61,8 @@ def register_checksum_fn(
 ) -> Callable:
     """Decorator to add a checksum function.
 
+    Example
+    -------
     >>> import numpy as np
     >>> @register_checksum_fn(np.ndarray)
     >>> def my_checksum_for_numpy(x: np.ndarray):
