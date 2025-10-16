@@ -46,6 +46,7 @@ extensions = [
     "sphinx.ext.coverage",
     "sphinx.ext.intersphinx",
     "sphinx_immaterial",
+    "sphinx_immaterial.apidoc.format_signatures",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -96,4 +97,4 @@ add_module_names = False
 intersphinx_mapping = {
     "python": ("https://docs.python.org/", None),
 }
-maximum_signature_line_length = 10
+maximum_signature_line_length = 68
