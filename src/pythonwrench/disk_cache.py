@@ -71,8 +71,7 @@ def disk_cache_call(
 
     Cache file is identified by the checksum of the function arguments, and stored by default in '~/.cache/disk_cache/<Function_name>/' directory.
 
-    Parameters
-    ----------
+    Args:
         fn: Function to store its output. By default, it must be a callable that returns a pickable object.
         cache_dpath: Cache directory path. defaults to '~/.cache/disk_cache'.
         cache_force: Force function call and overwrite cache. defaults to False.
@@ -165,15 +164,13 @@ def disk_cache_decorator(
 
     Cache file is identified by the checksum of the function arguments, and stored by default in `~/.cache/disk_cache/<Function_name>/` directory.
 
-    ```python
-    import pythonwrench as pw
-    @pw.disk_cache_decorator
-    def heavy_processing():
-        # Lot of stuff here
-        ...
-    outputs = heavy_processing()  # first time function is called
-    outputs = heavy_processing()  # second time outputs is loaded from disk
-    ```
+    >>> import pythonwrench as pw
+    >>> @pw.disk_cache_decorator
+    >>> def heavy_processing():
+    >>>     # Lot of stuff here
+    >>>     ...
+    >>> outputs = heavy_processing()  # first time function is called
+    >>> outputs = heavy_processing()  # second time outputs is loaded from disk
 
     Args:
         fn: Function to store its output. By default, it must be a callable that returns a pickable object.
