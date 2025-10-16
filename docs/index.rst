@@ -13,6 +13,7 @@ See the API doc here:
    modules
 
 Useful links:
+
 - `GitHub repository <https://github.com/Labbeti/pythonwrench>`_
 - `Pypi repository <https://pypi.org/project/pythonwrench/>`_
 
