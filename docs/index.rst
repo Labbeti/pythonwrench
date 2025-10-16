@@ -4,20 +4,25 @@ pythonwrench's documentation
 
 Set of tools for Python that could be in the standard library.
 
-See the API doc here:
+Useful links:
+- :ref:`API docs <pw-modules-page-ref>`
+- `GitHub repository <https://github.com/Labbeti/pythonwrench>`
+- `Pypi repository <https://pypi.org/project/pythonwrench/>`
 
-.. toctree::
-   :maxdepth: 1
-   :name: maintoc
+.. See the API doc here:
 
-   modules
+.. .. toctree::
+..    :maxdepth: 1
+..    :name: maintoc
+
+..    modules
 
 Here is some key features:
 
 Collections
 ############################
 
-Provides functions to facilitate iterables processing, like `unzip` :
+Provides functions to facilitate iterables processing, like `unzip` or `flatten` :
 
 .. :caption: Load an item.
 
