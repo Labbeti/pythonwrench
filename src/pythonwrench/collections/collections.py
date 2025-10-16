@@ -498,10 +498,11 @@ def list_dict_to_dict_list(
 
     Args:
         lst: The list of dict to merge.
-        key_mode: Can be "same" or "intersect".
-            If "same", all the dictionaries must contains the same keys otherwise a ValueError will be raised.
-            If "intersect", only the intersection of all keys will be used in output.
-            If "union", the output dict will contains the union of all keys, and the missing value will use the argument default_val.
+        key_mode: Can be "same" or "intersect". \
+            - If "same", all the dictionaries must contains the same keys otherwise a ValueError will be raised. \
+            - If "intersect", only the intersection of all keys will be used in output. \
+            - If "union", the output dict will contains the union of all keys, and the missing value will use the argument default_val. \
+            - If an iterable of elements, use them as keys for output dict.
         default_val: Default value of an element when key_mode is "union". defaults to None.
         default_val_fn: Function to return the default value according to a specific key. defaults to None.
         list_fn: Optional function to build the values. defaults to identity.

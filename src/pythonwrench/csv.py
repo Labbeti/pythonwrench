@@ -48,7 +48,7 @@ def dump_csv(
     replace_newline_by: Optional[str] = "\\n",
     **csv_writer_kwds,
 ) -> str:
-    """Dump content to CSV format into string and/or file.
+    r"""Dump content to CSV format into string and/or file.
 
     Args:
         data: Data to serialize. Can be a list of dicts, dicts of lists or list of lists.
@@ -59,7 +59,7 @@ def dump_csv(
         header: Indicates if CSV must have header. If "auto", an header is added when a dict of list or list of dicts is passed. defaults to "auto".
         align_content: If True, center content at the middle of each row for better visualization. defaults to False.
         replace_newline_by: Replace newline character to avoid newline in CSV content. defaults to "\\n".
-        **csv_writer_kwds: Others optional arguments passed to CSV writer object.
+        \*\*csv_writer_kwds: Others optional arguments passed to CSV writer object.
 
     Returns:
         Dumped content as string.
@@ -98,7 +98,7 @@ def dumps_csv(
     replace_newline_by: Optional[str] = "\\n",
     **csv_writer_kwds,
 ) -> str:
-    """Dump content to CSV format into string.
+    r"""Dump content to CSV format into string.
 
     Args:
         data: Data to serialize. Can be a list of dicts, dicts of lists or list of lists.
@@ -108,7 +108,7 @@ def dumps_csv(
         header: Indicates if CSV must have header. If "auto", an header is added when a dict of list or list of dicts is passed. defaults to "auto".
         align_content: If True, center content at the middle of each row for better visualization. defaults to False.
         replace_newline_by: Replace newline character to avoid newline in CSV content. defaults to "\\n".
-        **csv_writer_kwds: Others optional arguments passed to CSV writer object.
+        \*\*csv_writer_kwds: Others optional arguments passed to CSV writer object.
 
     Returns:
         Dumped content as string.
@@ -140,7 +140,7 @@ def save_csv(
     replace_newline_by: Optional[str] = "\\n",
     **csv_writer_kwds,
 ) -> None:
-    """Save content to CSV format into a file or buffer.
+    r"""Save content to CSV format into a file or buffer.
 
     Args:
         data: Data to serialize. Can be a list of dicts, dicts of lists or list of lists.
@@ -150,7 +150,7 @@ def save_csv(
         header: Indicates if CSV must have header. If "auto", an header is added when a dict of list or list of dicts is passed. defaults to "auto".
         align_content: If True, center content at the middle of each row for better visualization. defaults to False.
         replace_newline_by: Replace newline character to avoid newline in CSV content. defaults to "\\n".
-        **csv_writer_kwds: Others optional arguments passed to CSV writer object.
+        \*\*csv_writer_kwds: Others optional arguments passed to CSV writer object.
     """
     if isinstance(file, (str, Path, PathLike)):
         file = _setup_output_fpath(file, overwrite=overwrite, make_parents=make_parents)
@@ -320,14 +320,14 @@ def load_csv(
     delimiter: Optional[str] = ",",
     **csv_reader_kwds,
 ) -> Union[List[Dict[str, Any]], Dict[str, List[Any]]]:
-    """Load content from csv filepath.
+    r"""Load content from csv filepath.
 
     Args:
         orient: Orientation of the output value. Can be "list" or "dict". defaults to "list".
         header: Specify if CSV has header column. defaults to True.
         comment_start: If this string is not None and a line starts with this string, the line will be ignored. defaults to None.
         delimiter: Value delimiter. defaults to ",".
-        **csv_reader_kwds: Other optional csv arguments.
+        \*\*csv_reader_kwds: Other optional csv arguments.
 
     Returns:
         The loaded values as dict of lists, list of dicts or list of lists.

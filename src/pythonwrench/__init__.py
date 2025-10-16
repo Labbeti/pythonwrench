@@ -29,7 +29,6 @@ from . import functools as functools
 from . import hashlib as hashlib
 from . import importlib as importlib
 from . import inspect as inspect
-from . import io as io
 from . import json as json
 from . import jsonl as jsonl
 from . import logging as logging

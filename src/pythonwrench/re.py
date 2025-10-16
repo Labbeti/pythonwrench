@@ -52,7 +52,7 @@ def match_patterns(
     Args:
         x: String to check.
         include: Acceptable pattern(s) for x. If None, match all patterns with '.*'. defaults to '.*'.
-        exclude Forbidden pattern(s) for x. If None, match no patterns with value (). defaults to ().
+        exclude: Forbidden pattern(s) for x. If None, match no patterns with value (). defaults to ().
         match_fn: Match function use to compare a pattern with argument x. defaults to re.search.
     """
     if include is None:
