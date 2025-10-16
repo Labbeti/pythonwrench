@@ -24,6 +24,8 @@ logger = logging.getLogger(__name__)
 
 
 class VersionDict(TypedDict):
+    """TypedDict which represents a Version."""
+
     major: int
     minor: int
     patch: int
