@@ -69,32 +69,32 @@ def disk_cache_call(
 ) -> T:
     r"""Call function and store output in a cache file.
 
-    Cache file is identified by the checksum of the function arguments, and stored by default in `~/.cache/disk_cache/<Function_name>/` directory.
+    Cache file is identified by the checksum of the function arguments, and stored by default in '~/.cache/disk_cache/<Function_name>/' directory.
 
     Example:
     ```python
-        >>> import pythonwrench as pw
-        >>> def heavy_processing():
-        >>>     # Lot of stuff here
-        >>>     ...
-        >>> outputs = pw.disk_cache_call(heavy_processing)  # first time function is called
-        >>> outputs = pw.disk_cache_call(heavy_processing)  # second time outputs is loaded from disk
+    >>> import pythonwrench as pw
+    >>> def heavy_processing():
+    >>>     # Lot of stuff here
+    >>>     ...
+    >>> outputs = pw.disk_cache_call(heavy_processing)  # first time function is called
+    >>> outputs = pw.disk_cache_call(heavy_processing)  # second time outputs is loaded from disk
     ```
 
     Args:
         fn: Function to store its output. By default, it must be a callable that returns a pickable object.
-        *args: Positional arguments passed to the function.
-        **kwargs: Keywords arguments passed to the function.
-        cache_dpath: Cache directory path. defaults to `~/.cache/disk_cache`.
+        cache_dpath: Cache directory path. defaults to '~/.cache/disk_cache'.
         cache_force: Force function call and overwrite cache. defaults to False.
         cache_verbose: Set verbose logging level. Higher means more verbose. defaults to 0.
-        cache_checksum_fn: Checksum function to identify input arguments. defaults to `pythonwrench.checksum_any`.
+        cache_checksum_fn: Checksum function to identify input arguments. defaults to ``pythonwrench.checksum_any``.
         cache_saving_backend: Optional saving backend. Can be one of ('csv', 'json', 'pickle'). defaults to 'pickle'.
-        cache_fname_fmt: Cache filename format. defaults to "{fn_name}_{csum}{suffix}".
+        cache_fname_fmt: Cache filename format. defaults to '{fn_name}_{csum}{suffix}'.
         cache_dump_fn: Dump/save function to store outputs and overwrite saving backend. defaults to None.
         cache_load_fn: Load function to store outputs and overwrite saving backend. defaults to None.
         cache_enable: Enable disk cache. If False, the function has no effect. defaults to True.
-        cache_store_mode: Disk cache storage mode. By default, it store function output and saved date into the cache file. defaults to "outputs_metadata".
+        cache_store_mode: Disk cache storage mode. By default, it store function output and saved date into the cache file. defaults to 'outputs_metadata'.
+        \*args: Positional arguments passed to the function.
+        \**kwargs: Keywords arguments passed to the function.
     """
     wrapped_fn = _disk_cache_impl(
         cache_dpath=cache_dpath,
