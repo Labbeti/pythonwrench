@@ -27,8 +27,7 @@ def get_argnames(fn: Callable) -> List[str]:
         start = 0
 
     argnames = code.co_varnames
-    end = code.co_argcount
-    argnames = argnames[start:end]
+    argnames = argnames[start:]
     argnames = list(argnames)
     return argnames
 

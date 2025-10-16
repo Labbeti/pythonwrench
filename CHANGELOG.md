@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.2] UNRELEASED
+### Fixed
+- `get_argnames` function when containing keywords arguments.
+
 ## [0.4.1] 2025-09-11
 ### Added
 - `SupportsGetitem` protocol.
