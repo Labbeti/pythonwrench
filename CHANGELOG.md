@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.4.2] UNRELEASED
+## [0.4.2] 2025-10-16
 ### Fixed
 - `get_argnames` and `filter_and_call` functions when argument `fn` contains arguments with default values.
 
