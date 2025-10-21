@@ -177,6 +177,18 @@ def as_builtin(x: Any) -> Any:
 
     Additional objects to convert can be added dynamically with `pythonwrench.register_as_builtin_fn` function decorator.
 
+    Here is the list of default objects converted to built-in:
+    - tuple -> list
+    - collections.Counter -> dict
+    - argparse.Namespace -> dict
+    - re.Pattern -> str
+    - pathlib.Path -> str
+    - enum.Enum -> str
+    - Mapping -> dict
+    - Iterable -> list
+    - Dataclass -> dict
+    - NamedTuple -> dict
+
     Note: By default, tuple objects are converted to list.
 
     Args:
