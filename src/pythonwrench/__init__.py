@@ -52,7 +52,7 @@ from .argparse import (
     str_to_optional_str,
     str_to_type,
 )
-from .cast import as_builtin
+from .cast import as_builtin, register_as_builtin_fn
 from .checksum import checksum_any, register_checksum_fn
 from .collections import (
     all_eq,
