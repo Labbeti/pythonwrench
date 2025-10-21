@@ -154,8 +154,8 @@ def function_alias(alternative: Callable[P, U]) -> Callable[..., Callable[P, U]]
     return _decorator_factory(alternative)
 
 
-def identity(x: T) -> T:
-    """Identity function placeholder."""
+def identity(x: T, **kwargs) -> T:
+    """Identity function placeholder. Returns the first argument. Other keywords arguments are ignored."""
     return x
 
 
