@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 ## [0.4.3] UNRELEASED
 ### Added
 - `as_builtin` now supports `datetime.date` instances.
+- `check_only_first` argument in `isinstance_generic` function.
+- `filter_with_patterns` function.
 
 ## [0.4.2] 2025-10-16
 ### Fixed

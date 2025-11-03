@@ -151,6 +151,7 @@ from .re import (
     PatternLike,
     PatternListLike,
     compile_patterns,
+    filter_with_patterns,
     find_patterns,
     get_key_fn,
     match_patterns,
