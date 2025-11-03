@@ -100,8 +100,15 @@ def check_args_types(fn: Callable[P, T]) -> Callable[P, T]:
 def isinstance_generic(
     obj: Any,
     class_or_tuple: Union[Type[T], None, Tuple[Type[T], ...]],
+    *,
+    check_only_first: bool = False,
 ) -> TypeIs[T]:
     """Improved isinstance(...) function that supports parametrized Union, TypedDict, Literal, Mapping or Iterable.
+
+    Args:
+        obj: Object to check.
+        class_or_tuple: Type to check. Can be a parametrized type from `typing`.
+        check_only_first: If True, check only if first element when checking for Iterable[type]. defaults to False.
 
     Example 1
     ---------
@@ -114,6 +121,7 @@ def isinstance_generic(
     >>> from typing import Literal
     >>> isinstance_generic({"a": 1, "b": 2}, dict[str, Literal[1, 2]])
     ... True
+
     """
     if isinstance(obj, type):
         return False
@@ -125,6 +133,7 @@ def isinstance_generic(
         return any(
             isinstance_generic(obj, target_type_i) for target_type_i in class_or_tuple
         )
+
     if is_typed_dict(class_or_tuple):
         return _isinstance_generic_typed_dict(obj, class_or_tuple)
 
@@ -170,7 +179,10 @@ def isinstance_generic(
         elif len(args) == 1 and args[0] == ():
             return len(obj) == 0
         elif len(args) == 2 and args[1] is ...:
-            args = tuple([args[0]] * len(obj))
+            if check_only_first:
+                args = (args[0],)
+            else:
+                args = tuple([args[0]] * len(obj))
         elif len(obj) != len(args):
             return False
         return all(isinstance_generic(xi, ti) for xi, ti in zip(obj, args))
@@ -178,7 +190,11 @@ def isinstance_generic(
     if issubclass(origin, Iterable):
         if not isinstance_generic(obj, origin):
             return False
-        return all(isinstance_generic(xi, args[0]) for xi in obj)
+
+        if check_only_first:
+            return isinstance_generic(next(iter(obj)), args[0])
+        else:
+            return all(isinstance_generic(xi, args[0]) for xi in obj)
 
     msg = f"Unsupported type {class_or_tuple}. (expected unparametrized type or parametrized Union, TypedDict, Literal, Mapping or Iterable)"
     raise NotImplementedError(msg)
