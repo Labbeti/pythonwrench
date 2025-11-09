@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 - `as_builtin` now supports `datetime.date` instances.
 - `check_only_first` argument in `isinstance_generic` function.
 - `filter_with_patterns` function.
+- `skipfiles` and `include` for `tree_iter` function.
 
 ## [0.4.2] 2025-10-16
 ### Fixed
