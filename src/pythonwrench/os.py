@@ -90,6 +90,7 @@ def safe_rmdir(
 def tree_iter(
     root: Union[str, Path],
     *,
+    include: Union[PatternLike, Iterable[PatternLike]] = ".*",
     exclude: Union[PatternLike, Iterable[PatternLike]] = (),
     space: str = "    ",
     branch: str = "│   ",
@@ -97,6 +98,7 @@ def tree_iter(
     last: str = "└── ",
     max_depth: int = sys.maxsize,
     followlinks: bool = False,
+    skipfiles: bool = False,
 ) -> Generator[str, Any, None]:
     """A recursive generator, given a directory Path object will yield a visual tree structure line by line with each line prefixed by the same characters
 
@@ -111,8 +113,9 @@ def tree_iter(
         yield from ()
         return
 
+    include = compile_patterns(include)
     exclude = compile_patterns(exclude)
-    if match_patterns(str(root), exclude):
+    if not match_patterns(str(root), include, exclude=exclude):
         yield from ()
         return
 
@@ -123,61 +126,89 @@ def tree_iter(
 
     yield from _tree_impl(
         root,
+        include=include,
         exclude=exclude,
         prefix="",
         space=space,
         branch=branch,
         tee=tee,
         last=last,
-        depth=1,
         max_depth=max_depth,
         followlinks=followlinks,
+        skipfiles=skipfiles,
     )
 
 
 def _tree_impl(
     root: Path,
+    *,
+    include: List[Pattern],
     exclude: List[Pattern],
+    max_depth: int,
+    followlinks: bool,
+    skipfiles: bool,
     prefix: str,
     space: str,
     branch: str,
     tee: str,
     last: str,
-    depth: int,
-    max_depth: int,
-    followlinks: bool,
 ) -> Generator[str, Any, None]:
-    paths = root.iterdir()
-    try:
-        paths = [
-            path
-            for path in paths
-            if (followlinks or not path.is_symlink())
-            and not match_patterns(str(path), exclude)
-        ]
-    except PermissionError:
-        paths = []
-
-    # contents each get pointers that are ├── with a final └── :
-    pointers = [tee] * (len(paths) - 1) + [last]
-
-    for pointer, path in zip(pointers, paths):
-        is_dir = path.is_dir()
+    walker = _walker_impl(
+        root,
+        [],
+        include=include,
+        exclude=exclude,
+        max_depth=max_depth,
+        followlinks=followlinks,
+        skipfiles=skipfiles,
+    )
+    for path, is_dir, locs in walker:
+        prefix = "".join((branch if i < num - 1 else space) for i, num in locs[:-1])
+        index_in_parent, num_files_in_parent = locs[-1]
+        pointer = tee if index_in_parent < num_files_in_parent - 1 else last
         suffix = "/" if is_dir else ""
+
         yield prefix + pointer + path.name + suffix
 
-        if is_dir and depth <= max_depth:
-            extension = branch if pointer == tee else space
-            # i.e. space because last, └── , above so no more |
-            yield from _tree_impl(
+
+def _walker_impl(
+    root: Path,
+    locs: List[Tuple[int, int]],
+    *,
+    include: List[Pattern],
+    exclude: List[Pattern],
+    max_depth: int,
+    followlinks: bool,
+    skipfiles: bool,
+) -> Generator[Tuple[Path, bool, List[Tuple[int, int]]], Any, None]:
+    candidates_paths = root.iterdir()
+    paths: List[Path] = []
+    for path in candidates_paths:
+        if not match_patterns(str(path), include, exclude=exclude):
+            continue
+
+        try:
+            if not followlinks and path.is_symlink():
+                continue
+            if skipfiles and path.is_file():
+                continue
+
+            paths.append(path)
+        except PermissionError:
+            pass
+
+    for i, path in enumerate(paths):
+        is_dir = path.is_dir()
+        locs_i = locs + [(i, len(paths))]
+        yield path, is_dir, locs_i
+
+        if is_dir and len(locs_i) < max_depth:
+            yield from _walker_impl(
                 path,
+                locs=locs_i,
+                include=include,
                 exclude=exclude,
-                prefix=prefix + extension,
-                space=space,
-                branch=branch,
-                tee=tee,
-                last=last,
-                depth=depth + 1,
                 max_depth=max_depth,
                 followlinks=followlinks,
+                skipfiles=skipfiles,
             )
