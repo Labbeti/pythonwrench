@@ -80,7 +80,9 @@ def dataclassdict(
         # slots=slots,
     )
 
-    for attr_name in ("keys", "values", "items", "__len__", "__getitem__"):
-        setattr(cls_, attr_name, getattr(cls_.__dict__, attr_name))
+    # from functools import partial
+    # partial(getattr, x)
+    # for attr_name in ("keys", "values", "items", "__len__", "__getitem__"):
+    # setattr(cls_, "__getitem__", getattr)
 
     return cls_
