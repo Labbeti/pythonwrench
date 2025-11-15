@@ -23,7 +23,7 @@ BuiltinNumber: TypeAlias = Union[bool, int, float, complex]
 BuiltinScalar: TypeAlias = Union[bool, int, float, complex, NoneType, str, bytes]
 
 _T_Item = TypeVar("_T_Item", covariant=True)
-_T_Index = TypeVar("_T_Index", contravariant=True, default=int)
+_T_Index = TypeVar("_T_Index", contravariant=True, default=Any)
 _T_Other = TypeVar("_T_Other", contravariant=True, default=Any)
 
 T_BuiltinNumber = TypeVar(

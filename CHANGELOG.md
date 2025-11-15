@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - `check_only_first` argument in `isinstance_generic` function.
 - `filter_with_patterns` function.
 - `skipfiles` and `include` for `tree_iter` function.
+- `SupportsGetitem` protocols now has `T_Index` typevar set to `Any` instead of `int` by default.
 
 ## [0.4.2] 2025-10-16
 ### Fixed
