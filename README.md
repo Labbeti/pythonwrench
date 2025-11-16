@@ -101,10 +101,9 @@ Check generic types with ìsinstance_generic` :
 ```python
 >>> import pythonwrench as pw
 >>>
->>> # Combines Iterable and Sized !
->>> isinstance({"a": 1, "b": 2}, pw.SupportsGetitemLen)
-... True
 >>> isinstance({"a": 1, "b": 2}, pw.SupportsIterLen)
+... True
+>>> isinstance({"a": 1, "b": 2}, pw.SupportsGetitemLen)
 ... True
 ```
 

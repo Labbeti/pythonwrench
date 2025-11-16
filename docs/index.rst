@@ -98,9 +98,8 @@ Check generic types with ìsinstance_generic` :
 
     import pythonwrench as pw
 
-    # Combines Iterable and Sized !
-    isinstance({"a": 1, "b": 2}, pw.SupportsGetitemLen)  # True
     isinstance({"a": 1, "b": 2}, pw.SupportsIterLen)  # True
+    isinstance({"a": 1, "b": 2}, pw.SupportsGetitemLen)  # True
 
 Finally, you can also force argument type checking with `check_args_types` function :
 
