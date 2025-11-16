@@ -50,6 +50,7 @@ def print_tree(
     max_depth: int = sys.maxsize,
     followlinks: bool = False,
     skipfiles: bool = False,
+    sort: bool = False,
 ) -> None:
     """Print directory tree to stdout."""
     num_dirs = 0
@@ -62,6 +63,7 @@ def print_tree(
         max_depth=max_depth,
         followlinks=followlinks,
         skipfiles=skipfiles,
+        sort=sort,
     )
     for line in iterable:
         print(f"{line}")
@@ -115,6 +117,12 @@ def main_tree() -> None:
         help="Indicates whether or not symbolic files should be shown. defaults to False.",
         default=False,
     )
+    parser.add_argument(
+        "--sort",
+        type=str_to_bool,
+        help="Sort element by name. defaults to False.",
+        default=False,
+    )
     args = parser.parse_args()
 
     print_tree(
@@ -124,6 +132,7 @@ def main_tree() -> None:
         max_depth=args.max_depth,
         followlinks=args.followlinks,
         skipfiles=args.skipfiles,
+        sort=args.sort,
     )
 
 

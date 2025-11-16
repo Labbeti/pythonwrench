@@ -99,6 +99,7 @@ def tree_iter(
     max_depth: int = sys.maxsize,
     followlinks: bool = False,
     skipfiles: bool = False,
+    sort: bool = False,
 ) -> Generator[str, Any, None]:
     """A recursive generator, given a directory Path object will yield a visual tree structure line by line with each line prefixed by the same characters
 
@@ -136,6 +137,7 @@ def tree_iter(
         max_depth=max_depth,
         followlinks=followlinks,
         skipfiles=skipfiles,
+        sort=sort,
     )
 
 
@@ -147,6 +149,7 @@ def _tree_impl(
     max_depth: int,
     followlinks: bool,
     skipfiles: bool,
+    sort: bool,
     prefix: str,
     space: str,
     branch: str,
@@ -161,6 +164,7 @@ def _tree_impl(
         max_depth=max_depth,
         followlinks=followlinks,
         skipfiles=skipfiles,
+        sort=sort,
     )
     for path, is_dir, locs in walker:
         prefix = "".join((branch if i < num - 1 else space) for i, num in locs[:-1])
@@ -180,8 +184,13 @@ def _walker_impl(
     max_depth: int,
     followlinks: bool,
     skipfiles: bool,
+    sort: bool,
 ) -> Generator[Tuple[Path, bool, List[Tuple[int, int]]], Any, None]:
     candidates_paths = root.iterdir()
+
+    if sort:
+        candidates_paths = sorted(candidates_paths)
+
     paths: List[Path] = []
     for path in candidates_paths:
         if not match_patterns(str(path), include, exclude=exclude):
@@ -211,4 +220,5 @@ def _walker_impl(
                 max_depth=max_depth,
                 followlinks=followlinks,
                 skipfiles=skipfiles,
+                sort=sort,
             )
