@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from dataclasses import MISSING, dataclass
+from dataclasses import MISSING
 from typing import Any, Dict, TypeVar
 
 from pythonwrench.typing.checks import is_dataclass_instance  # noqa: F401
