@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 - `filter_with_patterns` function.
 - `skipfiles`, `include` and `sort` to `tree_iter` function.
 - `SupportsGetitem` protocols now has `T_Index` typevar set to `Any` instead of `int` by default.
+- `ThreadPoolExecutorHelper` class.
 
 ## [0.4.2] 2025-10-16
 ### Fixed
