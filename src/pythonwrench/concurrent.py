@@ -3,9 +3,9 @@
 
 import logging
 from concurrent.futures import Future, ThreadPoolExecutor
-from typing import Generic, TypeVar, Callable, Optional, List
-from typing_extensions import ParamSpec
+from typing import Callable, Generic, List, Optional, TypeVar
 
+from typing_extensions import ParamSpec
 
 logger = logging.getLogger(__name__)
 
@@ -36,13 +36,14 @@ class ThreadPoolExecutorHelper(Generic[P, T]):
         if verbose:
             try:
                 import tqdm  # type: ignore
+
                 futures = tqdm.tqdm(futures, disable=not verbose)
             except ImportError:
-                logger.warning("Cannot display verbose bar because tqdm is not installed.")
+                logger.warning(
+                    "Cannot display verbose bar because tqdm is not installed."
+                )
 
-        results = [
-            future.result() for future in futures
-        ]
+        results = [future.result() for future in futures]
         self.futures.clear()
         if shutdown and self.executor is not None:
             self.executor.shutdown()
