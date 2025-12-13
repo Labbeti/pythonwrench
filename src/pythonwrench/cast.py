@@ -4,6 +4,7 @@
 from argparse import Namespace
 from collections import Counter
 from dataclasses import asdict
+from datetime import date
 from enum import Enum
 from functools import partial
 from pathlib import Path
@@ -81,105 +82,128 @@ def register_as_builtin_fn(
 
 
 _AS_BUILTIN_REGISTRY.register(
-    identity, custom_predicate=partial(is_builtin_scalar, strict=True)
+    identity,
+    custom_predicate=partial(is_builtin_scalar, strict=True),
 )
 
 
 @register_as_builtin_fn(Counter)
-def _counter_to_builtin(x: Counter) -> Dict[Any, int]:
+def _counter_to_builtin(x: Counter, **kwargs) -> Dict[Any, int]:
     return dict(x)
 
 
+@register_as_builtin_fn(date)
+def _date_to_builtin(x: date, **kwargs) -> str:
+    return str(x)
+
+
 @register_as_builtin_fn(Path)
-def _path_to_builtin(x: Path) -> str:
+def _path_to_builtin(x: Path, **kwargs) -> str:
     return str(x)
 
 
 @register_as_builtin_fn(Enum)
-def _enum_to_builtin(x: Enum) -> str:
+def _enum_to_builtin(x: Enum, **kwargs) -> str:
     return x.name
 
 
 @register_as_builtin_fn(Pattern)
-def _pattern_to_builtin(x: Pattern) -> str:
+def _pattern_to_builtin(x: Pattern, **kwargs) -> str:
     return x.pattern
 
 
 @register_as_builtin_fn(Namespace)
-def _namespace_to_builtin(x: Namespace) -> Any:
-    return as_builtin(x.__dict__)
+def _namespace_to_builtin(x: Namespace, **kwargs) -> Any:
+    return as_builtin(x.__dict__, **kwargs)
 
 
 @register_as_builtin_fn(DataclassInstance)
-def _dataclass_to_builtin(x: DataclassInstance) -> Any:
-    return as_builtin(asdict(x))
+def _dataclass_to_builtin(x: DataclassInstance, **kwargs) -> Any:
+    return as_builtin(asdict(x), **kwargs)
 
 
 @register_as_builtin_fn(NamedTupleInstance)
-def _namedtuple_to_builtin(x: NamedTupleInstance) -> Any:
-    return as_builtin(x._asdict())
+def _namedtuple_to_builtin(x: NamedTupleInstance, **kwargs) -> Any:
+    return as_builtin(x._asdict(), **kwargs)
 
 
 @register_as_builtin_fn(Mapping, priority=-100)
-def _mapping_to_builtin(x: Mapping) -> Any:
-    return {as_builtin(k): as_builtin(v) for k, v in x.items()}
+def _mapping_to_builtin(x: Mapping, **kwargs) -> Any:
+    return {as_builtin(k, **kwargs): as_builtin(v, **kwargs) for k, v in x.items()}
 
 
 @register_as_builtin_fn(Iterable, priority=-200)
-def _iterable_to_builtin(x: Iterable) -> Any:
-    return [as_builtin(xi) for xi in x]
+def _iterable_to_builtin(x: Iterable, **kwargs) -> Any:
+    return [as_builtin(xi, **kwargs) for xi in x]
 
 
 @overload
-def as_builtin(x: Counter) -> Dict[Any, int]: ...
+def as_builtin(x: Counter, **kwargs) -> Dict[Any, int]: ...
 
 
 @overload
-def as_builtin(x: Enum) -> str: ...
+def as_builtin(x: date, **kwargs) -> str: ...
 
 
 @overload
-def as_builtin(x: Path) -> str: ...
+def as_builtin(x: Enum, **kwargs) -> str: ...
 
 
 @overload
-def as_builtin(x: Pattern) -> str: ...
+def as_builtin(x: Path, **kwargs) -> str: ...
 
 
 @overload
-def as_builtin(x: Namespace) -> Dict[str, Any]: ...
+def as_builtin(x: Pattern, **kwargs) -> str: ...
 
 
 @overload
-def as_builtin(x: Mapping[K, V]) -> Dict[K, V]: ...
+def as_builtin(x: Namespace, **kwargs) -> Dict[str, Any]: ...
 
 
 @overload
-def as_builtin(x: DataclassInstance) -> Dict[str, Any]: ...
+def as_builtin(x: Mapping[K, V], **kwargs) -> Dict[K, V]: ...
 
 
 @overload
-def as_builtin(x: NamedTupleInstance) -> Dict[str, Any]: ...
+def as_builtin(x: DataclassInstance, **kwargs) -> Dict[str, Any]: ...
 
 
 @overload
-def as_builtin(x: T_BuiltinScalar) -> T_BuiltinScalar: ...
+def as_builtin(x: NamedTupleInstance, **kwargs) -> Dict[str, Any]: ...
 
 
 @overload
-def as_builtin(x: Any) -> Any: ...
+def as_builtin(x: T_BuiltinScalar, **kwargs) -> T_BuiltinScalar: ...
 
 
-def as_builtin(x: Any) -> Any:
+@overload
+def as_builtin(x: Any, **kwargs) -> Any: ...
+
+
+def as_builtin(x: Any, **kwargs) -> Any:
     """Convert an object to a sanitized python builtin equivalent.
 
     This function can be used to sanitize data before saving to a JSON, YAML or CSV file.
 
     Additional objects to convert can be added dynamically with `pythonwrench.register_as_builtin_fn` function decorator.
 
+    Here is the list of default objects converted to built-in:
+    - tuple -> list
+    - collections.Counter -> dict
+    - datetime.date -> str
+    - argparse.Namespace -> dict
+    - re.Pattern -> str
+    - pathlib.Path -> str
+    - enum.Enum -> str
+    - Mapping -> dict
+    - Iterable -> list
+    - Dataclass -> dict
+    - NamedTuple -> dict
+
     Note: By default, tuple objects are converted to list.
 
     Args:
         x: Object to convert to built-in equivalent.
     """
-    return _AS_BUILTIN_REGISTRY.apply(x)
+    return _AS_BUILTIN_REGISTRY.apply(x, **kwargs)

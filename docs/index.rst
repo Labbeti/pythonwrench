@@ -2,7 +2,7 @@
 pythonwrench's documentation
 ========================================
 
-Set of tools for Python that could be in the standard library.
+Python library with tools for typing, manipulating collections, and more!
 
 See the API doc here:
 
@@ -98,9 +98,8 @@ Check generic types with ìsinstance_generic` :
 
     import pythonwrench as pw
 
-    # Combines Iterable and Sized !
-    isinstance({"a": 1, "b": 2}, pw.SupportsGetitemLen)  # True
     isinstance({"a": 1, "b": 2}, pw.SupportsIterLen)  # True
+    isinstance({"a": 1, "b": 2}, pw.SupportsGetitemLen)  # True
 
 Finally, you can also force argument type checking with `check_args_types` function :
 
@@ -171,4 +170,5 @@ Contact
 ============================
 
 Maintainer:
-- [Étienne Labbé](https://labbeti.github.io/) "Labbeti": labbeti.pub@gmail.com
+
+- `Étienne Labbé<https://labbeti.github.io/>`_ "Labbeti": labbeti.pub@gmail.com

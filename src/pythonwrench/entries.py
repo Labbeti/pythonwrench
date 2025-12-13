@@ -4,6 +4,7 @@
 import logging
 import platform
 import sys
+import warnings
 from argparse import ArgumentParser
 from pathlib import Path
 from typing import Dict, Iterable, Union
@@ -37,7 +38,9 @@ def get_install_info() -> Dict[str, Union[str, int]]:
 
 def print_install_info() -> None:
     """Show main packages versions."""
+    warnings.filterwarnings("ignore", category=UserWarning)
     install_info = get_install_info()
+    warnings.filterwarnings("default", category=UserWarning)
     dumped = dump_json(install_info)
     print(dumped)
 
@@ -45,9 +48,12 @@ def print_install_info() -> None:
 def print_tree(
     root: Union[str, Path],
     *,
+    include: Union[PatternLike, Iterable[PatternLike]] = ".*",
     exclude: Union[PatternLike, Iterable[PatternLike]] = (),
     max_depth: int = sys.maxsize,
     followlinks: bool = False,
+    skipfiles: bool = False,
+    sort: bool = False,
 ) -> None:
     """Print directory tree to stdout."""
     num_dirs = 0
@@ -55,9 +61,12 @@ def print_tree(
 
     iterable = tree_iter(
         root=root,
+        include=include,
         exclude=exclude,
         max_depth=max_depth,
         followlinks=followlinks,
+        skipfiles=skipfiles,
+        sort=sort,
     )
     for line in iterable:
         print(f"{line}")
@@ -80,9 +89,16 @@ def main_tree() -> None:
         nargs="?",  # for optional positional argument
     )
     parser.add_argument(
+        "--include",
+        type=str,
+        help="Include file/dir patterns.",
+        default=".*",
+        nargs="*",
+    )
+    parser.add_argument(
         "--exclude",
         type=str,
-        help="Exclude file patterns.",
+        help="Exclude file/dir patterns.",
         default=(),
         nargs="*",
     )
@@ -95,16 +111,31 @@ def main_tree() -> None:
     parser.add_argument(
         "--followlinks",
         type=str_to_bool,
-        help="Indicates whether or not symbolic links shound be followed. defaults to True.",
+        help="Indicates whether or not symbolic links should be followed. defaults to True.",
         default=True,
+    )
+    parser.add_argument(
+        "--skipfiles",
+        type=str_to_bool,
+        help="Indicates whether or not symbolic files should be shown. defaults to False.",
+        default=False,
+    )
+    parser.add_argument(
+        "--sort",
+        type=str_to_bool,
+        help="Sort element by name. defaults to False.",
+        default=False,
     )
     args = parser.parse_args()
 
     print_tree(
         root=args.root,
+        include=args.include,
         exclude=args.exclude,
         max_depth=args.max_depth,
         followlinks=args.followlinks,
+        skipfiles=args.skipfiles,
+        sort=args.sort,
     )
 
 

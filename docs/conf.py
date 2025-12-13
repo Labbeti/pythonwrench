@@ -91,7 +91,10 @@ html_theme = "sphinx_immaterial"
 #         ("PyPI", "https://pypi.org/project/pythonwrench/"),
 #     ],
 # }
-html_theme_options = {}
+html_theme_options = {
+    "repo_url": "https://github.com/Labbeti/pythonwrench",
+    "site_url": "https://pypi.org/project/pythonwrench",
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

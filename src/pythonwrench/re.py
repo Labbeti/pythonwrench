@@ -98,3 +98,21 @@ def sort_with_patterns(
     key_fn = get_key_fn(patterns, match_fn=match_fn)
     x = sorted(x, key=key_fn, reverse=reverse)
     return x
+
+
+def filter_with_patterns(
+    x: Iterable[str],
+    include: Optional[PatternListLike] = ".*",
+    *,
+    exclude: Optional[PatternListLike] = (),
+    match_fn: Callable[[PatternLike, str], Any] = re.search,
+) -> List[str]:
+    if include is None:
+        include = ".*"
+    if exclude is None:
+        exclude = ()
+    return [
+        xi
+        for xi in x
+        if match_patterns(xi, include, exclude=exclude, match_fn=match_fn)
+    ]

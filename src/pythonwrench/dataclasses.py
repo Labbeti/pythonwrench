@@ -2,10 +2,12 @@
 # -*- coding: utf-8 -*-
 
 from dataclasses import MISSING
-from typing import Any, Dict
+from typing import Any, Dict, TypeVar
 
 from pythonwrench.typing.checks import is_dataclass_instance  # noqa: F401
 from pythonwrench.typing.classes import DataclassInstance
+
+T = TypeVar("T")
 
 
 def get_defaults_values(obj: DataclassInstance) -> Dict[str, Any]:

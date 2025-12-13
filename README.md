@@ -12,26 +12,66 @@
     <img src='https://readthedocs.org/projects/pythonwrench/badge/?version=stable&style=for-the-badge' alt='Documentation Status' />
 </a>
 
-Set of tools for Python that could be in the standard library.
+Python library with tools for typing, manipulating collections, and more!
 
 </center>
 
 
 ## Installation
 
-With pip:
-```bash
-pip install pythonwrench
-```
-
 With uv:
 ```bash
 uv add pythonwrench
 ```
 
-This library has been tested on all Python versions **3.8 - 3.13**, requires only `typing_extensions>=4.10.0`, and runs on **Linux, Mac and Windows** systems.
+With pip:
+```bash
+pip install pythonwrench
+```
+
+This library has been tested on all Python versions **3.8 - 3.14**, requires only `typing_extensions>=4.10.0`, and runs on **Linux, Mac and Windows** systems.
 
 ## Examples
+
+### Typing
+
+Check generic types with ìsinstance_generic` :
+
+```python
+>>> import pythonwrench as pw
+>>>
+>>> # Behaves like builtin isinstance() :
+>>> pw.isinstance_generic({"a": 1, "b": 2}, dict)
+... True
+>>> # But works with generic types !
+>>> pw.isinstance_generic({"a": 1, "b": 2}, dict[str, int])
+... True
+>>> pw.isinstance_generic({"a": 1, "b": 2}, dict[str, str])
+... False
+```
+
+... or check specific methods with protocols classes beginning with `Supports`
+```python
+>>> import pythonwrench as pw
+>>>
+>>> isinstance({"a": 1, "b": 2}, pw.SupportsIterLen)
+... True
+>>> isinstance({"a": 1, "b": 2}, pw.SupportsGetitemLen)
+... True
+```
+
+Finally, you can also force argument type checking with `check_args_types` function :
+
+```python
+>>> import pythonwrench as pw
+
+>>> @pw.check_args_types
+>>> def f(a: int, b: str) -> str:
+>>>     return a * b
+
+>>> f(1, "a")  # pass check
+>>> f(1, 2)  # raises TypeError from decorator
+```
 
 ### Collections
 
@@ -78,47 +118,6 @@ Easely converts common python structures like list of dicts to dict of lists :
 >>> dict_of_dicts = {"a": {"x": 1, "y": 2}, "b": {"x": 3, "y": 4}}
 >>> pw.flat_dict_of_dict(dict_of_dicts)
 ... {"a.x": 1, "a.y": 2, "b.x": 3, "b.y": 4}
-```
-
-### Typing
-
-Check generic types with ìsinstance_generic` :
-
-```python
->>> import pythonwrench as pw
->>>
->>> # Behaves like builtin isinstance() :
->>> pw.isinstance_generic({"a": 1, "b": 2}, dict)
-... True
->>> # But works with generic types !
->>> pw.isinstance_generic({"a": 1, "b": 2}, dict[str, int])
-... True
->>> pw.isinstance_generic({"a": 1, "b": 2}, dict[str, str])
-... False
-```
-
-... or check specific methods with protocols classes beginning with `Supports`
-```python
->>> import pythonwrench as pw
->>>
->>> # Combines Iterable and Sized !
->>> isinstance({"a": 1, "b": 2}, pw.SupportsGetitemLen)
-... True
->>> isinstance({"a": 1, "b": 2}, pw.SupportsIterLen)
-... True
-```
-
-Finally, you can also force argument type checking with `check_args_types` function :
-
-```python
->>> import pythonwrench as pw
-
->>> @pw.check_args_types
->>> def f(a: int, b: str) -> str:
->>>     return a * b
-
->>> f(1, "a")  # pass check
->>> f(1, 2)  # raises TypeError from decorator
 ```
 
 ### Disk caching (memoize)

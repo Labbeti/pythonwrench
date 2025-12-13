@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Set of tools for Python that could be in the standard library."""
+"""Python library with tools for typing, manipulating collections, and more!"""
 
 __name__ = "pythonwrench"
 __author__ = "Étienne Labbé (Labbeti)"
@@ -9,7 +9,7 @@ __author_email__ = "labbeti.pub@gmail.com"
 __license__ = "MIT"
 __maintainer__ = "Étienne Labbé (Labbeti)"
 __status__ = "Development"
-__version__ = "0.4.2"
+__version__ = "0.4.3"
 
 
 # Re-import for language servers
@@ -52,7 +52,7 @@ from .argparse import (
     str_to_optional_str,
     str_to_type,
 )
-from .cast import as_builtin
+from .cast import as_builtin, register_as_builtin_fn
 from .checksum import checksum_any, register_checksum_fn
 from .collections import (
     all_eq,
@@ -151,6 +151,7 @@ from .re import (
     PatternLike,
     PatternListLike,
     compile_patterns,
+    filter_with_patterns,
     find_patterns,
     get_key_fn,
     match_patterns,

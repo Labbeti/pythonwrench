@@ -34,6 +34,7 @@ from .reducers import (
     prod,
     reduce_add,
     reduce_and,
+    reduce_matmul,
     reduce_mul,
     reduce_or,
     sum,

@@ -124,22 +124,22 @@ def _serialize_pickle(
 # -- Load / Read / Parse PICKLE content --
 
 
-def load_pickle(file: Union[str, Path, BinaryIO], /, **json_loads_kwds) -> Any:
+def load_pickle(file: Union[str, Path, BinaryIO], /, **pkl_loads_kwds) -> Any:
     if isinstance(file, (str, Path, PathLike)):
         file = open(file, "rb")
         close = True
     else:
         close = False
 
-    data = _parse_pickle(file, **json_loads_kwds)
+    data = _parse_pickle(file, **pkl_loads_kwds)
     if close:
         file.close()
     return data
 
 
-def loads_pickle(content: bytes, /, **json_loads_kwds) -> Any:
+def loads_pickle(content: bytes, /, **pkl_loads_kwds) -> Any:
     with BytesIO(content) as buffer:
-        return _parse_pickle(buffer, **json_loads_kwds)
+        return _parse_pickle(buffer, **pkl_loads_kwds)
 
 
 @function_alias(load_pickle)

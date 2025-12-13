@@ -3,9 +3,9 @@ name = "pythonwrench"
 authors = [
     {name = "Étienne Labbé (Labbeti)", email = "labbeti.pub@gmail.com"},
 ]
-description = "Set of tools for Python that could be in the standard library."
+description = "Python library with tools for typing, manipulating collections, and more!"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.8,<3.15"
 keywords = ["python", "tools", "utilities"]
 license = {file = "LICENSE"}
 # license-files = ["LICENSE"]  # unsupported by python 3.8, but will be required in 2026
@@ -19,8 +19,12 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering",
     "Operating System :: OS Independent",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX",
 ]
 maintainers = [
     {name = "Étienne Labbé (Labbeti)", email = "labbeti.pub@gmail.com"},

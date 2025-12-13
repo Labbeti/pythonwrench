@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.3] 2025-12-13
+### Added
+- `as_builtin` now supports `datetime.date` instances.
+- `check_only_first` argument in `isinstance_generic` function.
+- `filter_with_patterns` function.
+- `skipfiles`, `include` and `sort` to `tree_iter` function.
+- `SupportsGetitem` protocols now has `T_Index` typevar set to `Any` instead of `int` by default.
+- `SupportsGetitem2`, `SupportsGetitemLen2` and `SupportsGetitemIterLen2` protocols with generic parameters in reversed order to match `Mapping[key, value]` order.
+- `ThreadPoolExecutorHelper` class.
+- `SupportsMatmul` typing class.
+- `reduce_matmul` function.
+
 ## [0.4.2] 2025-10-16
 ### Fixed
 - `get_argnames` and `filter_and_call` functions when argument `fn` contains arguments with default values.

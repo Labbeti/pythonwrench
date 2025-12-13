@@ -25,6 +25,7 @@ Submodules
    pythonwrench.argparse
    pythonwrench.cast
    pythonwrench.checksum
+   pythonwrench.concurrent
    pythonwrench.csv
    pythonwrench.dataclasses
    pythonwrench.datetime
