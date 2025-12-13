@@ -2,7 +2,7 @@
 pythonwrench's documentation
 ========================================
 
-Set of tools for Python that could be in the standard library.
+Python library with tools for typing, manipulating collections, and more!
 
 See the API doc here:
 

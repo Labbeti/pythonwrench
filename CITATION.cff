@@ -11,7 +11,7 @@ authors:
     affiliation: IRIT
     orcid: 'https://orcid.org/0000-0002-7219-5463'
 repository-code: 'https://github.com/Labbeti/pythonwrench/'
-abstract: Set of tools for Python that could be in the standard library.
+abstract: Python library with tools for typing, manipulating collections, and more!
 keywords:
   - python
   - tools

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Set of tools for Python that could be in the standard library."""
+"""Python library with tools for typing, manipulating collections, and more!"""
 
 __name__ = "pythonwrench"
 __author__ = "Étienne Labbé (Labbeti)"
