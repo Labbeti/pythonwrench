@@ -140,3 +140,9 @@ class SupportsMul(Protocol[_T_Other]):
 class SupportsOr(Protocol[_T_Other]):
     def __or__(self, other: _T_Other, /):
         raise NotImplementedError
+
+
+@runtime_checkable
+class SupportsMatmul(Protocol[_T_Other]):
+    def __matmul__(self, other: _T_Other, /):
+        raise NotImplementedError

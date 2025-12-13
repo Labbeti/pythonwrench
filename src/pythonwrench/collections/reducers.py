@@ -19,6 +19,7 @@ from pythonwrench.typing.checks import isinstance_generic
 from pythonwrench.typing.classes import (
     SupportsAdd,
     SupportsAnd,
+    SupportsMatmul,
     SupportsMul,
     SupportsOr,
 )
@@ -28,6 +29,7 @@ T_SupportsAdd = TypeVar("T_SupportsAdd", bound=SupportsAdd)
 T_SupportsAnd = TypeVar("T_SupportsAnd", bound=SupportsAnd)
 T_SupportsMul = TypeVar("T_SupportsMul", bound=SupportsMul)
 T_SupportsOr = TypeVar("T_SupportsOr", bound=SupportsOr)
+T_SupportsMatmul = TypeVar("T_SupportsMatmul", bound=SupportsMatmul)
 
 
 @overload
@@ -88,6 +90,36 @@ def reduce_and(
 def reduce_and(*args, start=None):
     """Reduce elements using "and" operator (&)."""
     return _reduce(*args, start=start, op_fn=operator.and_, type_=SupportsAnd)
+
+
+@overload
+def reduce_matmul(
+    args: Iterable[T_SupportsMatmul],
+    /,
+    *,
+    start: T_SupportsMatmul,
+) -> T_SupportsMatmul: ...
+
+
+@overload
+def reduce_matmul(
+    *args: T_SupportsMatmul,
+    start: T_SupportsMatmul,
+) -> T_SupportsMatmul: ...
+
+
+@overload
+def reduce_matmul(
+    arg0: T_SupportsMatmul,
+    /,
+    *args: T_SupportsMatmul,
+    start: Optional[T_SupportsMatmul] = None,
+) -> T_SupportsMatmul: ...
+
+
+def reduce_matmul(*args, start=None):
+    """Reduce elements using "mul" operator (*)."""
+    return _reduce(*args, start=start, op_fn=operator.matmul, type_=SupportsMatmul)
 
 
 @overload
@@ -172,7 +204,7 @@ def _reduce(
         try:
             accumulator = next(it)
         except StopIteration:
-            msg = f"Invalid combinaison of arguments {args=} and {start=}. (expected at least 1 non-empty argument or start that supports or operator.)"
+            msg = f"Invalid combinaison of arguments {args=} and {start=}. (expected at least 1 non-empty argument or start object that supports operator.)"
             raise ValueError(msg)
     else:
         raise TypeError(f"Invalid argument type {type(start)}.")
