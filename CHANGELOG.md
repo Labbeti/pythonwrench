@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 - `filter_with_patterns` function.
 - `skipfiles`, `include` and `sort` to `tree_iter` function.
 - `SupportsGetitem` protocols now has `T_Index` typevar set to `Any` instead of `int` by default.
+- `SupportsGetitem2`, `SupportsGetitemLen2` and `SupportsGetitemIterLen2` protocols with generic parameters in reversed order to match `Mapping[key, value]` order.
 - `ThreadPoolExecutorHelper` class.
 - `SupportsMatmul` typing class.
 - `reduce_matmul` function.

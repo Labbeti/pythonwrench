@@ -25,6 +25,7 @@ BuiltinScalar: TypeAlias = Union[bool, int, float, complex, NoneType, str, bytes
 _T_Item = TypeVar("_T_Item", covariant=True)
 _T_Index = TypeVar("_T_Index", contravariant=True, default=Any)
 _T_Other = TypeVar("_T_Other", contravariant=True, default=Any)
+_T_Index2 = TypeVar("_T_Index2", contravariant=True)
 
 T_BuiltinNumber = TypeVar(
     "T_BuiltinNumber",
@@ -95,6 +96,14 @@ class SupportsGetitem(Protocol[_T_Item, _T_Index]):
 
 
 @runtime_checkable
+class SupportsGetitem2(Protocol[_T_Index2, _T_Item]):
+    """Same than `SupportsGetitem` except that generic parameters are in reversed order: [T_Index, T_Item]."""
+
+    def __getitem__(self, idx: _T_Index2, /) -> _T_Item:
+        raise NotImplementedError
+
+
+@runtime_checkable
 class SupportsGetitemLen(Protocol[_T_Item, _T_Index]):
     def __getitem__(self, idx: _T_Index, /) -> _T_Item:
         raise NotImplementedError
@@ -104,8 +113,33 @@ class SupportsGetitemLen(Protocol[_T_Item, _T_Index]):
 
 
 @runtime_checkable
+class SupportsGetitemLen2(Protocol[_T_Index2, _T_Item]):
+    """Same than `SupportsGetitemLen` except that generic parameters are in reversed order: [T_Index, T_Item]."""
+
+    def __getitem__(self, idx: _T_Index2, /) -> _T_Item:
+        raise NotImplementedError
+
+    def __len__(self) -> int:
+        raise NotImplementedError
+
+
+@runtime_checkable
 class SupportsGetitemIterLen(Protocol[_T_Item, _T_Index]):
     def __getitem__(self, idx: _T_Index, /) -> _T_Item:
+        raise NotImplementedError
+
+    def __iter__(self) -> Iterator[_T_Item]:
+        raise NotImplementedError
+
+    def __len__(self) -> int:
+        raise NotImplementedError
+
+
+@runtime_checkable
+class SupportsGetitemIterLen2(Protocol[_T_Index2, _T_Item]):
+    """Same than `SupportsGetitemIterLen` except that generic parameters are in reversed order: [T_Index, T_Item]."""
+
+    def __getitem__(self, idx: _T_Index2, /) -> _T_Item:
         raise NotImplementedError
 
     def __iter__(self) -> Iterator[_T_Item]:
