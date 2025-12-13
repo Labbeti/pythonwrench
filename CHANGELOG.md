@@ -10,6 +10,8 @@ All notable changes to this project will be documented in this file.
 - `skipfiles`, `include` and `sort` to `tree_iter` function.
 - `SupportsGetitem` protocols now has `T_Index` typevar set to `Any` instead of `int` by default.
 - `ThreadPoolExecutorHelper` class.
+- `SupportsMatmul` typing class.
+- `reduce_matmul` function.
 
 ## [0.4.2] 2025-10-16
 ### Fixed

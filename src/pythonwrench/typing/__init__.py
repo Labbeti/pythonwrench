@@ -37,6 +37,7 @@ from .classes import (
     SupportsGetitemLen,
     SupportsIterLen,
     SupportsLen,
+    SupportsMatmul,
     SupportsMul,
     SupportsOr,
     T_BuiltinNumber,

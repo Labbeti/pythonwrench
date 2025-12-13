@@ -200,14 +200,15 @@ def _reduce(
 
     if isinstance(start, type_):
         accumulator = start
-    elif start is None:
+    elif start is None or start is ...:
         try:
             accumulator = next(it)
         except StopIteration:
             msg = f"Invalid combinaison of arguments {args=} and {start=}. (expected at least 1 non-empty argument or start object that supports operator.)"
             raise ValueError(msg)
     else:
-        raise TypeError(f"Invalid argument type {type(start)}.")
+        msg = f"Invalid argument type {type(start)}."
+        raise TypeError(msg)
 
     for arg in it:
         accumulator = op_fn(accumulator, arg)
