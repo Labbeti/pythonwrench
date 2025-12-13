@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.4] UNRELEASED
+### Added
+- `SizedGenerator` class wrapper.
+
 ## [0.4.3] 2025-12-13
 ### Added
 - `as_builtin` now supports `datetime.date` instances.

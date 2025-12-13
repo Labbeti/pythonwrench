@@ -47,6 +47,19 @@ KeyMode = Literal["intersect", "same", "union"]
 Order = Literal["left", "right"]
 
 
+class SizedGenerator:
+    def __init__(self, generator: Generator, size: int) -> None:
+        super().__init__()
+        self._generator = generator
+        self._size = size
+
+    def __iter__(self):
+        yield from self._generator
+
+    def __len__(self) -> int:
+        return self._size
+
+
 def contained(
     x: T,
     include: Optional[Iterable[T]] = None,
