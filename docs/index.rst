@@ -170,4 +170,5 @@ Contact
 ============================
 
 Maintainer:
+
 - [Étienne Labbé](https://labbeti.github.io/) "Labbeti": labbeti.pub@gmail.com
