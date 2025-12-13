@@ -4,6 +4,7 @@
 import logging
 import platform
 import sys
+import warnings
 from argparse import ArgumentParser
 from pathlib import Path
 from typing import Dict, Iterable, Union
@@ -37,7 +38,9 @@ def get_install_info() -> Dict[str, Union[str, int]]:
 
 def print_install_info() -> None:
     """Show main packages versions."""
+    warnings.filterwarnings("ignore", category=UserWarning)
     install_info = get_install_info()
+    warnings.filterwarnings("default", category=UserWarning)
     dumped = dump_json(install_info)
     print(dumped)
 

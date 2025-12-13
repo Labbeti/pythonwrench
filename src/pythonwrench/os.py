@@ -24,7 +24,7 @@ def get_num_cpus_available() -> int:
     try:
         num_cpus = len(os.sched_getaffinity(0))
     except AttributeError:
-        msg = "Cannot detect number of CPUs available for the current process. This function will just returns the number of CPUs."
+        msg = "Cannot detect number of CPUs available for the current process. This function will just returns the number of CPUs on this machine."
         warn_once(msg)
 
         num_cpus = os.cpu_count()
