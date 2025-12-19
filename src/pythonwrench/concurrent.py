@@ -3,7 +3,7 @@
 
 import logging
 from concurrent.futures import Future, ThreadPoolExecutor
-from typing import Callable, Generic, List, Optional, TypeVar
+from typing import Any, Callable, Dict, Generic, List, Optional, TypeVar
 
 from typing_extensions import ParamSpec
 
@@ -15,16 +15,26 @@ T = TypeVar("T")
 
 
 class ThreadPoolExecutorHelper(Generic[P, T]):
-    def __init__(self, fn: Callable[P, T], **default_kwargs) -> None:
+    def __init__(
+        self,
+        fn: Callable[P, T],
+        executor_kwds: Optional[Dict[str, Any]] = None,
+        **default_kwargs,
+    ) -> None:
         super().__init__()
         self.fn = fn
+        self.executor_kwds = executor_kwds
         self.default_kwargs = default_kwargs
+
         self.executor: Optional[ThreadPoolExecutor] = None
         self.futures: list[Future[T]] = []
 
     def submit(self, *args: P.args, **kwargs: P.kwargs) -> Future[T]:
         if self.executor is None:
-            self.executor = ThreadPoolExecutor()
+            executor_kwds = self.executor_kwds
+            if executor_kwds is None:
+                executor_kwds = {}
+            self.executor = ThreadPoolExecutor(**executor_kwds)
 
         kwargs = self.default_kwargs | kwargs  # type: ignore
         future = self.executor.submit(self.fn, *args, **kwargs)
