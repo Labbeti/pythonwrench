@@ -10,8 +10,10 @@ from typing import (
     Callable,
     Dict,
     Generator,
+    Generic,
     Hashable,
     Iterable,
+    Iterator,
     List,
     Literal,
     Mapping,
@@ -47,13 +49,13 @@ KeyMode = Literal["intersect", "same", "union"]
 Order = Literal["left", "right"]
 
 
-class SizedGenerator:
-    def __init__(self, generator: Generator, size: int) -> None:
+class SizedGenerator(Generic[T]):
+    def __init__(self, generator: Generator[T], size: int) -> None:
         super().__init__()
         self._generator = generator
         self._size = size
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[T]:
         yield from self._generator
 
     def __len__(self) -> int:
