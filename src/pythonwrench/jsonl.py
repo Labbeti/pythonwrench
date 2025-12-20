@@ -18,6 +18,15 @@ from pythonwrench.json import (
 from pythonwrench.semver import Version
 from pythonwrench.warnings import warn_once
 
+__all__ = [
+    "dump_jsonl",
+    "dumps_jsonl",
+    "save_jsonl",
+    "load_jsonl",
+    "loads_jsonl",
+    "read_jsonl",
+]
+
 # -- Dump / Save / Serialize content to JSONL --
 
 
