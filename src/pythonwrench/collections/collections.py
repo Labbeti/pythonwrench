@@ -50,7 +50,9 @@ Order = Literal["left", "right"]
 
 
 class SizedGenerator(Generic[T]):
-    def __init__(self, generator: Generator[T], size: int) -> None:
+    """Wraps a generator and size to provide a sized iterable object."""
+
+    def __init__(self, generator: Generator[T, None, None], size: int) -> None:
         super().__init__()
         self._generator = generator
         self._size = size
