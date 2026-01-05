@@ -514,7 +514,7 @@ def list_dict_to_dict_list(
     """Convert list of dicts to dict of lists.
 
     Args:
-        lst: The list of dict to merge.
+        lst: The list of dict to merge. Cannot be a Generator.
         key_mode: Can be "same" or "intersect". \
             - If "same", all the dictionaries must contains the same keys otherwise a ValueError will be raised. \
             - If "intersect", only the intersection of all keys will be used in output. \
@@ -524,6 +524,10 @@ def list_dict_to_dict_list(
         default_val_fn: Function to return the default value according to a specific key. defaults to None.
         list_fn: Optional function to build the values. defaults to identity.
     """
+    if isinstance(lst, Generator):
+        msg = f"Invalid argument type {type(lst)}. (expected any Iterable except Generator)"
+        raise TypeError(msg)
+
     try:
         item0 = next(iter(lst))
     except StopIteration:
