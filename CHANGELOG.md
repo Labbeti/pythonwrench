@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - `SizedGenerator` class wrapper.
 - `executor_kwds` argument to `ThreadPoolExecutorHelper` class.
+- `cache_fname_fmt` argument in `disk_cache` now supports inputs arguments values to name the cache file.
 
 ## [0.4.3] 2025-12-13
 ### Added
