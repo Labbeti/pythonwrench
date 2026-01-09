@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from .collections import (
+    SizedGenerator,
     contained,
     dict_list_to_list_dict,
     dump_dict,

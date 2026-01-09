@@ -9,7 +9,7 @@ __author_email__ = "labbeti.pub@gmail.com"
 __license__ = "MIT"
 __maintainer__ = "Étienne Labbé (Labbeti)"
 __status__ = "Development"
-__version__ = "0.4.3"
+__version__ = "0.4.4"
 
 
 # Re-import for language servers
@@ -18,6 +18,7 @@ from . import argparse as argparse
 from . import cast as cast
 from . import checksum as checksum
 from . import collections as collections
+from . import concurrent as concurrent
 from . import csv as csv
 from . import dataclasses as dataclasses
 from . import datetime as datetime

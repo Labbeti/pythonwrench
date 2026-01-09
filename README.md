@@ -35,7 +35,7 @@ This library has been tested on all Python versions **3.8 - 3.14**, requires onl
 
 ### Typing
 
-Check generic types with ìsinstance_generic` :
+Check generic types with `isinstance_generic` :
 
 ```python
 >>> import pythonwrench as pw

@@ -23,7 +23,7 @@ class TestDiskCache(TestCase):
 
     def test_disk_cache_example_2(self) -> None:
         @pw.disk_cache_decorator(
-            cache_fname_fmt="{fn_name}_{csum}.json",
+            cache_fname_fmt="{fn_name}_{csum}_x={x}.json",
             cache_load_fn=pw.load_json,
             cache_dump_fn=pw.dump_json,
         )

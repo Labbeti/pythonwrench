@@ -5,6 +5,7 @@ import logging
 import os
 import shutil
 import time
+import warnings
 from functools import wraps
 from pathlib import Path
 from typing import (
@@ -25,7 +26,7 @@ from typing_extensions import ParamSpec
 
 from pythonwrench.checksum import checksum_any
 from pythonwrench.datetime import get_now
-from pythonwrench.inspect import get_fullname
+from pythonwrench.inspect import get_argnames, get_fullname
 
 T = TypeVar("T")
 P = ParamSpec("P")
@@ -218,6 +219,10 @@ def _disk_cache_impl(
 ) -> Callable[[Callable[P, T]], Callable[P, T]]:
     # for backward compatibility
     if cache_fname_fmt is None:
+        warnings.warn(
+            f"Deprecated argument value {cache_fname_fmt=}. (use default instead)",
+            DeprecationWarning,
+        )
         cache_fname_fmt = "{fn_name}_{csum}{suffix}"
 
     if cache_saving_backend == "pickle":
@@ -270,13 +275,19 @@ def _disk_cache_impl(
         )
         load_start_msg = f"[{fn_name}] Loading cache..."
         load_end_msg = f"[{fn_name}] Cache loaded."
+        argnames = get_argnames(fn)
 
         @wraps(fn)
         def _disk_cache_wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
             checksum_args = fn, args, kwargs
             csum = cache_checksum_fn(checksum_args)
+            inputs = dict(zip(argnames, args))
+            inputs.update(kwargs)
             cache_fname = cache_fname_fmt.format(
-                fn_name=fn_name, csum=csum, suffix=suffix
+                fn_name=fn_name,
+                csum=csum,
+                suffix=suffix,
+                **inputs,
             )
             cache_fpath = cache_fn_dpath.joinpath(cache_fname)
 

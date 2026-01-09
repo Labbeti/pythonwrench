@@ -3,7 +3,7 @@
 
 import logging
 from concurrent.futures import Future, ThreadPoolExecutor
-from typing import Callable, Generic, List, Optional, TypeVar
+from typing import Any, Callable, Dict, Generic, Iterable, List, Optional, TypeVar
 
 from typing_extensions import ParamSpec
 
@@ -15,16 +15,32 @@ T = TypeVar("T")
 
 
 class ThreadPoolExecutorHelper(Generic[P, T]):
-    def __init__(self, fn: Callable[P, T], **default_kwargs) -> None:
+    # Note: use commas for typing because Future is not generic in older python versions
+
+    def __init__(
+        self,
+        fn: Callable[P, T],
+        *,
+        executor_kwds: Optional[Dict[str, Any]] = None,
+        executor: Optional[ThreadPoolExecutor] = None,
+        futures: "Iterable[Future[T]]" = (),
+        **default_fn_kwds,
+    ) -> None:
+        futures = list(futures)
+
         super().__init__()
         self.fn = fn
-        self.default_kwargs = default_kwargs
-        self.executor: Optional[ThreadPoolExecutor] = None
-        self.futures: list[Future[T]] = []
+        self.executor_kwds = executor_kwds
+        self.executor = executor
+        self.futures = futures
+        self.default_kwargs = default_fn_kwds
 
-    def submit(self, *args: P.args, **kwargs: P.kwargs) -> Future[T]:
+    def submit(self, *args: P.args, **kwargs: P.kwargs) -> "Future[T]":
         if self.executor is None:
-            self.executor = ThreadPoolExecutor()
+            executor_kwds = self.executor_kwds
+            if executor_kwds is None:
+                executor_kwds = {}
+            self.executor = ThreadPoolExecutor(**executor_kwds)
 
         kwargs = self.default_kwargs | kwargs  # type: ignore
         future = self.executor.submit(self.fn, *args, **kwargs)
@@ -39,9 +55,8 @@ class ThreadPoolExecutorHelper(Generic[P, T]):
 
                 futures = tqdm.tqdm(futures, disable=not verbose)
             except ImportError:
-                logger.warning(
-                    "Cannot display verbose bar because tqdm is not installed."
-                )
+                msg = "Cannot display verbose bar because tqdm is not installed."
+                logger.warning(msg)
 
         results = [future.result() for future in futures]
         self.futures.clear()

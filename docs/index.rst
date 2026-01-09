@@ -171,4 +171,4 @@ Contact
 
 Maintainer:
 
-- `Étienne Labbé<https://labbeti.github.io/>`_ "Labbeti": labbeti.pub@gmail.com
+- `Étienne Labbé <https://labbeti.github.io/>`_ "Labbeti": labbeti.pub@gmail.com
