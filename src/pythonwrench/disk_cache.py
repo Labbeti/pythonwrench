@@ -62,7 +62,7 @@ def disk_cache_decorator(
     cache_verbose: int = 0,
     cache_checksum_fn: ChecksumFn = checksum_any,
     cache_saving_backend: Optional[SavingBackend] = "pickle",
-    cache_fname_fmt: str = "{fn_name}_{csum}{suffix}",
+    cache_fname_fmt: Union[str, Callable[..., str]] = "{fn_name}_{csum}{suffix}",
     cache_dump_fn: Optional[Callable[[Any, Path], Any]] = None,
     cache_load_fn: Optional[Callable[[Path], Any]] = None,
     cache_enable: bool = True,
@@ -79,7 +79,7 @@ def disk_cache_decorator(
     cache_verbose: int = 0,
     cache_checksum_fn: ChecksumFn = checksum_any,
     cache_saving_backend: Optional[SavingBackend] = "pickle",
-    cache_fname_fmt: str = "{fn_name}_{csum}{suffix}",
+    cache_fname_fmt: Union[str, Callable[..., str]] = "{fn_name}_{csum}{suffix}",
     cache_dump_fn: Optional[Callable[[Any, Path], Any]] = None,
     cache_load_fn: Optional[Callable[[Path], Any]] = None,
     cache_enable: bool = True,
@@ -95,7 +95,7 @@ def disk_cache_decorator(
     cache_verbose: int = 0,
     cache_checksum_fn: ChecksumFn = checksum_any,
     cache_saving_backend: Optional[SavingBackend] = "pickle",
-    cache_fname_fmt: str = "{fn_name}_{csum}{suffix}",
+    cache_fname_fmt: Union[str, Callable[..., str]] = "{fn_name}_{csum}{suffix}",
     cache_dump_fn: Optional[Callable[[Any, Path], Any]] = None,
     cache_load_fn: Optional[Callable[[Path], Any]] = None,
     cache_enable: bool = True,
@@ -154,7 +154,7 @@ def disk_cache_call(
     cache_verbose: int = 0,
     cache_checksum_fn: ChecksumFn = checksum_any,
     cache_saving_backend: Optional[SavingBackend] = "pickle",
-    cache_fname_fmt: str = "{fn_name}_{csum}{suffix}",
+    cache_fname_fmt: Union[str, Callable[..., str]] = "{fn_name}_{csum}{suffix}",
     cache_dump_fn: Optional[Callable[[Any, Path], Any]] = None,
     cache_load_fn: Optional[Callable[[Path], Any]] = None,
     cache_enable: bool = True,
@@ -211,7 +211,7 @@ def _disk_cache_impl(
     cache_verbose: int = 0,
     cache_checksum_fn: ChecksumFn = checksum_any,
     cache_saving_backend: Optional[SavingBackend] = "pickle",
-    cache_fname_fmt: str = "{fn_name}_{csum}{suffix}",
+    cache_fname_fmt: Union[str, Callable[..., str]] = "{fn_name}_{csum}{suffix}",
     cache_dump_fn: Optional[Callable[[Any, Path], Any]] = None,
     cache_load_fn: Optional[Callable[[Path], Any]] = None,
     cache_enable: bool = True,
@@ -260,6 +260,9 @@ def _disk_cache_impl(
         msg = f"Invalid argument {cache_saving_backend=}. (expected one of {get_args(SavingBackend)})"
         raise ValueError(msg)
 
+    if isinstance(cache_fname_fmt, str):
+        cache_fname_fmt = cache_fname_fmt.format
+
     def _disk_cache_impl_fn(fn: Callable[P, T]) -> Callable[P, T]:
         fn_name = get_fullname(fn).replace("<locals>", "_locals_")
         cache_fn_dpath = _get_fn_cache_dpath(fn, cache_dpath=cache_dpath)
@@ -283,7 +286,7 @@ def _disk_cache_impl(
             csum = cache_checksum_fn(checksum_args)
             inputs = dict(zip(argnames, args))
             inputs.update(kwargs)
-            cache_fname = cache_fname_fmt.format(
+            cache_fname = cache_fname_fmt(
                 fn_name=fn_name,
                 csum=csum,
                 suffix=suffix,
