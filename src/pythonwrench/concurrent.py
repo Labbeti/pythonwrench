@@ -15,13 +15,15 @@ T = TypeVar("T")
 
 
 class ThreadPoolExecutorHelper(Generic[P, T]):
+    # Note: use commas for typing because Future is not generic in older python versions
+
     def __init__(
         self,
         fn: Callable[P, T],
         *,
         executor_kwds: Optional[Dict[str, Any]] = None,
         executor: Optional[ThreadPoolExecutor] = None,
-        futures: Iterable[Future[T]] = (),
+        futures: "Iterable[Future[T]]" = (),
         **default_fn_kwds,
     ) -> None:
         futures = list(futures)
@@ -33,7 +35,7 @@ class ThreadPoolExecutorHelper(Generic[P, T]):
         self.futures = futures
         self.default_kwargs = default_fn_kwds
 
-    def submit(self, *args: P.args, **kwargs: P.kwargs) -> Future[T]:
+    def submit(self, *args: P.args, **kwargs: P.kwargs) -> "Future[T]":
         if self.executor is None:
             executor_kwds = self.executor_kwds
             if executor_kwds is None:
@@ -53,9 +55,8 @@ class ThreadPoolExecutorHelper(Generic[P, T]):
 
                 futures = tqdm.tqdm(futures, disable=not verbose)
             except ImportError:
-                logger.warning(
-                    "Cannot display verbose bar because tqdm is not installed."
-                )
+                msg = "Cannot display verbose bar because tqdm is not installed."
+                logger.warning(msg)
 
         results = [future.result() for future in futures]
         self.futures.clear()
