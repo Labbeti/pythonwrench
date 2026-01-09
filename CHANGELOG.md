@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.5] 2026-01-09
+### Fixed
+- Documentation build with constraint `sphinx<9.0.0`.
+
 ## [0.4.4] 2026-01-09
 ### Added
 - `SizedGenerator` class wrapper.
