@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.4.6] UNRELEASED
+## [0.4.6] 2026-01-09
 ### Added
 - `cache_fname_fmt` can now be a custom callable formatter.
 
