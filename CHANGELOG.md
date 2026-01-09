@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.4.4] UNRELEASED
+## [0.4.4] 2026-01-09
 ### Added
 - `SizedGenerator` class wrapper.
 - `executor_kwds` argument to `ThreadPoolExecutorHelper` class.
