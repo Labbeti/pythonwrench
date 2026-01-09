@@ -93,7 +93,7 @@ dev = [
     "pythonwrench",
     "ruff>=0.12.0",
     "setuptools",
-    "sphinx",
+    "sphinx<9.0.0",
     "sphinx-immaterial>=0.11.14",
     "twine",
 ]
