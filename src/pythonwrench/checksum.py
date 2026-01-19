@@ -253,6 +253,10 @@ def checksum_path(x: Path, **kwargs) -> int:
     kwargs["accumulator"] = kwargs.get("accumulator", 0) + _cached_checksum_str(
         get_fullname(x)
     )
+    resolve_path = kwargs.get("resolve_path", False)
+    if isinstance(resolve_path, bool) and resolve_path:
+        x = x.expanduser().resolve()
+
     return checksum_str(str(x), **kwargs)
 
 
