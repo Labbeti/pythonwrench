@@ -67,37 +67,50 @@ class NamedTupleInstance(Protocol):
 
 @runtime_checkable
 class SupportsAdd(Protocol[_T_Other]):
+    """Protocol that support `__add__` (+) method."""
+
     def __add__(self, other: _T_Other, /):
         raise NotImplementedError
 
 
 @runtime_checkable
 class SupportsAnd(Protocol[_T_Other]):
+    """Protocol that support `__and__` (&) method."""
+
     def __and__(self, other: _T_Other, /):
         raise NotImplementedError
 
 
 @runtime_checkable
 class SupportsBool(Protocol):
+    """Protocol that support `__bool__` method."""
+
     def __bool__(self) -> bool:
         raise NotImplementedError
 
 
 @runtime_checkable
 class SupportsDiv(Protocol[_T_Other]):
+    """Protocol that support `__div__` (/) method."""
+
     def __div__(self, other: _T_Other, /):
         raise NotImplementedError
 
 
 @runtime_checkable
 class SupportsGetitem(Protocol[_T_Item, _T_Index]):
+    """Protocol that support `__getitem__` method."""
+
     def __getitem__(self, idx: _T_Index, /) -> _T_Item:
         raise NotImplementedError
 
 
 @runtime_checkable
 class SupportsGetitem2(Protocol[_T_Index2, _T_Item]):
-    """Same than `SupportsGetitem` except that generic parameters are in reversed order: [T_Index, T_Item]."""
+    """Protocol that support `__getitem__` method.
+
+    Same than `SupportsGetitem` except that generic parameters are in reversed order: [T_Index, T_Item].
+    """
 
     def __getitem__(self, idx: _T_Index2, /) -> _T_Item:
         raise NotImplementedError
@@ -105,6 +118,8 @@ class SupportsGetitem2(Protocol[_T_Index2, _T_Item]):
 
 @runtime_checkable
 class SupportsGetitemLen(Protocol[_T_Item, _T_Index]):
+    """Protocol that support `__getitem__` and `__len__` methods."""
+
     def __getitem__(self, idx: _T_Index, /) -> _T_Item:
         raise NotImplementedError
 
@@ -114,7 +129,9 @@ class SupportsGetitemLen(Protocol[_T_Item, _T_Index]):
 
 @runtime_checkable
 class SupportsGetitemLen2(Protocol[_T_Index2, _T_Item]):
-    """Same than `SupportsGetitemLen` except that generic parameters are in reversed order: [T_Index, T_Item]."""
+    """Protocol that support `__getitem__` and `__len__` methods.
+
+    Same than `SupportsGetitemLen` except that generic parameters are in reversed order: [T_Index, T_Item]."""
 
     def __getitem__(self, idx: _T_Index2, /) -> _T_Item:
         raise NotImplementedError
@@ -125,6 +142,8 @@ class SupportsGetitemLen2(Protocol[_T_Index2, _T_Item]):
 
 @runtime_checkable
 class SupportsGetitemIterLen(Protocol[_T_Item, _T_Index]):
+    """Protocol that support `__getitem__`, `__iter__` and `__len__` methods."""
+
     def __getitem__(self, idx: _T_Index, /) -> _T_Item:
         raise NotImplementedError
 
@@ -137,7 +156,10 @@ class SupportsGetitemIterLen(Protocol[_T_Item, _T_Index]):
 
 @runtime_checkable
 class SupportsGetitemIterLen2(Protocol[_T_Index2, _T_Item]):
-    """Same than `SupportsGetitemIterLen` except that generic parameters are in reversed order: [T_Index, T_Item]."""
+    """Protocol that support `__getitem__`, `__iter__` and `__len__` methods.
+
+    Same than `SupportsGetitemIterLen` except that generic parameters are in reversed order: [T_Index, T_Item].
+    """
 
     def __getitem__(self, idx: _T_Index2, /) -> _T_Item:
         raise NotImplementedError
@@ -151,6 +173,8 @@ class SupportsGetitemIterLen2(Protocol[_T_Index2, _T_Item]):
 
 @runtime_checkable
 class SupportsIterLen(Protocol[_T_Item]):
+    """Protocol that support `__iter__` and `__len__` methods."""
+
     def __iter__(self) -> Iterator[_T_Item]:
         raise NotImplementedError
 
@@ -160,23 +184,31 @@ class SupportsIterLen(Protocol[_T_Item]):
 
 @runtime_checkable
 class SupportsLen(Protocol):
+    """Protocol that support `__len__` method."""
+
     def __len__(self) -> int:
         raise NotImplementedError
 
 
 @runtime_checkable
 class SupportsMul(Protocol[_T_Other]):
+    """Protocol that support `__mul__` (*) method."""
+
     def __mul__(self, other: _T_Other, /):
         raise NotImplementedError
 
 
 @runtime_checkable
 class SupportsOr(Protocol[_T_Other]):
+    """Protocol that support `__or__` (|) method."""
+
     def __or__(self, other: _T_Other, /):
         raise NotImplementedError
 
 
 @runtime_checkable
 class SupportsMatmul(Protocol[_T_Other]):
+    """Protocol that support `__matmul__` (@) method."""
+
     def __matmul__(self, other: _T_Other, /):
         raise NotImplementedError
