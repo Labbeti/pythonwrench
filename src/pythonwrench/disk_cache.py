@@ -66,7 +66,7 @@ def disk_cache_decorator(
     cache_dump_fn: Callable[[Any, Path], Any],
     cache_load_fn: Callable[[Path], Any],
     cache_enable: bool = True,
-    cache_store_mode: StoreMode = "outputs_only",
+    cache_store_mode: StoreMode = "outputs_metadata",
 ) -> Callable[[Callable[P, T]], Callable[P, T]]: ...
 
 
@@ -83,7 +83,7 @@ def disk_cache_decorator(
     cache_dump_fn: Optional[Callable[[Any, Path], Any]] = None,
     cache_load_fn: Optional[Callable[[Path], Any]] = None,
     cache_enable: bool = True,
-    cache_store_mode: StoreMode = "outputs_only",
+    cache_store_mode: StoreMode = "outputs_metadata",
 ) -> Callable[[Callable[P, T]], Callable[P, T]]: ...
 
 
@@ -100,7 +100,7 @@ def disk_cache_decorator(
     cache_dump_fn: Callable[[Any, Path], Any],
     cache_load_fn: Callable[[Path], Any],
     cache_enable: bool = True,
-    cache_store_mode: StoreMode = "outputs_only",
+    cache_store_mode: StoreMode = "outputs_metadata",
 ) -> Callable[P, T]: ...
 
 
@@ -117,7 +117,7 @@ def disk_cache_decorator(
     cache_dump_fn: Optional[Callable[[Any, Path], Any]] = None,
     cache_load_fn: Optional[Callable[[Path], Any]] = None,
     cache_enable: bool = True,
-    cache_store_mode: StoreMode = "outputs_only",
+    cache_store_mode: StoreMode = "outputs_metadata",
 ) -> Callable[P, T]: ...
 
 
