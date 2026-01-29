@@ -66,6 +66,16 @@ def dumps_pickle(
     to_builtins: bool = False,
     **pkl_dumps_kwds,
 ) -> bytes:
+    r"""Dump content to PICKLE format into bytes.
+
+    Args:
+        data: Data to dump to PICKLE.
+        to_builtins: If True, converts data to builtin equivalent before saving. defaults to False.
+        \*\*pkl_dumps_kwds: Other args passed to `pickle.dumps`.
+
+    Returns:
+        Dumped content as bytes.
+    """
     with BytesIO() as buffer:
         _serialize_pickle(
             data,
@@ -87,6 +97,16 @@ def save_pickle(
     to_builtins: bool = False,
     **pkl_dumps_kwds,
 ) -> None:
+    r"""Dump content to PICKLE format into file.
+
+    Args:
+        data: Data to dump to PICKLE.
+        file: Filepath to save dumped data.
+        overwrite: If True, overwrite target filepath. defaults to True.
+        make_parents: Build intermediate directories to filepath. defaults to True.
+        to_builtins: If True, converts data to builtin equivalent before saving. defaults to False.
+        \*\*pkl_dumps_kwds: Other args passed to `pickle.dumps`.
+    """
     if isinstance(file, (str, Path, PathLike)):
         file = _setup_output_fpath(file, overwrite=overwrite, make_parents=make_parents)
         file = open(file, "wb")
@@ -125,6 +145,12 @@ def _serialize_pickle(
 
 
 def load_pickle(file: Union[str, Path, BinaryIO], /, **pkl_loads_kwds) -> Any:
+    r"""Load content from PICKLE file.
+
+    Args:
+        file: Filepath file path.
+        \*\*pkl_loads_kwds: Other args passed to `pickle.loads`.
+    """
     if isinstance(file, (str, Path, PathLike)):
         file = open(file, "rb")
         close = True
@@ -138,6 +164,12 @@ def load_pickle(file: Union[str, Path, BinaryIO], /, **pkl_loads_kwds) -> Any:
 
 
 def loads_pickle(content: bytes, /, **pkl_loads_kwds) -> Any:
+    r"""Load content from raw bytes.
+
+    Args:
+        content: Encoded elements bytes.
+        \*\*pkl_loads_kwds: Other args passed to `pickle.loads`.
+    """
     with BytesIO(content) as buffer:
         return _parse_pickle(buffer, **pkl_loads_kwds)
 
