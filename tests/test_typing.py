@@ -4,6 +4,7 @@
 import unittest
 from dataclasses import dataclass
 from numbers import Number
+from pathlib import Path
 from typing import (
     Any,
     Callable,
@@ -279,6 +280,13 @@ class TestIsInstanceGuard(TestCase):
 
         with self.assertRaises(TypeError):
             assert not isinstance_generic(1, Generator[int, None, None])
+
+    def test_callable(self) -> None:
+        assert isinstance_generic(lambda x: x, Callable)
+        assert isinstance_generic(Path, Callable)
+
+        with self.assertRaises(NotImplementedError):
+            assert isinstance_generic(Path, Callable[[str], Path])
 
 
 class TestCheckArgsType(TestCase):

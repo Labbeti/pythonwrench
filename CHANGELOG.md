@@ -6,6 +6,9 @@ All notable changes to this project will be documented in this file.
 ### Modified
 - Disk cache functions now detect saving backend when custom load/dump functions are provided.
 
+### Fixed
+- `Callable` in `isinstance_generic` check.
+
 ## [0.4.6] 2026-01-09
 ### Added
 - `cache_fname_fmt` can now be a custom callable formatter.

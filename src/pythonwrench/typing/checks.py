@@ -99,7 +99,7 @@ def check_args_types(fn: Callable[P, T]) -> Callable[P, T]:
 
 def isinstance_generic(
     obj: Any,
-    class_or_tuple: Union[Type[T], None, Tuple[Type[T], ...]],
+    class_or_tuple: Union[Type[T], None, Tuple[Type[T], ...], Any],
     *,
     check_only_first: bool = False,
 ) -> TypeIs[T]:
@@ -123,8 +123,6 @@ def isinstance_generic(
     ... True
 
     """
-    if isinstance(obj, type):
-        return False
     if class_or_tuple is Any or class_or_tuple is typing_extensions.Any:
         return True
     if class_or_tuple is None:
@@ -139,7 +137,7 @@ def isinstance_generic(
 
     origin = get_origin(class_or_tuple)
     if origin is None:
-        return isinstance(obj, class_or_tuple)
+        return isinstance(obj, class_or_tuple)  # type: ignore
 
     # Special case for empty tuple because get_args(Tuple[()]) returns () and not ((),) in python >= 3.11
     # More info at https://github.com/python/cpython/issues/91137
@@ -147,6 +145,14 @@ def isinstance_generic(
         return obj == ()
 
     args = get_args(class_or_tuple)
+    if origin is Callable:
+        if len(args) == 0:
+            return callable(obj)
+        else:
+            # TODO: impl
+            msg = "Function `isinstance_generic` currently does not support parametrized Callable."
+            raise NotImplementedError(msg)
+
     if len(args) == 0:
         return isinstance_generic(obj, origin)
 
@@ -298,7 +304,7 @@ def is_dataclass_instance(x: Any) -> TypeIs[DataclassInstance]:
 
     Unlike function `dataclasses.is_dataclass`, this function returns False for a dataclass type.
     """
-    return isinstance_generic(x, DataclassInstance)
+    return not isinstance(x, type) and isinstance_generic(x, DataclassInstance)
 
 
 def is_iterable_bool(
@@ -369,7 +375,7 @@ def is_iterable_str(
 
 def is_namedtuple_instance(x: Any) -> TypeIs[NamedTupleInstance]:
     """Returns True if argument is a NamedTuple."""
-    return isinstance_generic(x, NamedTupleInstance)
+    return not isinstance(x, type) and isinstance_generic(x, NamedTupleInstance)
 
 
 def is_sequence_str(
