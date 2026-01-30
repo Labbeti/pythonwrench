@@ -175,24 +175,29 @@ def main_safe_rmdir() -> None:
     )
     parser.add_argument(
         "--rm_root",
+        "--rm-root",
         type=str_to_bool,
         default=True,
         help="If True, remove the root directory too if it is empty at the end. defaults to True.",
     )
     parser.add_argument(
         "--error_on_non_empty_dir",
+        "--error-on-non-empty-dir",
         type=str_to_bool,
         default=True,
         help="If True, raises a RuntimeError if a subdirectory contains at least 1 file. Otherwise it will ignore non-empty directories. defaults to True.",
     )
     parser.add_argument(
         "--followlinks",
+        "--follow_links",
+        "--follow-links",
         type=str_to_bool,
         default=False,
         help="Indicates whether or not symbolic links shound be followed. defaults to False.",
     )
     parser.add_argument(
         "--dry_run",
+        "--dry-run",
         type=str_to_bool,
         default=False,
         help="If True, does not remove any directory and just output the list of directories which could be deleted. defaults to False.",
