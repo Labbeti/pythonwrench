@@ -54,7 +54,7 @@ from .argparse import (
     str_to_type,
 )
 from .cast import as_builtin, register_as_builtin_fn
-from .checksum import checksum_any, register_checksum_fn
+from .checksum import checksum_any, checksum_object, register_checksum_fn
 from .collections import (
     all_eq,
     all_ne,

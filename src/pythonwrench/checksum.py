@@ -22,6 +22,7 @@ from typing import (
 )
 
 from pythonwrench._core import ClassOrTuple, Predicate, _FunctionRegistry
+from pythonwrench.functools import function_alias
 from pythonwrench.inspect import get_fullname
 from pythonwrench.typing import (
     DataclassInstance,
@@ -85,8 +86,13 @@ def checksum_any(
     """Compute checksum integer value from an arbitrary object.
 
     Supports most builtin types. Checksum can be used to compare objects.
+    Not meant for security/cryptography.
     """
     return _CHECKSUM_REGISTRY.apply(x, isinstance_fn=isinstance_fn, **kwargs)
+
+
+@function_alias(checksum_any)
+def checksum_object(*args, **kwargs): ...
 
 
 # Terminate functions
