@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.4.7] UNRELEASED
+## [0.4.7] 2026-02-01
 ### Modified
 - Disk cache functions now detect saving backend when custom load/dump functions are provided.
 
