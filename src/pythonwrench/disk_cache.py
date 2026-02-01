@@ -61,7 +61,24 @@ def disk_cache_decorator(
     cache_force: bool = False,
     cache_verbose: int = 0,
     cache_checksum_fn: ChecksumFn = checksum_any,
-    cache_saving_backend: Optional[SavingBackend] = "pickle",
+    cache_saving_backend: Literal["custom"],
+    cache_fname_fmt: Union[str, Callable[..., str]] = "{fn_name}_{csum}{suffix}",
+    cache_dump_fn: Callable[[Any, Path], Any],
+    cache_load_fn: Callable[[Path], Any],
+    cache_enable: bool = True,
+    cache_store_mode: StoreMode = "outputs_metadata",
+) -> Callable[[Callable[P, T]], Callable[P, T]]: ...
+
+
+@overload
+def disk_cache_decorator(
+    fn: None = None,
+    *,
+    cache_dpath: Union[str, Path, None] = None,
+    cache_force: bool = False,
+    cache_verbose: int = 0,
+    cache_checksum_fn: ChecksumFn = checksum_any,
+    cache_saving_backend: Union[SavingBackend, Literal["custom", "auto"]] = "auto",
     cache_fname_fmt: Union[str, Callable[..., str]] = "{fn_name}_{csum}{suffix}",
     cache_dump_fn: Optional[Callable[[Any, Path], Any]] = None,
     cache_load_fn: Optional[Callable[[Path], Any]] = None,
@@ -78,7 +95,24 @@ def disk_cache_decorator(
     cache_force: bool = False,
     cache_verbose: int = 0,
     cache_checksum_fn: ChecksumFn = checksum_any,
-    cache_saving_backend: Optional[SavingBackend] = "pickle",
+    cache_saving_backend: Literal["custom"],
+    cache_fname_fmt: Union[str, Callable[..., str]] = "{fn_name}_{csum}{suffix}",
+    cache_dump_fn: Callable[[Any, Path], Any],
+    cache_load_fn: Callable[[Path], Any],
+    cache_enable: bool = True,
+    cache_store_mode: StoreMode = "outputs_metadata",
+) -> Callable[P, T]: ...
+
+
+@overload
+def disk_cache_decorator(
+    fn: Callable[P, T],
+    *,
+    cache_dpath: Union[str, Path, None] = None,
+    cache_force: bool = False,
+    cache_verbose: int = 0,
+    cache_checksum_fn: ChecksumFn = checksum_any,
+    cache_saving_backend: Union[SavingBackend, Literal["custom", "auto"]] = "auto",
     cache_fname_fmt: Union[str, Callable[..., str]] = "{fn_name}_{csum}{suffix}",
     cache_dump_fn: Optional[Callable[[Any, Path], Any]] = None,
     cache_load_fn: Optional[Callable[[Path], Any]] = None,
@@ -94,7 +128,7 @@ def disk_cache_decorator(
     cache_force: bool = False,
     cache_verbose: int = 0,
     cache_checksum_fn: ChecksumFn = checksum_any,
-    cache_saving_backend: Optional[SavingBackend] = "pickle",
+    cache_saving_backend: Union[SavingBackend, Literal["custom", "auto"]] = "auto",
     cache_fname_fmt: Union[str, Callable[..., str]] = "{fn_name}_{csum}{suffix}",
     cache_dump_fn: Optional[Callable[[Any, Path], Any]] = None,
     cache_load_fn: Optional[Callable[[Path], Any]] = None,
@@ -121,7 +155,7 @@ def disk_cache_decorator(
         cache_force: Force function call and overwrite cache. defaults to False.
         cache_verbose: Set verbose logging level. Higher means more verbose. defaults to 0.
         cache_checksum_fn: Checksum function to identify input arguments. defaults to ``pythonwrench.checksum_any``.
-        cache_saving_backend: Optional saving backend. Can be one of ('csv', 'json', 'pickle'). defaults to 'pickle'.
+        cache_saving_backend: Optional saving backend. Can be one of ('csv', 'json', 'pickle', 'custom', 'auto'). defaults to 'auto'.
         cache_fname_fmt: Cache filename format. defaults to "{fn_name}_{csum}{suffix}".
         cache_dump_fn: Dump/save function to store outputs and overwrite saving backend. defaults to None.
         cache_load_fn: Load function to store outputs and overwrite saving backend. defaults to None.
@@ -146,6 +180,7 @@ def disk_cache_decorator(
         return impl_fn
 
 
+@overload
 def disk_cache_call(
     fn: Callable[..., T],
     *args,
@@ -153,7 +188,42 @@ def disk_cache_call(
     cache_force: bool = False,
     cache_verbose: int = 0,
     cache_checksum_fn: ChecksumFn = checksum_any,
-    cache_saving_backend: Optional[SavingBackend] = "pickle",
+    cache_saving_backend: Literal["custom"],
+    cache_fname_fmt: Union[str, Callable[..., str]] = "{fn_name}_{csum}{suffix}",
+    cache_dump_fn: Optional[Callable[[Any, Path], Any]] = None,
+    cache_load_fn: Optional[Callable[[Path], Any]] = None,
+    cache_enable: bool = True,
+    cache_store_mode: StoreMode = "outputs_metadata",
+    **kwargs,
+) -> T: ...
+
+
+@overload
+def disk_cache_call(
+    fn: Callable[..., T],
+    *args,
+    cache_dpath: Union[str, Path, None] = None,
+    cache_force: bool = False,
+    cache_verbose: int = 0,
+    cache_checksum_fn: ChecksumFn = checksum_any,
+    cache_saving_backend: Union[SavingBackend, Literal["custom", "auto"]] = "auto",
+    cache_fname_fmt: Union[str, Callable[..., str]] = "{fn_name}_{csum}{suffix}",
+    cache_dump_fn: Optional[Callable[[Any, Path], Any]] = None,
+    cache_load_fn: Optional[Callable[[Path], Any]] = None,
+    cache_enable: bool = True,
+    cache_store_mode: StoreMode = "outputs_metadata",
+    **kwargs,
+) -> T: ...
+
+
+def disk_cache_call(
+    fn: Callable[..., T],
+    *args,
+    cache_dpath: Union[str, Path, None] = None,
+    cache_force: bool = False,
+    cache_verbose: int = 0,
+    cache_checksum_fn: ChecksumFn = checksum_any,
+    cache_saving_backend: Union[SavingBackend, Literal["custom", "auto"]] = "auto",
     cache_fname_fmt: Union[str, Callable[..., str]] = "{fn_name}_{csum}{suffix}",
     cache_dump_fn: Optional[Callable[[Any, Path], Any]] = None,
     cache_load_fn: Optional[Callable[[Path], Any]] = None,
@@ -180,7 +250,7 @@ def disk_cache_call(
         cache_force: Force function call and overwrite cache. defaults to False.
         cache_verbose: Set verbose logging level. Higher means more verbose. defaults to 0.
         cache_checksum_fn: Checksum function to identify input arguments. defaults to ``pythonwrench.checksum_any``.
-        cache_saving_backend: Optional saving backend. Can be one of ('csv', 'json', 'pickle'). defaults to 'pickle'.
+        cache_saving_backend: Optional saving backend. Can be one of ('csv', 'json', 'pickle', 'custom', 'auto'). defaults to 'auto'.
         cache_fname_fmt: Cache filename format. defaults to '{fn_name}_{csum}{suffix}'.
         cache_dump_fn: Dump/save function to store outputs and overwrite saving backend. defaults to None.
         cache_load_fn: Load function to store outputs and overwrite saving backend. defaults to None.
@@ -210,7 +280,7 @@ def _disk_cache_impl(
     cache_force: bool = False,
     cache_verbose: int = 0,
     cache_checksum_fn: ChecksumFn = checksum_any,
-    cache_saving_backend: Optional[SavingBackend] = "pickle",
+    cache_saving_backend: Union[SavingBackend, Literal["custom", "auto"]] = "auto",
     cache_fname_fmt: Union[str, Callable[..., str]] = "{fn_name}_{csum}{suffix}",
     cache_dump_fn: Optional[Callable[[Any, Path], Any]] = None,
     cache_load_fn: Optional[Callable[[Path], Any]] = None,
@@ -219,11 +289,26 @@ def _disk_cache_impl(
 ) -> Callable[[Callable[P, T]], Callable[P, T]]:
     # for backward compatibility
     if cache_fname_fmt is None:
+        expected = "{fn_name}_{csum}{suffix}"
         warnings.warn(
-            f"Deprecated argument value {cache_fname_fmt=}. (use default instead)",
+            f"Deprecated argument value {cache_fname_fmt=}. (use {expected} instead)",
             DeprecationWarning,
         )
-        cache_fname_fmt = "{fn_name}_{csum}{suffix}"
+        cache_fname_fmt = expected
+
+    if cache_saving_backend is None:
+        expected = "auto"
+        warnings.warn(
+            f"Deprecated argument value {cache_saving_backend=}. (use {expected} instead)",
+            DeprecationWarning,
+        )
+        cache_saving_backend = expected
+
+    if cache_saving_backend == "auto":
+        if cache_dump_fn is not None and cache_load_fn is not None:
+            cache_saving_backend = "custom"
+        else:
+            cache_saving_backend = "pickle"
 
     if cache_saving_backend == "pickle":
         from pythonwrench.pickle import dump_pickle, load_pickle
@@ -250,9 +335,9 @@ def _disk_cache_impl(
         cache_dump_fn = dump_csv
         cache_load_fn = load_csv
 
-    elif cache_saving_backend is None:
-        if cache_fname_fmt is None or cache_dump_fn is None or cache_load_fn is None:
-            msg = f"If {cache_saving_backend=}, arguments cache_fname_fmt, cache_dump_fn and cache_load_fn cannot be None. (found {cache_fname_fmt=}, {cache_dump_fn=} {cache_load_fn=})"
+    elif cache_saving_backend == "custom":
+        if cache_dump_fn is None or cache_load_fn is None:
+            msg = f"If {cache_saving_backend=}, arguments cache_dump_fn and cache_load_fn cannot be None. (found {cache_dump_fn=} {cache_load_fn=})"
             raise ValueError(msg)
 
         suffix = ""

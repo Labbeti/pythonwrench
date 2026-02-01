@@ -89,7 +89,7 @@ class Compose(Generic[T, U]):
         elif isinstance_generic(fns, Tuple[Callable, ...]):
             pass
         else:
-            msg = f"Invalid argument types {type(fns)=}."
+            msg = f"Invalid argument types {type(fns)=}. (with {fns=})"
             raise TypeError(msg)
 
         super().__init__()
