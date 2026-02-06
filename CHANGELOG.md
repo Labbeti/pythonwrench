@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.9] 2026-02-06
+### Fixed
+- `Version` now ignores buildmetadata when comparing versions.
+
 ## [0.4.8] 2026-02-06
 ### Added
 - `checksum_any` now supports `Enum` instances.

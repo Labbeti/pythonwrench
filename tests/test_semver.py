@@ -63,6 +63,15 @@ class TestVersion(TestCase):
         # Check if versions can be parsed
         Version(pw.__version__)
 
+        # buildmetadata can contains "-" symbol
+        v14 = Version("1.0.0+build-info")
+        assert v14.to_dict() == {
+            "major": 1,
+            "minor": 0,
+            "patch": 0,
+            "buildmetadata": "build-info",
+        }
+
     def test_parse_invalid(self) -> None:
         with self.assertRaises(ValueError):
             Version()  # type: ignore
@@ -132,6 +141,27 @@ class TestVersion(TestCase):
         ]
         for version_str in tests:
             _ = Version(version_str)
+
+    def test_priority(self) -> None:
+        v1 = Version("1.0.0")
+        v2 = Version("1.0.0-alpha")
+        v3 = Version("1.0.0+build")
+        v4 = Version("1.0.0-alpha+build")
+
+        # IMPORTANT: prerelease should have lower precedence than the associated normal version
+        assert v1 > v2
+        assert not (v1 < v2)
+        assert v1 != v2
+
+        # IMPORTANT: build metadata should not affect version precedence
+        assert not (v1 > v3)
+        assert not (v1 < v3)
+        assert v1 != v3
+
+        # check both
+        assert v1 > v4
+        assert not (v1 < v4)
+        assert v1 != v4
 
 
 if __name__ == "__main__":
