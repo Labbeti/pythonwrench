@@ -6,6 +6,7 @@ import re
 import struct
 import zlib
 from dataclasses import asdict
+from enum import Enum
 from functools import lru_cache
 from pathlib import Path
 from types import FunctionType, MethodType
@@ -189,6 +190,11 @@ def checksum_dataclass(x: DataclassInstance, **kwargs) -> int:
 @register_checksum_fn(dict)
 def checksum_dict(x: dict, **kwargs) -> int:
     return _checksum_mapping(x, **kwargs)
+
+
+@register_checksum_fn(Enum)
+def checksum_enum(x: Enum, **kwargs) -> int:
+    return _checksum_iterable((x.__class__, x.name, x.value), **kwargs)
 
 
 @register_checksum_fn((list, tuple))

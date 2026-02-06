@@ -182,7 +182,7 @@ def as_builtin(x: Any, **kwargs) -> Any: ...
 
 
 def as_builtin(x: Any, **kwargs) -> Any:
-    """Convert an object to a sanitized python builtin equivalent.
+    """Convert an object to a sanitized python builtin equivalent recursively.
 
     This function can be used to sanitize data before saving to a JSON, YAML or CSV file.
 

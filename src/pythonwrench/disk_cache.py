@@ -12,6 +12,7 @@ from typing import (
     Any,
     Callable,
     Dict,
+    Iterable,
     Literal,
     Optional,
     Tuple,
@@ -36,6 +37,8 @@ U = TypeVar("U")
 ChecksumFn = Callable[[Tuple[Callable[P, T], Tuple, Dict[str, Any]]], int]
 SavingBackend = Literal["csv", "json", "pickle"]
 StoreMode = Literal["outputs_only", "outputs_metadata", "outputs_metadata_inputs"]
+
+_DEFAULT_CACHE_STORE_MODE: StoreMode = "outputs_metadata"
 
 
 class _CacheMeta(TypedDict):
@@ -63,10 +66,29 @@ def disk_cache_decorator(
     cache_checksum_fn: ChecksumFn = checksum_any,
     cache_saving_backend: Literal["custom"],
     cache_fname_fmt: Union[str, Callable[..., str]] = "{fn_name}_{csum}{suffix}",
+    cache_fname_fmt_args: Optional[Iterable[str]] = None,
     cache_dump_fn: Callable[[Any, Path], Any],
     cache_load_fn: Callable[[Path], Any],
     cache_enable: bool = True,
-    cache_store_mode: StoreMode = "outputs_metadata",
+    cache_store_mode: StoreMode,
+) -> Callable[[Callable[P, T]], Callable[P, T]]: ...
+
+
+@overload
+def disk_cache_decorator(
+    fn: None = None,
+    *,
+    cache_dpath: Union[str, Path, None] = None,
+    cache_force: bool = False,
+    cache_verbose: int = 0,
+    cache_checksum_fn: ChecksumFn = checksum_any,
+    cache_saving_backend: SavingBackend,
+    cache_fname_fmt: Union[str, Callable[..., str]] = "{fn_name}_{csum}{suffix}",
+    cache_fname_fmt_args: Optional[Iterable[str]] = None,
+    cache_dump_fn: None = None,
+    cache_load_fn: None = None,
+    cache_enable: bool = True,
+    cache_store_mode: StoreMode = _DEFAULT_CACHE_STORE_MODE,
 ) -> Callable[[Callable[P, T]], Callable[P, T]]: ...
 
 
@@ -80,10 +102,11 @@ def disk_cache_decorator(
     cache_checksum_fn: ChecksumFn = checksum_any,
     cache_saving_backend: Union[SavingBackend, Literal["custom", "auto"]] = "auto",
     cache_fname_fmt: Union[str, Callable[..., str]] = "{fn_name}_{csum}{suffix}",
+    cache_fname_fmt_args: Optional[Iterable[str]] = None,
     cache_dump_fn: Optional[Callable[[Any, Path], Any]] = None,
     cache_load_fn: Optional[Callable[[Path], Any]] = None,
     cache_enable: bool = True,
-    cache_store_mode: StoreMode = "outputs_metadata",
+    cache_store_mode: StoreMode = _DEFAULT_CACHE_STORE_MODE,
 ) -> Callable[[Callable[P, T]], Callable[P, T]]: ...
 
 
@@ -97,10 +120,11 @@ def disk_cache_decorator(
     cache_checksum_fn: ChecksumFn = checksum_any,
     cache_saving_backend: Literal["custom"],
     cache_fname_fmt: Union[str, Callable[..., str]] = "{fn_name}_{csum}{suffix}",
+    cache_fname_fmt_args: Optional[Iterable[str]] = None,
     cache_dump_fn: Callable[[Any, Path], Any],
     cache_load_fn: Callable[[Path], Any],
     cache_enable: bool = True,
-    cache_store_mode: StoreMode = "outputs_metadata",
+    cache_store_mode: StoreMode = _DEFAULT_CACHE_STORE_MODE,
 ) -> Callable[P, T]: ...
 
 
@@ -114,10 +138,11 @@ def disk_cache_decorator(
     cache_checksum_fn: ChecksumFn = checksum_any,
     cache_saving_backend: Union[SavingBackend, Literal["custom", "auto"]] = "auto",
     cache_fname_fmt: Union[str, Callable[..., str]] = "{fn_name}_{csum}{suffix}",
+    cache_fname_fmt_args: Optional[Iterable[str]] = None,
     cache_dump_fn: Optional[Callable[[Any, Path], Any]] = None,
     cache_load_fn: Optional[Callable[[Path], Any]] = None,
     cache_enable: bool = True,
-    cache_store_mode: StoreMode = "outputs_metadata",
+    cache_store_mode: StoreMode = _DEFAULT_CACHE_STORE_MODE,
 ) -> Callable[P, T]: ...
 
 
@@ -130,10 +155,11 @@ def disk_cache_decorator(
     cache_checksum_fn: ChecksumFn = checksum_any,
     cache_saving_backend: Union[SavingBackend, Literal["custom", "auto"]] = "auto",
     cache_fname_fmt: Union[str, Callable[..., str]] = "{fn_name}_{csum}{suffix}",
+    cache_fname_fmt_args: Optional[Iterable[str]] = None,
     cache_dump_fn: Optional[Callable[[Any, Path], Any]] = None,
     cache_load_fn: Optional[Callable[[Path], Any]] = None,
     cache_enable: bool = True,
-    cache_store_mode: StoreMode = "outputs_metadata",
+    cache_store_mode: StoreMode = _DEFAULT_CACHE_STORE_MODE,
 ) -> Callable:
     """Decorator to store function output in a cache file.
 
@@ -169,6 +195,7 @@ def disk_cache_decorator(
         cache_checksum_fn=cache_checksum_fn,
         cache_saving_backend=cache_saving_backend,
         cache_fname_fmt=cache_fname_fmt,
+        cache_fname_fmt_args=cache_fname_fmt_args,
         cache_dump_fn=cache_dump_fn,
         cache_load_fn=cache_load_fn,
         cache_enable=cache_enable,
@@ -190,10 +217,30 @@ def disk_cache_call(
     cache_checksum_fn: ChecksumFn = checksum_any,
     cache_saving_backend: Literal["custom"],
     cache_fname_fmt: Union[str, Callable[..., str]] = "{fn_name}_{csum}{suffix}",
-    cache_dump_fn: Optional[Callable[[Any, Path], Any]] = None,
-    cache_load_fn: Optional[Callable[[Path], Any]] = None,
+    cache_fname_fmt_args: Optional[Iterable[str]] = None,
+    cache_dump_fn: Callable[[Any, Path], Any],
+    cache_load_fn: Callable[[Path], Any],
     cache_enable: bool = True,
-    cache_store_mode: StoreMode = "outputs_metadata",
+    cache_store_mode: StoreMode,
+    **kwargs,
+) -> T: ...
+
+
+@overload
+def disk_cache_call(
+    fn: Callable[..., T],
+    *args,
+    cache_dpath: Union[str, Path, None] = None,
+    cache_force: bool = False,
+    cache_verbose: int = 0,
+    cache_checksum_fn: ChecksumFn = checksum_any,
+    cache_saving_backend: SavingBackend,
+    cache_fname_fmt: Union[str, Callable[..., str]] = "{fn_name}_{csum}{suffix}",
+    cache_fname_fmt_args: Optional[Iterable[str]] = None,
+    cache_dump_fn: None = None,
+    cache_load_fn: None = None,
+    cache_enable: bool = True,
+    cache_store_mode: StoreMode = _DEFAULT_CACHE_STORE_MODE,
     **kwargs,
 ) -> T: ...
 
@@ -208,10 +255,11 @@ def disk_cache_call(
     cache_checksum_fn: ChecksumFn = checksum_any,
     cache_saving_backend: Union[SavingBackend, Literal["custom", "auto"]] = "auto",
     cache_fname_fmt: Union[str, Callable[..., str]] = "{fn_name}_{csum}{suffix}",
+    cache_fname_fmt_args: Optional[Iterable[str]] = None,
     cache_dump_fn: Optional[Callable[[Any, Path], Any]] = None,
     cache_load_fn: Optional[Callable[[Path], Any]] = None,
     cache_enable: bool = True,
-    cache_store_mode: StoreMode = "outputs_metadata",
+    cache_store_mode: StoreMode = _DEFAULT_CACHE_STORE_MODE,
     **kwargs,
 ) -> T: ...
 
@@ -225,10 +273,11 @@ def disk_cache_call(
     cache_checksum_fn: ChecksumFn = checksum_any,
     cache_saving_backend: Union[SavingBackend, Literal["custom", "auto"]] = "auto",
     cache_fname_fmt: Union[str, Callable[..., str]] = "{fn_name}_{csum}{suffix}",
+    cache_fname_fmt_args: Optional[Iterable[str]] = None,
     cache_dump_fn: Optional[Callable[[Any, Path], Any]] = None,
     cache_load_fn: Optional[Callable[[Path], Any]] = None,
     cache_enable: bool = True,
-    cache_store_mode: StoreMode = "outputs_metadata",
+    cache_store_mode: StoreMode = _DEFAULT_CACHE_STORE_MODE,
     **kwargs,
 ) -> T:
     r"""Call function and store output in a cache file.
@@ -266,6 +315,7 @@ def disk_cache_call(
         cache_checksum_fn=cache_checksum_fn,
         cache_saving_backend=cache_saving_backend,
         cache_fname_fmt=cache_fname_fmt,
+        cache_fname_fmt_args=cache_fname_fmt_args,
         cache_dump_fn=cache_dump_fn,
         cache_load_fn=cache_load_fn,
         cache_enable=cache_enable,
@@ -282,10 +332,11 @@ def _disk_cache_impl(
     cache_checksum_fn: ChecksumFn = checksum_any,
     cache_saving_backend: Union[SavingBackend, Literal["custom", "auto"]] = "auto",
     cache_fname_fmt: Union[str, Callable[..., str]] = "{fn_name}_{csum}{suffix}",
+    cache_fname_fmt_args: Optional[Iterable[str]] = None,
     cache_dump_fn: Optional[Callable[[Any, Path], Any]] = None,
     cache_load_fn: Optional[Callable[[Path], Any]] = None,
     cache_enable: bool = True,
-    cache_store_mode: StoreMode = "outputs_metadata",
+    cache_store_mode: StoreMode = _DEFAULT_CACHE_STORE_MODE,
 ) -> Callable[[Callable[P, T]], Callable[P, T]]:
     # for backward compatibility
     if cache_fname_fmt is None:
@@ -368,15 +419,30 @@ def _disk_cache_impl(
         @wraps(fn)
         def _disk_cache_wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
             checksum_args = fn, args, kwargs
-            csum = cache_checksum_fn(checksum_args)
-            inputs = dict(zip(argnames, args))
-            inputs.update(kwargs)
-            cache_fname = cache_fname_fmt(
-                fn_name=fn_name,
-                csum=csum,
-                suffix=suffix,
-                **inputs,
-            )
+
+            kwds = {}
+
+            if cache_fname_fmt_args is None or "fn_name" in cache_fname_fmt_args:
+                kwds["fn_name"] = fn_name
+
+            if cache_fname_fmt_args is None or "suffix" in cache_fname_fmt_args:
+                kwds["suffix"] = suffix
+
+            if cache_fname_fmt_args is None or "csum" in cache_fname_fmt_args:
+                csum = cache_checksum_fn(checksum_args)
+                kwds["checksum"] = csum
+                kwds["csum"] = csum
+            else:
+                csum = None
+
+            inputs_kwds = {
+                argname: argval
+                for argname, argval in zip(argnames, args)
+                if cache_fname_fmt_args is None or argname in cache_fname_fmt_args
+            }
+            kwds.update(inputs_kwds)
+
+            cache_fname = cache_fname_fmt(**kwds)
             cache_fpath = cache_fn_dpath.joinpath(cache_fname)
 
             if not cache_enable:

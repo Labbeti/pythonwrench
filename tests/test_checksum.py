@@ -57,6 +57,23 @@ class TestChecksum(TestCase):
         assert s1 == s2
         assert checksum_any(s1) == checksum_any(s2)
 
+    def test_enums(self) -> None:
+        from enum import Enum
+
+        class Color(Enum):
+            RED = 1
+            GREEN = 2
+            BLUE = 3
+            ROUGE = RED
+
+        c1 = Color.RED
+        c2 = Color.GREEN
+        assert c1 != c2
+        assert checksum_any(c1) != checksum_any(c2)
+
+        assert Color.RED == Color.ROUGE
+        assert checksum_any(Color.RED) == checksum_any(Color.ROUGE)
+
 
 if __name__ == "__main__":
     unittest.main()
