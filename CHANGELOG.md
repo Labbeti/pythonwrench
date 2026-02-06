@@ -3,6 +3,9 @@
 All notable changes to this project will be documented in this file.
 
 ## [0.4.8] UNRELEASED
+### Added
+- `checksum_any` now supports `Enum` instances.
+
 ### Fixed
 - Missing global typing imports.
 
