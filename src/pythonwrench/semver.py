@@ -5,7 +5,7 @@ import logging
 import re
 import sys
 from dataclasses import asdict, dataclass
-from typing import Any, Iterable, List, Mapping, Tuple, TypedDict, Union, overload
+from typing import Any, List, Mapping, Tuple, TypedDict, Union, overload
 
 from typing_extensions import NotRequired, Self, TypeAlias
 
@@ -40,7 +40,7 @@ VersionTuple: TypeAlias = Union[
 ]
 
 VersionDictLike: TypeAlias = Mapping[str, Union[int, PreRelease, BuildMetadata]]
-VersionTupleLike: TypeAlias = Iterable[Union[int, PreRelease, BuildMetadata]]
+VersionTupleLike: TypeAlias = Tuple[Union[int, PreRelease, BuildMetadata], ...]
 VersionLike: TypeAlias = Union["Version", str, VersionDictLike, VersionTupleLike]
 
 
@@ -50,7 +50,7 @@ class Version:
 
     Version format is: MAJOR.MINOR.PATCH[-PRERELEASE][+BUILDMETADATA]
 
-    Based on https://semver.org/.
+    Based on https://semver.org/ version 2.0.0.
     """
 
     major: int
@@ -107,7 +107,7 @@ class Version:
         # Version str
         elif has_1_pos_arg and isinstance(args[0], str):
             version_str = args[0]
-            version_dict = _parse_version_str(version_str)
+            version_dict = __parse_version_str(version_str)
 
         # Version dict
         elif has_1_pos_arg and isinstance_generic(args[0], VersionDictLike):
@@ -266,11 +266,8 @@ class Version:
         version_tuple = tuple(self.to_dict(exclude_none).values())
         return version_tuple  # type: ignore
 
-    def __str__(self) -> str:
-        return self.to_str()
-
-    def __eq__(self, other: Any) -> bool:
-        if isinstance(other, (dict, tuple, str)):
+    def equals(self, other: VersionLike, *, ignore_buildmetadata: bool = False) -> bool:
+        if isinstance(other, (Mapping, tuple, str)):
             other = Version(other)
         # note: use self.__class__ to avoid error cause by 'pytest -v test' collect
         elif not isinstance(other, (Version, self.__class__)):
@@ -281,70 +278,83 @@ class Version:
             and self.minor == other.minor
             and self.patch == other.patch
             and self.prerelease == other.prerelease
-            and self.buildmetadata == other.buildmetadata
+            and (ignore_buildmetadata or self.buildmetadata == other.buildmetadata)
         )
 
+    def __str__(self) -> str:
+        return self.to_str()
+
+    def __eq__(self, other: Any) -> bool:
+        return self.equals(other)
+
     def __lt__(self, other: VersionLike) -> bool:
-        if isinstance(other, (dict, tuple, str)):
-            other = Version(other)
-        # note: use self.__class__ to avoid error cause by 'pytest -v test' collect
-        elif not isinstance(other, (Version, self.__class__)):
-            msg = f"Invalid argument type {type(other)}. (expected an instance of one of {(dict, tuple, str, Version)})"
-            raise TypeError(msg)
-
-        self_tuple = self.to_tuple(exclude_none=False)
-        other_tuple = other.to_tuple(exclude_none=False)
-
-        for self_v, other_v in zip(self_tuple, other_tuple):
-            if self_v == other_v:
-                continue
-            if self_v is None and other_v is not None:
-                return False
-            if self_v is not None and other_v is None:
-                return True
-
-            if isinstance(self_v, (int, str, NoneType)):
-                self_v = [self_v]
-            elif not isinstance(self_v, list):
-                raise TypeError(f"Invalid argument type {type(self_v)}.")
-
-            if isinstance(other_v, (int, str, NoneType)):
-                other_v = [other_v]
-            elif not isinstance(other_v, list):
-                raise TypeError(f"Invalid argument type {type(other_v)}.")
-
-            minlen = min(len(self_v), len(other_v))
-            if len(self_v) != len(other_v) and self_v[:minlen] == other_v[:minlen]:
-                return len(self_v) < len(other_v)
-
-            for self_vi, other_vi in zip(self_v, other_v):
-                if self_vi == other_vi:
-                    continue
-                if isinstance(self_vi, int) and isinstance(other_vi, int):
-                    return self_vi < other_vi
-                if isinstance(self_vi, int) and isinstance(other_vi, str):
-                    return True
-                if isinstance(self_vi, str) and isinstance(other_vi, int):
-                    return False
-                if isinstance(self_vi, str) and isinstance(other_vi, str):
-                    return self_vi < other_vi
-
-                msg = f"Invalid attribute type {self_vi=} and {other_vi=}."
-                raise TypeError(msg)
-
-        return False
+        return __compare_lt(self, other)
 
     def __le__(self, other: VersionLike) -> bool:
         return (self == other) or (self < other)
 
     def __gt__(self, other: VersionLike) -> bool:
-        return (self != other) and not (self < other)
+        return __compare_lt(other, self)
 
     def __ge__(self, other: VersionLike) -> bool:
-        return not (self < other)
+        return (self == other) or (self > other)
 
 
-def _parse_version_str(version_str: str) -> VersionDict:
+def __compare_lt(
+    x: Union[Version, Mapping, tuple, str], y: Union[Version, Mapping, tuple, str]
+) -> bool:
+    if isinstance(x, (Mapping, tuple, str)):
+        x = Version(x)
+    if isinstance(y, (Mapping, tuple, str)):
+        y = Version(y)
+
+    self_tuple = x.to_tuple(exclude_none=False)
+    other_tuple = y.to_tuple(exclude_none=False)
+
+    self_tuple = self_tuple[:4]
+    other_tuple = other_tuple[:4]
+
+    for self_v, other_v in zip(self_tuple, other_tuple):
+        if self_v == other_v:
+            continue
+        if self_v is None and other_v is not None:
+            return False
+        if self_v is not None and other_v is None:
+            return True
+
+        if isinstance(self_v, (int, str, NoneType)):
+            self_v = [self_v]
+        elif not isinstance(self_v, list):
+            raise TypeError(f"Invalid argument type {type(self_v)}.")
+
+        if isinstance(other_v, (int, str, NoneType)):
+            other_v = [other_v]
+        elif not isinstance(other_v, list):
+            raise TypeError(f"Invalid argument type {type(other_v)}.")
+
+        minlen = min(len(self_v), len(other_v))
+        if len(self_v) != len(other_v) and self_v[:minlen] == other_v[:minlen]:
+            return len(self_v) < len(other_v)
+
+        for self_vi, other_vi in zip(self_v, other_v):
+            if self_vi == other_vi:
+                continue
+            if isinstance(self_vi, int) and isinstance(other_vi, int):
+                return self_vi < other_vi
+            if isinstance(self_vi, int) and isinstance(other_vi, str):
+                return True
+            if isinstance(self_vi, str) and isinstance(other_vi, int):
+                return False
+            if isinstance(self_vi, str) and isinstance(other_vi, str):
+                return self_vi < other_vi
+
+            msg = f"Invalid attribute type {self_vi=} and {other_vi=}."
+            raise TypeError(msg)
+
+    return False
+
+
+def __parse_version_str(version_str: str) -> VersionDict:
     version_match = re.match(_VERSION_PATTERN, version_str)
     if version_match is None:
         msg = f"Invalid argument {version_str=}. (not a version)"
