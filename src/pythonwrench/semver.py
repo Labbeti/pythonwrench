@@ -107,7 +107,7 @@ class Version:
         # Version str
         elif has_1_pos_arg and isinstance(args[0], str):
             version_str = args[0]
-            version_dict = __parse_version_str(version_str)
+            version_dict = _parse_version_str(version_str)
 
         # Version dict
         elif has_1_pos_arg and isinstance_generic(args[0], VersionDictLike):
@@ -288,19 +288,19 @@ class Version:
         return self.equals(other)
 
     def __lt__(self, other: VersionLike) -> bool:
-        return __compare_lt(self, other)
+        return _compare_lt(self, other)
 
     def __le__(self, other: VersionLike) -> bool:
         return (self == other) or (self < other)
 
     def __gt__(self, other: VersionLike) -> bool:
-        return __compare_lt(other, self)
+        return _compare_lt(other, self)
 
     def __ge__(self, other: VersionLike) -> bool:
         return (self == other) or (self > other)
 
 
-def __compare_lt(
+def _compare_lt(
     x: Union[Version, Mapping, tuple, str], y: Union[Version, Mapping, tuple, str]
 ) -> bool:
     if isinstance(x, (Mapping, tuple, str)):
@@ -354,7 +354,7 @@ def __compare_lt(
     return False
 
 
-def __parse_version_str(version_str: str) -> VersionDict:
+def _parse_version_str(version_str: str) -> VersionDict:
     version_match = re.match(_VERSION_PATTERN, version_str)
     if version_match is None:
         msg = f"Invalid argument {version_str=}. (not a version)"
