@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.4.10] UNRELEASED
+## [0.4.10] 2026-02-09
 ### Fixed
 - Disk cache custom keywords arguments for cache filename.
 
