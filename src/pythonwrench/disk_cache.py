@@ -441,6 +441,7 @@ def _disk_cache_impl(
                 if cache_fname_fmt_args is None or argname in cache_fname_fmt_args
             }
             kwds.update(inputs_kwds)
+            kwds.update(kwargs)
 
             cache_fname = cache_fname_fmt(**kwds)
             cache_fpath = cache_fn_dpath.joinpath(cache_fname)
