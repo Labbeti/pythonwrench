@@ -68,7 +68,7 @@ version = {attr = "pythonwrench.__version__"}
 
 [tool.pyright]
 include = ["src"]
-exclude = ["**/__pycache__"]
+exclude = ["**/__pycache__", '**/node_modules', '**/.*', '.venv']
 pythonVersion = "3.8"
 
 [tool.pytest.ini_options]
