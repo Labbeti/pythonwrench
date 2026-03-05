@@ -14,7 +14,13 @@ __version__ = "0.4.10"
 
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
+try:
+    import lazy_loader as lazy  # type: ignore
+except ImportError:
+    lazy = None
+
+
+if TYPE_CHECKING or lazy is None:
     # Re-import for language servers
     from . import abc as abc
     from . import argparse as argparse
@@ -208,8 +214,6 @@ if TYPE_CHECKING:
     from .warnings import deprecated_alias, deprecated_function, warn_once
 
 else:
-    import lazy_loader as lazy
-
     __getattr__, __dir__, __all__ = lazy.attach(
         __name__,
         submodules=[

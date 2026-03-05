@@ -3,7 +3,13 @@
 
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
+try:
+    import lazy_loader as lazy  # type: ignore
+except ImportError:
+    lazy = None
+
+
+if TYPE_CHECKING or lazy is None:
     from .checks import (
         check_args_types,
         is_builtin_collection,
@@ -51,8 +57,6 @@ if TYPE_CHECKING:
     )
 
 else:
-    import lazy_loader as lazy
-
     __getattr__, __dir__, __all__ = lazy.attach(
         __name__,
         submodules=[
