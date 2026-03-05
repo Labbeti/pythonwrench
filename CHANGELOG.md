@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 ### Modified
 - Change default store mode to `"outputs_only"` in disk cache.
 - Change default `fn_name` to function name instead of fully qualified name in disk cache.
+- Lazily load imports if `lazy_loader` package is available.
 
 ## [0.4.10] 2026-02-09
 ### Fixed
