@@ -4,9 +4,9 @@ name: Python package using Pip
 
 on:
   push:
-    branches: [ main, dev ]
+    branches: [ main, dev** ]
   pull_request:
-    branches: [ main, dev ]
+    branches: [ main, dev** ]
 
 env:
   CACHE_NUMBER: 0  # increase to reset cache manually
