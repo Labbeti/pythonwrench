@@ -189,20 +189,27 @@ def _serialize_csv(
     if to_builtins:
         data = as_builtin(data)
 
-    if header == "auto":
-        header = isinstance_generic(
-            data, (Mapping[str, Iterable], Iterable[Mapping[str, Any]])
-        )
+    is_mapping_iterable = isinstance_generic(data, Mapping[str, Iterable])
+    if is_mapping_iterable:
+        is_iterable_mapping = False
+    else:
+        is_iterable_mapping = isinstance_generic(data, Iterable[Mapping[str, Any]])
 
-    if isinstance_generic(data, Mapping[str, Iterable]):
-        data_lst = dict_list_to_list_dict(data, "same")  # type: ignore
-    elif isinstance_generic(data, Iterable[Mapping[str, Any]]):
+    if header == "auto":
+        header = is_mapping_iterable or is_iterable_mapping
+
+    if is_mapping_iterable:
+        data_lst = dict_list_to_list_dict(data, "same")
+    elif is_iterable_mapping:
         data_lst = [dict(data_i.items()) for data_i in data]
+    elif isinstance(data, str):
+        msg = f"Invalid argument type {type(data)}."
+        raise TypeError(msg)
     elif not header and isinstance_generic(data, Iterable[str]):
         data_lst = [{"0": data_i} for data_i in data]
     elif not header and isinstance_generic(data, Iterable[Iterable]):
         data_lst = [dict(zip(map(str, range(len(data_i))), data)) for data_i in data]
-    elif not header and isinstance_generic(data, Iterable):
+    elif not header and isinstance(data, Iterable):
         data_lst = [{"0": data_i} for data_i in data]
     else:
         msg = f"Invalid argument type {type(data)} with {header=}."
