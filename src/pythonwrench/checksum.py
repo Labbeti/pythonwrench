@@ -6,6 +6,7 @@ import re
 import struct
 import zlib
 from dataclasses import asdict
+from datetime import date, datetime
 from enum import Enum
 from functools import lru_cache
 from pathlib import Path
@@ -187,6 +188,30 @@ def checksum_dataclass(x: DataclassInstance, **kwargs) -> int:
     return checksum_dict(asdict(x), **kwargs)
 
 
+@register_checksum_fn(datetime)
+def checksum_datetime(x: datetime, **kwargs) -> int:
+    return _checksum_iterable(
+        [
+            x.__class__,
+            x.year,
+            x.month,
+            x.day,
+            x.hour,
+            x.minute,
+            x.second,
+            x.microsecond,
+            x.tzinfo,
+            x.fold,
+        ],
+        **kwargs,
+    )
+
+
+@register_checksum_fn(date)
+def checksum_date(x: date, **kwargs) -> int:
+    return _checksum_iterable([x.__class__, x.year, x.month, x.day], **kwargs)
+
+
 @register_checksum_fn(dict)
 def checksum_dict(x: dict, **kwargs) -> int:
     return _checksum_mapping(x, **kwargs)
@@ -282,17 +307,11 @@ def checksum_slice(x: slice, **kwargs) -> int:
 
 @register_checksum_fn(Mapping, priority=-100)
 def checksum_mapping(x: Mapping, **kwargs) -> int:
-    kwargs["accumulator"] = kwargs.get("accumulator", 0) + _cached_checksum_str(
-        get_fullname(x)
-    )
-    return _checksum_iterable(x.items(), **kwargs)
+    return _checksum_mapping(x, **kwargs)
 
 
 @register_checksum_fn(Iterable, priority=-200)
 def checksum_iterable(x: Iterable, **kwargs) -> int:
-    kwargs["accumulator"] = kwargs.get("accumulator", 0) + _cached_checksum_str(
-        get_fullname(x)
-    )
     return _checksum_iterable(x, **kwargs)
 
 

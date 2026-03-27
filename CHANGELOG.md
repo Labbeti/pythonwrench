@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.1] UNRELEASED
+### Modified
+- Checksum can apply to `date`, `datetime`, `Mapping` or `Iterable` objects.
+
 ## [0.5.0] 2026-03-05
 ### Modified
 - Change default store mode to `"outputs_only"` in disk cache.
