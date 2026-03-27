@@ -280,6 +280,22 @@ def checksum_slice(x: slice, **kwargs) -> int:
     return checksum_list_tuple((x.start, x.stop, x.step), **kwargs)
 
 
+@register_checksum_fn(Mapping, priority=-100)
+def checksum_mapping(x: Mapping, **kwargs) -> int:
+    kwargs["accumulator"] = kwargs.get("accumulator", 0) + _cached_checksum_str(
+        get_fullname(x)
+    )
+    return _checksum_iterable(x.items(), **kwargs)
+
+
+@register_checksum_fn(Iterable, priority=-200)
+def checksum_iterable(x: Iterable, **kwargs) -> int:
+    kwargs["accumulator"] = kwargs.get("accumulator", 0) + _cached_checksum_str(
+        get_fullname(x)
+    )
+    return _checksum_iterable(x, **kwargs)
+
+
 # Private functions
 def _checksum_bytes_bytearray(x: Union[bytes, bytearray], **kwargs) -> int:
     xint = zlib.crc32(x) % (1 << 32)
