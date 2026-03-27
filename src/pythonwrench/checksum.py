@@ -36,6 +36,7 @@ T = TypeVar("T")
 
 
 _CHECKSUM_REGISTRY = _FunctionRegistry[int]()
+_CHECKSUM_PROTOCOLS = False
 
 
 @overload
@@ -305,14 +306,15 @@ def checksum_slice(x: slice, **kwargs) -> int:
     return checksum_list_tuple((x.start, x.stop, x.step), **kwargs)
 
 
-@register_checksum_fn(Mapping, priority=-100)
-def checksum_mapping(x: Mapping, **kwargs) -> int:
-    return _checksum_mapping(x, **kwargs)
+if _CHECKSUM_PROTOCOLS:
 
+    @register_checksum_fn(Mapping, priority=-100)
+    def checksum_mapping(x: Mapping, **kwargs) -> int:
+        return _checksum_mapping(x, **kwargs)
 
-@register_checksum_fn(Iterable, priority=-200)
-def checksum_iterable(x: Iterable, **kwargs) -> int:
-    return _checksum_iterable(x, **kwargs)
+    @register_checksum_fn(Iterable, priority=-200)
+    def checksum_iterable(x: Iterable, **kwargs) -> int:
+        return _checksum_iterable(x, **kwargs)
 
 
 # Private functions
