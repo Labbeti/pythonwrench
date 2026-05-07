@@ -597,14 +597,70 @@ def recursive_generator(x: Any) -> Generator[Tuple[Any, int, int], None, None]:
     return recursive_generator_impl(x, 0, 0)
 
 
+@overload
 def sorted_dict(
     x: Mapping[K, V],
     /,
     *,
+    by: Literal["key"] = "key",
     key: Optional[Callable[[K], Any]] = None,
     reverse: bool = False,
+) -> Dict[K, V]: ...
+
+
+@overload
+def sorted_dict(
+    x: Mapping[K, V],
+    /,
+    *,
+    by: Literal["value"],
+    key: Optional[Callable[[V], Any]] = None,
+    reverse: bool = False,
+) -> Dict[K, V]: ...
+
+
+@overload
+def sorted_dict(
+    x: Mapping[K, V],
+    /,
+    *,
+    by: Literal["item"],
+    key: Optional[Callable[[Tuple[K, V]], Any]] = None,
+    reverse: bool = False,
+) -> Dict[K, V]: ...
+
+
+def sorted_dict(
+    x: Mapping[K, V],
+    /,
+    *,
+    by: Literal["key", "value", "item"] = "key",
+    key: Optional[Callable[[Any], Any]] = None,
+    reverse: bool = False,
 ) -> Dict[K, V]:
-    return {k: x[k] for k in sorted(x.keys(), key=key, reverse=reverse)}  # type: ignore
+    """Sort a dictionnary by key, value or item."""
+    if key is None or by == "item":
+        impl_key = key
+
+    elif by == "key":
+
+        def by_key_fn(x: Tuple[K, V]) -> Any:
+            return key(x[0])
+
+        impl_key = by_key_fn
+
+    elif by == "value":
+
+        def by_value_fn(x: Tuple[K, V]) -> Any:
+            return key(x[1])
+
+        impl_key = by_value_fn
+
+    else:
+        msg = f"Invalid argument {by=}. (expected one of {('key', 'value', 'item')})"
+        raise ValueError(msg)
+
+    return {k: v for k, v in sorted(x.items(), key=impl_key, reverse=reverse)}  # type: ignore
 
 
 def shuffled(

@@ -25,6 +25,7 @@ from pythonwrench.collections import (
     recursive_generator,
     reduce_add,
     shuffled,
+    sorted_dict,
     unflat_dict_of_dict,
     unflat_list_of_list,
     union_dicts,
@@ -323,6 +324,19 @@ class TestReduce(TestCase):
 
         with self.assertRaises(TypeError):
             assert reduce_add(args, args, start=1)
+
+
+class TestSortedDict(TestCase):
+    def test_example_1(self) -> None:
+        x = {"b": 2, "a": 3, "c": 1}
+        result = sorted_dict(x)
+        assert result == {"a": 3, "b": 2, "c": 1}
+
+        result = sorted_dict(x, by="value")
+        assert result == {"c": 1, "b": 2, "a": 3}
+
+        result = sorted_dict(x, reverse=True, key=lambda x: x % 3, by="value")
+        assert result == {"a": 3, "c": 1, "b": 2}
 
 
 if __name__ == "__main__":
