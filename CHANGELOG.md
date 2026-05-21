@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [0.5.1] UNRELEASED
 ### Added
 - Argument `by` to `sorted_dict` function.
+- `Ticker` class.
 
 ### Modified
 - Checksum can apply to `date` and `datetime` objects.
