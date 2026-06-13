@@ -5,6 +5,7 @@ from typing import (
     Any,
     ClassVar,
     Dict,
+    Iterable,
     Iterator,
     List,
     Protocol,
@@ -41,6 +42,7 @@ T_BuiltinScalar = TypeVar(
 )
 
 ListOrTuple = Union[List[_T_Item], Tuple[_T_Item, ...]]
+SupportsIter = Iterable
 
 
 @runtime_checkable

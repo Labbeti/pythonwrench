@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Argument `by` to `sorted_dict` function.
 - `Ticker` class.
+- `SupportsIter` alias of `Iterable`.
 
 ### Modified
 - Checksum can apply to `date` and `datetime` objects.
