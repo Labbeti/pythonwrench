@@ -4,7 +4,10 @@
 import math
 import random
 import unittest
+from typing import Any, Iterable, Mapping, Tuple
 from unittest import TestCase
+
+from typing_extensions import Annotated
 
 from pythonwrench.checksum import checksum_any
 from pythonwrench.collections import all_ne
@@ -73,6 +76,23 @@ class TestChecksum(TestCase):
 
         assert Color.RED == Color.ROUGE
         assert checksum_any(Color.RED) == checksum_any(Color.ROUGE)
+
+    def test_typing_classes(self) -> None:
+        x = [
+            Any,
+            Iterable,
+            Iterable[int],
+            Annotated,
+            Annotated[int, "annotation"],
+            Tuple[int, ...],
+            Tuple[int],
+            Tuple[int, int],
+            tuple,
+            Mapping,
+            Mapping[int, int],
+        ]
+        csums = [checksum_any(xi) for xi in x]
+        assert all_ne(csums), f"{csums=}"
 
 
 if __name__ == "__main__":

@@ -6,6 +6,7 @@ import re
 import struct
 import zlib
 from dataclasses import asdict
+from datetime import date, datetime
 from enum import Enum
 from functools import lru_cache
 from pathlib import Path
@@ -13,12 +14,15 @@ from types import FunctionType, MethodType
 from typing import (
     Any,
     Callable,
+    Dict,
     Generator,
     Iterable,
     Mapping,
     Optional,
     TypeVar,
     Union,
+    get_args,
+    get_origin,
     overload,
 )
 
@@ -27,14 +31,19 @@ from pythonwrench.functools import function_alias
 from pythonwrench.inspect import get_fullname
 from pythonwrench.typing import (
     DataclassInstance,
+    EllipsisType,
     NamedTupleInstance,
     NoneType,
+    is_collection_alias,
+    is_parameterized,
+    is_special_form,
 )
 
 T = TypeVar("T")
 
 
 _CHECKSUM_REGISTRY = _FunctionRegistry[int]()
+_CHECKSUM_PROTOCOLS = False
 
 
 @overload
@@ -130,9 +139,7 @@ def checksum_int(x: int, **kwargs) -> int:
 # Intermediate functions
 @register_checksum_fn(bytearray)
 def checksum_bytearray(x: bytearray, **kwargs) -> int:
-    kwargs["accumulator"] = kwargs.get("accumulator", 0) + _cached_checksum_str(
-        get_fullname(x)
-    )
+    kwargs = _add_type_checksum_to_accumulator(x, kwargs)
     return _checksum_bytes_bytearray(x, **kwargs)
 
 
@@ -151,25 +158,25 @@ def checksum_complex(x: complex, **kwargs) -> int:
 
 @register_checksum_fn(FunctionType)
 def checksum_function(x: FunctionType, **kwargs) -> int:
-    kwargs["accumulator"] = kwargs.get("accumulator", 0) + _cached_checksum_str(
-        get_fullname(x)
-    )
+    kwargs = _add_type_checksum_to_accumulator(x, kwargs)
     return checksum_str(x.__qualname__, **kwargs)
 
 
 @register_checksum_fn(NoneType)
 def checksum_none(x: None, **kwargs) -> int:
-    kwargs["accumulator"] = kwargs.get("accumulator", 0) + _cached_checksum_str(
-        get_fullname(x)
-    )
-    return checksum_type(x.__class__, **kwargs) + kwargs.get("accumulator", 0)
+    kwargs = _add_type_checksum_to_accumulator(x, kwargs)
+    return checksum_type(x.__class__, **kwargs)
+
+
+@register_checksum_fn(EllipsisType)
+def checksum_ellipsis(x: None, **kwargs) -> int:
+    kwargs = _add_type_checksum_to_accumulator(x, kwargs)
+    return checksum_type(x.__class__, **kwargs)
 
 
 @register_checksum_fn(str)
 def checksum_str(x: str, **kwargs) -> int:
-    kwargs["accumulator"] = kwargs.get("accumulator", 0) + _cached_checksum_str(
-        get_fullname(x)
-    )
+    kwargs = _add_type_checksum_to_accumulator(x, kwargs)
     return checksum_bytes(x.encode(), **kwargs)
 
 
@@ -181,10 +188,32 @@ def checksum_type(x: type, **kwargs) -> int:
 # Recursive functions
 @register_checksum_fn(DataclassInstance)
 def checksum_dataclass(x: DataclassInstance, **kwargs) -> int:
-    kwargs["accumulator"] = kwargs.get("accumulator", 0) + _cached_checksum_str(
-        get_fullname(x)
-    )
+    kwargs = _add_type_checksum_to_accumulator(x, kwargs)
     return checksum_dict(asdict(x), **kwargs)
+
+
+@register_checksum_fn(datetime)
+def checksum_datetime(x: datetime, **kwargs) -> int:
+    return _checksum_iterable(
+        [
+            x.__class__,
+            x.year,
+            x.month,
+            x.day,
+            x.hour,
+            x.minute,
+            x.second,
+            x.microsecond,
+            x.tzinfo,
+            x.fold,
+        ],
+        **kwargs,
+    )
+
+
+@register_checksum_fn(date)
+def checksum_date(x: date, **kwargs) -> int:
+    return _checksum_iterable([x.__class__, x.year, x.month, x.day], **kwargs)
 
 
 @register_checksum_fn(dict)
@@ -214,9 +243,7 @@ def checksum_set(x: Union[set, frozenset], **kwargs) -> int:
 
 @register_checksum_fn(range)
 def checksum_range(x: range, **kwargs) -> int:
-    kwargs["accumulator"] = kwargs.get("accumulator", 0) + _cached_checksum_str(
-        get_fullname(x)
-    )
+    kwargs = _add_type_checksum_to_accumulator(x, kwargs)
     return _checksum_iterable([x.start, x.stop, x.step], **kwargs)
 
 
@@ -238,46 +265,74 @@ def checksum_method(x: MethodType, **kwargs) -> int:
 
 @register_checksum_fn(NamedTupleInstance)
 def checksum_namedtuple(x: NamedTupleInstance, **kwargs) -> int:
-    kwargs["accumulator"] = kwargs.get("accumulator", 0) + _cached_checksum_str(
-        get_fullname(x)
-    )
+    kwargs = _add_type_checksum_to_accumulator(x, kwargs)
     return checksum_dict(x._asdict(), **kwargs)
 
 
 @register_checksum_fn(functools.partial)
 def checksum_partial(x: functools.partial, **kwargs) -> int:
-    kwargs["accumulator"] = kwargs.get("accumulator", 0) + _cached_checksum_str(
-        get_fullname(x)
-    )
+    kwargs = _add_type_checksum_to_accumulator(x, kwargs)
     return checksum_list_tuple((x.func, x.args, x.keywords), **kwargs)
 
 
 @register_checksum_fn(re.Pattern)
 def checksum_pattern(x: re.Pattern, **kwargs) -> int:
-    kwargs["accumulator"] = kwargs.get("accumulator", 0) + _cached_checksum_str(
-        get_fullname(x)
-    )
+    kwargs = _add_type_checksum_to_accumulator(x, kwargs)
     return checksum_str(str(x), **kwargs)
 
 
 @register_checksum_fn(Path)
 def checksum_path(x: Path, **kwargs) -> int:
-    kwargs["accumulator"] = kwargs.get("accumulator", 0) + _cached_checksum_str(
-        get_fullname(x)
-    )
+    kwargs = _add_type_checksum_to_accumulator(x, kwargs)
+
     resolve_path = kwargs.get("resolve_path", False)
     if isinstance(resolve_path, bool) and resolve_path:
         x = x.expanduser().resolve()
-
     return checksum_str(str(x), **kwargs)
 
 
 @register_checksum_fn(slice)
 def checksum_slice(x: slice, **kwargs) -> int:
-    kwargs["accumulator"] = kwargs.get("accumulator", 0) + _cached_checksum_str(
-        get_fullname(x)
-    )
+    kwargs = _add_type_checksum_to_accumulator(x, kwargs)
     return checksum_list_tuple((x.start, x.stop, x.step), **kwargs)
+
+
+@register_checksum_fn(custom_predicate=is_parameterized)
+def checksum_parametrized(x: Any, **kwargs) -> int:
+    kwargs = _add_type_checksum_to_accumulator(x, kwargs)
+    return checksum_list_tuple((get_origin(x),) + get_args(x), **kwargs)
+
+
+@register_checksum_fn(custom_predicate=is_collection_alias)
+def checksum_collection_alias(x: Any, **kwargs) -> int:
+    kwargs = _add_type_checksum_to_accumulator(x, kwargs)
+    return checksum_str(x._name, **kwargs)
+
+
+@register_checksum_fn(custom_predicate=is_special_form)
+def checksum_special_form(x: Any, **kwargs) -> int:
+    kwargs = _add_type_checksum_to_accumulator(x, kwargs)
+
+    if hasattr(x, "_name"):
+        name = x._name
+    elif hasattr(x, "__name__"):
+        name = x.__name__
+    else:
+        msg = f"Unsupported argument {x=} in checksum_special_form."
+        raise ValueError(msg)
+
+    return checksum_str(name, **kwargs)
+
+
+if _CHECKSUM_PROTOCOLS:
+
+    @register_checksum_fn(Mapping, priority=-100)
+    def checksum_mapping(x: Mapping, **kwargs) -> int:
+        return _checksum_mapping(x, **kwargs)
+
+    @register_checksum_fn(Iterable, priority=-200)
+    def checksum_iterable(x: Iterable, **kwargs) -> int:
+        return _checksum_iterable(x, **kwargs)
 
 
 # Private functions
@@ -307,7 +362,15 @@ def _checksum_mapping(x: Mapping, **kwargs) -> int:
 
 
 def _terminate_checksum(x: int, fullname: str, **kwargs) -> int:
+    """Returns checksum for final value + name + accumulator."""
     return x + _cached_checksum_str(fullname) + kwargs.get("accumulator", 0)
+
+
+def _add_type_checksum_to_accumulator(x: Any, kwargs: Dict[str, Any]) -> Dict[str, Any]:
+    kwargs["accumulator"] = kwargs.get("accumulator", 0) + _cached_checksum_str(
+        get_fullname(x)
+    )
+    return kwargs
 
 
 @lru_cache(maxsize=None)

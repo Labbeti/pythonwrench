@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.1] 2026-06-19
+### Added
+- Argument `by` to `sorted_dict` function.
+- `Ticker` class.
+- `SupportsIter` alias of `Iterable`.
+- `is_parameterized`, `is_collection_alias`, `is_special_form` functions.
+
+### Modified
+- Checksum can apply to `date`, `datetime`, parametrized types, collections aliases and special forms.
+
 ## [0.5.0] 2026-03-05
 ### Modified
 - Change default store mode to `"outputs_only"` in disk cache.

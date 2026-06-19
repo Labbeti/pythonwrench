@@ -46,4 +46,5 @@ Submodules
    pythonwrench.random
    pythonwrench.re
    pythonwrench.semver
+   pythonwrench.time
    pythonwrench.warnings

@@ -9,7 +9,7 @@ __author_email__ = "labbeti.pub@gmail.com"
 __license__ = "MIT"
 __maintainer__ = "Étienne Labbé (Labbeti)"
 __status__ = "Development"
-__version__ = "0.5.0"
+__version__ = "0.5.1"
 
 
 from typing import TYPE_CHECKING
@@ -187,6 +187,7 @@ if TYPE_CHECKING or lazy is None:
         SupportsGetitemIterLen2,
         SupportsGetitemLen,
         SupportsGetitemLen2,
+        SupportsIter,
         SupportsIterLen,
         SupportsLen,
         SupportsMatmul,
@@ -199,6 +200,7 @@ if TYPE_CHECKING or lazy is None:
         is_builtin_number,
         is_builtin_obj,
         is_builtin_scalar,
+        is_collection_alias,
         is_dataclass_instance,
         is_iterable_bool,
         is_iterable_bytes_or_list,
@@ -207,7 +209,9 @@ if TYPE_CHECKING or lazy is None:
         is_iterable_integral,
         is_iterable_str,
         is_namedtuple_instance,
+        is_parameterized,
         is_sequence_str,
+        is_special_form,
         is_typed_dict,
         isinstance_generic,
     )
@@ -397,6 +401,7 @@ else:
                 "SupportsGetitemIterLen2",
                 "SupportsGetitemLen",
                 "SupportsGetitemLen2",
+                "SupportsIter",
                 "SupportsIterLen",
                 "SupportsLen",
                 "SupportsMatmul",
@@ -409,6 +414,7 @@ else:
                 "is_builtin_number",
                 "is_builtin_obj",
                 "is_builtin_scalar",
+                "is_collection_alias",
                 "is_dataclass_instance",
                 "is_iterable_bool",
                 "is_iterable_bytes_or_list",
@@ -417,7 +423,9 @@ else:
                 "is_iterable_integral",
                 "is_iterable_str",
                 "is_namedtuple_instance",
+                "is_parameterized",
                 "is_sequence_str",
+                "is_special_form",
                 "is_typed_dict",
                 "isinstance_generic",
             ],

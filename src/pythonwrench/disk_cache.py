@@ -362,19 +362,15 @@ def _disk_cache_impl(
 ) -> Callable[[Callable[P, T]], Callable[P, T]]:
     # for backward compatibility
     if cache_fname_fmt is None:
-        expected = "{fn_name}_{checksum_hex}{suffix}"
-        warnings.warn(
-            f"Deprecated argument value {cache_fname_fmt=}. (use {expected} instead)",
-            DeprecationWarning,
-        )
+        expected = "{fn_name}_{csum}{suffix}"
+        msg = f"Deprecated argument value {cache_fname_fmt=}. (use {expected} instead)"
+        warnings.warn(msg, DeprecationWarning)
         cache_fname_fmt = expected
 
     if cache_saving_backend is None:
         expected = "auto"
-        warnings.warn(
-            f"Deprecated argument value {cache_saving_backend=}. (use {expected} instead)",
-            DeprecationWarning,
-        )
+        msg = f"Deprecated argument value {cache_saving_backend=}. (use {expected} instead)"
+        warnings.warn(msg, DeprecationWarning)
         cache_saving_backend = expected
 
     if cache_saving_backend == "auto":
