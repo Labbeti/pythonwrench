@@ -22,14 +22,18 @@ from typing import (
 )
 from unittest import TestCase
 
+import typing_extensions
 from typing_extensions import NotRequired
 
 from pythonwrench.typing import (
     NoneType,
     check_args_types,
+    is_collection_alias,
     is_dataclass_instance,
     is_iterable_str,
     is_namedtuple_instance,
+    is_parameterized,
+    is_special_form,
     is_typed_dict,
     isinstance_generic,
 )
@@ -100,6 +104,25 @@ class TestChecks(TestCase):
         assert not is_dataclass_instance(NT2)
         assert not is_dataclass_instance(nt1)
         assert not is_dataclass_instance(nt2)
+
+    def test_is_parameterized(self) -> None:
+        assert is_parameterized(Iterable[int])
+        assert is_parameterized(Tuple[int, ...])
+        assert not is_parameterized(Iterable)
+        assert not is_parameterized(Tuple)
+
+    def test_is_collection_alias(self) -> None:
+        assert not is_collection_alias(Iterable[int])
+        assert not is_collection_alias(Tuple[int, ...])
+        assert is_collection_alias(Iterable)
+        assert not is_collection_alias(Tuple)
+        assert not is_collection_alias(list)
+
+    def test_is_special_form(self) -> None:
+        assert not is_special_form(Iterable[int])
+        assert not is_special_form(Tuple[int, ...])
+        assert is_special_form(Any)
+        assert is_special_form(typing_extensions.Any)
 
 
 class TestIsInstanceGuard(TestCase):

@@ -4,8 +4,10 @@
 import math
 import random
 import unittest
-from typing import Any, Iterable
+from typing import Any, Iterable, Mapping, Tuple
 from unittest import TestCase
+
+from typing_extensions import Annotated
 
 from pythonwrench.checksum import checksum_any
 from pythonwrench.collections import all_ne
@@ -79,6 +81,15 @@ class TestChecksum(TestCase):
         x = [
             Any,
             Iterable,
+            Iterable[int],
+            Annotated,
+            Annotated[int, "annotation"],
+            Tuple[int, ...],
+            Tuple[int],
+            Tuple[int, int],
+            tuple,
+            Mapping,
+            Mapping[int, int],
         ]
         csums = [checksum_any(xi) for xi in x]
         assert all_ne(csums), f"{csums=}"

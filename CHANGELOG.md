@@ -7,9 +7,10 @@ All notable changes to this project will be documented in this file.
 - Argument `by` to `sorted_dict` function.
 - `Ticker` class.
 - `SupportsIter` alias of `Iterable`.
+- `is_parameterized`, `is_collection_alias`, `is_special_form` functions.
 
 ### Modified
-- Checksum can apply to `date` and `datetime` objects.
+- Checksum can apply to `date`, `datetime`, parametrized types, collections aliases and special forms.
 
 ## [0.5.0] 2026-03-05
 ### Modified

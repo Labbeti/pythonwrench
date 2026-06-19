@@ -32,7 +32,7 @@ ClassOrTuple = Union[type, Tuple[type, ...]]
 
 
 class Predicate(Protocol[T_Any]):
-    def __call__(self, x: T_Any) -> bool: ...
+    def __call__(self, /, x: T_Any) -> bool: ...
 
 
 def return_none(*args, **kwargs) -> None:

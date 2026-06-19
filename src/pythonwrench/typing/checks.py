@@ -4,6 +4,7 @@
 import inspect
 import logging
 import sys
+import typing
 from numbers import Integral
 from types import FunctionType, MethodType
 from typing import (
@@ -395,3 +396,99 @@ def is_typed_dict(x: Any) -> TypeGuard[type]:
         return x.__class__.__name__ == "_TypedDictMeta"
     else:
         return hasattr(x, "__orig_bases__") and TypedDict in x.__orig_bases__
+
+
+def is_parameterized(x: Any) -> bool:
+    """Returns True if object is a parametrized object like `Iterable[int]`, `Mapping[str, float]`, etc."""
+    return get_origin(x) is not None and len(get_args(x)) > 0
+
+
+_COLLECTION_ALIASES = [
+    typing.Iterable,
+    typing.Iterator,
+    typing.Reversible,
+    typing.Generator,
+    typing.AsyncIterable,
+    typing.AsyncIterator,
+    typing.AsyncGenerator,
+    typing.Collection,
+    typing.Container,
+    typing.Sized,
+    typing.Sequence,
+    typing.MutableSequence,
+    typing.Set,
+    typing.MutableSet,
+    typing.Mapping,
+    typing.MutableMapping,
+    typing.MappingView,
+    typing.KeysView,
+    typing.ItemsView,
+    typing.ValuesView,
+    typing.Awaitable,
+    typing.Coroutine,
+    typing.Callable,
+    typing.Hashable,
+    typing_extensions.Iterable,
+    typing_extensions.Iterator,
+    typing_extensions.Reversible,
+    typing_extensions.Generator,
+    typing_extensions.AsyncIterable,
+    typing_extensions.AsyncIterator,
+    typing_extensions.AsyncGenerator,
+    typing_extensions.Collection,
+    typing_extensions.Container,
+    typing_extensions.Sized,
+    typing_extensions.Sequence,
+    typing_extensions.MutableSequence,
+    typing_extensions.Set,
+    typing_extensions.MutableSet,
+    typing_extensions.Mapping,
+    typing_extensions.MutableMapping,
+    typing_extensions.MappingView,
+    typing_extensions.KeysView,
+    typing_extensions.ItemsView,
+    typing_extensions.ValuesView,
+    typing_extensions.Awaitable,
+    typing_extensions.Coroutine,
+    typing_extensions.Callable,
+    typing_extensions.Hashable,
+]
+
+_SPECIAL_FORMS = [] + [
+    getattr(module, candidate_name, None)
+    for module in (typing, typing_extensions)
+    for candidate_name in [
+        "Any",
+        "NoReturn",
+        "Union",
+        "Optional",
+        "Literal",
+        "Final",
+        "ClassVar",
+        "TypeVar",
+        "Annotated",
+        "Never",
+        "Self",
+        "Required",
+        "NotRequired",
+        "TypeGuard",
+        "TypeIs",
+        "Concatenate",
+        "ParamSpec",
+        "ParamSpecArgs",
+        "ParamSpecKwargs",
+        "TypeVarTuple",
+        "Unpack",
+    ]
+    if getattr(module, candidate_name, None) is not None
+]
+
+
+def is_collection_alias(x: Any) -> bool:
+    """Returns True if object is a non-parameterized collection alias type."""
+    return x in _COLLECTION_ALIASES
+
+
+def is_special_form(x: Any) -> bool:
+    """Returns True if object is a typing special form like `Any`."""
+    return x in _SPECIAL_FORMS
