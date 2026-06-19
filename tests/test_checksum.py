@@ -4,6 +4,7 @@
 import math
 import random
 import unittest
+from typing import Any, Iterable
 from unittest import TestCase
 
 from pythonwrench.checksum import checksum_any
@@ -73,6 +74,14 @@ class TestChecksum(TestCase):
 
         assert Color.RED == Color.ROUGE
         assert checksum_any(Color.RED) == checksum_any(Color.ROUGE)
+
+    def test_typing_classes(self) -> None:
+        x = [
+            Any,
+            Iterable,
+        ]
+        csums = [checksum_any(xi) for xi in x]
+        assert all_ne(csums), f"{csums=}"
 
 
 if __name__ == "__main__":
