@@ -31,7 +31,6 @@ maintainers = [
 ]
 dynamic = ["version"]
 dependencies = [
-    "lazy-loader>=0.4",
     "typing-extensions>=4.10.0",
 ]
 
