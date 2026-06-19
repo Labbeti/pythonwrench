@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.5.1] UNRELEASED
+## [0.5.1] 2026-06-19
 ### Added
 - Argument `by` to `sorted_dict` function.
 - `Ticker` class.
