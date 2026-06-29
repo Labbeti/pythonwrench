@@ -114,10 +114,12 @@ if TYPE_CHECKING or lazy is None:
     )
     from .hashlib import hash_file
     from .importlib import (
+        Placeholder,
         is_available_package,
         is_editable_package,
         reload_editable_packages,
         reload_submodules,
+        requires_packages,
         search_submodules,
     )
     from .inspect import get_argnames, get_current_fn_name, get_fullname
@@ -325,7 +327,9 @@ else:
                 "is_editable_package",
                 "reload_editable_packages",
                 "reload_submodules",
+                "requires_packages",
                 "search_submodules",
+                "Placeholder",
             ],
             "inspect": ["get_argnames", "get_current_fn_name", "get_fullname"],
             "json": [
