@@ -3,7 +3,11 @@
 All notable changes to this project will be documented in this file.
 
 ## [0.5.2] UNRELEASED
+### Modified
+- `lazy-loader` package is now optional.
+
 ### Fixed
+- `Placeholder` and `requires_packages` in global context.
 - `as_builtin`  now support conversions of dataclasses attributes, without converting to dict with `dataclasses.asdict`.
 
 ## [0.5.1] 2026-06-19

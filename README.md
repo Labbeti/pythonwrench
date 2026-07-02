@@ -161,6 +161,9 @@ Easely converts common python structures like list of dicts to dict of lists :
 ... True
 ```
 
+## Lazy loading
+To speed up this package loading, you can install it with `uv add pythonwrench[lazy]`, so `import pythonwrench as pw` will be faster.
+
 ## Contact
 Maintainer:
 - [Étienne Labbé](https://labbeti.github.io/) "Labbeti": labbeti.pub@gmail.com
