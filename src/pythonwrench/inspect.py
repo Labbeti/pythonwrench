@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import inspect
-from types import CodeType
-from typing import Any, Callable, List, Tuple, TypeVar, Union, get_args
+from typing import Any, Callable, List, TypeVar, Union, get_args
 
 T = TypeVar("T")
 
@@ -68,21 +67,3 @@ def get_fullname(x: Any, *, inst_suffix: str = "(...)") -> str:
         name = f"{name}[{argsnames_str}]"
 
     return name
-
-
-def _get_code_and_start(fn: Callable) -> Tuple[CodeType, int]:
-    if inspect.isfunction(fn):
-        code = fn.__code__
-        start = 0
-    elif inspect.ismethod(fn):
-        code = fn.__code__
-        start = 1  # If method, remove 'self' arg
-    elif inspect.isclass(fn):
-        # If init, remove 'self' arg
-        code = fn.__init__.__code__
-        start = 1  # If init, remove 'self' arg
-    else:
-        code = fn.__call__.__code__
-        start = 0
-
-    return code, start

@@ -119,8 +119,6 @@ def str_to_optional_bool(
     x: str,
     *,
     case_sensitive: bool = False,
-    true_values: Union[str, Iterable[str]] = DEFAULT_TRUE_VALUES,
-    false_values: Union[str, Iterable[str]] = DEFAULT_FALSE_VALUES,
     none_values: Union[str, Iterable[str]] = DEFAULT_NONE_VALUES,
 ) -> Optional[bool]:
     """Convert string values to optional bool safely. Intended for argparse arguments.

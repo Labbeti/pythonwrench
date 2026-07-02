@@ -3,7 +3,6 @@
 
 from argparse import Namespace
 from collections import Counter
-from dataclasses import asdict
 from datetime import date
 from enum import Enum
 from functools import partial
@@ -119,7 +118,10 @@ def _namespace_to_builtin(x: Namespace, **kwargs) -> Any:
 
 @register_as_builtin_fn(DataclassInstance)
 def _dataclass_to_builtin(x: DataclassInstance, **kwargs) -> Any:
-    return as_builtin(asdict(x), **kwargs)
+    # IMPORTANT note : we do not use dataclasses.asdict() because it also converts attributes like Counter, but not do dicts
+    field_names = x.__dataclass_fields__.keys()
+    xdict = {name: as_builtin(getattr(x, name), **kwargs) for name in field_names}
+    return xdict
 
 
 @register_as_builtin_fn(NamedTupleInstance)
