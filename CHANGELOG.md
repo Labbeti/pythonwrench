@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.2] UNRELEASED
+### Fixed
+- `as_builtin`  now support conversions of dataclasses attributes, without converting to dict with `dataclasses.asdict`.
+
 ## [0.5.1] 2026-06-19
 ### Added
 - Argument `by` to `sorted_dict` function.
