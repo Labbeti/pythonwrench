@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.5.2] UNRELEASED
+## [0.5.2] 2026-07-02
 ### Modified
 - `lazy-loader` package is now optional.
 
