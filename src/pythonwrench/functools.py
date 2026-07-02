@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import inspect
+from types import CodeType
 from typing import (
     Any,
     Callable,
@@ -14,7 +16,7 @@ from typing import (
 from typing_extensions import ParamSpec
 
 from pythonwrench._core import _decorator_factory, return_none  # noqa: F401
-from pythonwrench.inspect import _get_code_and_start, get_argnames
+from pythonwrench.inspect import get_argnames
 from pythonwrench.typing import isinstance_generic
 
 T = TypeVar("T")
@@ -162,3 +164,21 @@ def identity(x: T, **kwargs) -> T:
 def repeat_fn(f: Callable[[T], T], n: int) -> Callable[[T], T]:
     """Creates wrapper which call a function n items."""
     return Compose([f] * n)
+
+
+def _get_code_and_start(fn: Callable) -> Tuple[CodeType, int]:
+    if inspect.isfunction(fn):
+        code = fn.__code__
+        start = 0
+    elif inspect.ismethod(fn):
+        code = fn.__code__
+        start = 1  # If method, remove 'self' arg
+    elif inspect.isclass(fn):
+        # If init, remove 'self' arg
+        code = fn.__init__.__code__
+        start = 1  # If init, remove 'self' arg
+    else:
+        code = fn.__call__.__code__
+        start = 0
+
+    return code, start
