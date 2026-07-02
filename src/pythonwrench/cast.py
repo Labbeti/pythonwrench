@@ -17,7 +17,6 @@ from typing import (
     Mapping,
     Optional,
     TypeVar,
-    get_type_hints,
     overload,
 )
 
@@ -120,10 +119,8 @@ def _namespace_to_builtin(x: Namespace, **kwargs) -> Any:
 @register_as_builtin_fn(DataclassInstance)
 def _dataclass_to_builtin(x: DataclassInstance, **kwargs) -> Any:
     # IMPORTANT note : we do not use dataclasses.asdict() because it also converts attributes like Counter, but not do dicts
-    annotations = get_type_hints(x)
-    xdict = {
-        name: as_builtin(getattr(x, name), **kwargs) for name in annotations.keys()
-    }
+    field_names = x.__dataclass_fields__.keys()
+    xdict = {name: as_builtin(getattr(x, name), **kwargs) for name in field_names}
     return xdict
 
 
