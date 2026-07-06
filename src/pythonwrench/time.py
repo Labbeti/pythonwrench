@@ -12,6 +12,7 @@ class Ticker:
         get_time_fn: Callable[[], float] = time.perf_counter,
         prev_tick: Optional[float] = None,
     ) -> None:
+        """Utility class to show time elapsed since last tick."""
         if prev_tick is None:
             prev_tick = get_time_fn()
 
@@ -20,12 +21,14 @@ class Ticker:
         self._prev_tick = prev_tick
 
     def tick(self) -> float:
+        """Set tick time and returns duration since last tick."""
         now = self._get_time_fn()
         duration = now - self._prev_tick
         self._prev_tick = now
         return duration
 
     def set_prev_tick(self, prev_tick: Optional[float] = None) -> None:
+        """Set tick time."""
         if prev_tick is None:
             prev_tick = self._get_time_fn()
         self._prev_tick = prev_tick
