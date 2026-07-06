@@ -48,6 +48,7 @@ if TYPE_CHECKING or lazy is None:
     from . import random as random
     from . import re as re
     from . import semver as semver
+    from . import time as time
     from . import warnings as warnings
 
     # Global library imports
@@ -170,6 +171,7 @@ if TYPE_CHECKING or lazy is None:
         sort_with_patterns,
     )
     from .semver import Version
+    from .time import Ticker
     from .typing import (
         BuiltinCollection,
         BuiltinNumber,
@@ -249,6 +251,7 @@ else:
             "random",
             "re",
             "semver",
+            "time",
             "typing",
             "warnings",
         ],
@@ -386,6 +389,7 @@ else:
                 "sort_with_patterns",
             ],
             "semver": ["Version"],
+            "time": ["Ticker"],
             "typing": [
                 "BuiltinCollection",
                 "BuiltinNumber",
