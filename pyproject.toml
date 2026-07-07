@@ -50,7 +50,20 @@ pyw-tree = "pythonwrench.entries:main_tree"
 pyw-safe-rmdir = "pythonwrench.entries:main_safe_rmdir"
 
 [project.optional-dependencies]
-dev = []
+dev = [
+    "pandas>=2.0.3",
+    "coverage[toml]>=7.6.1",
+    "flake8",
+    "ipykernel",
+    "ipython",
+    "pre-commit",
+    "pytest",
+    "ruff>=0.12.0",
+    "setuptools",
+    "sphinx<9.0.0",
+    "sphinx-immaterial>=0.11.14",
+    "twine",
+]
 lazy = [
     "lazy-loader>=0.4",
 ]
@@ -84,19 +97,3 @@ source = ["src"]
 
 [tool.uv.sources]
 pythonwrench = { workspace = true }
-
-[dependency-groups]
-dev = [
-    "coverage[toml]>=7.6.1",
-    "flake8",
-    "ipykernel",
-    "ipython",
-    "pre-commit",
-    "pytest",
-    "pythonwrench",
-    "ruff>=0.12.0",
-    "setuptools",
-    "sphinx<9.0.0",
-    "sphinx-immaterial>=0.11.14",
-    "twine",
-]
