@@ -22,6 +22,7 @@ from typing import (
 )
 from unittest import TestCase
 
+import pandas as pd
 import typing_extensions
 from typing_extensions import NotRequired
 
@@ -123,6 +124,8 @@ class TestChecks(TestCase):
         assert not is_special_form(Tuple[int, ...])
         assert is_special_form(Any)
         assert is_special_form(typing_extensions.Any)
+
+        assert not is_special_form(pd.DataFrame({"a": [1, 2, 3]}))
 
 
 class TestIsInstanceGuard(TestCase):

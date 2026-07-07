@@ -486,9 +486,16 @@ _SPECIAL_FORMS = [] + [
 
 def is_collection_alias(x: Any) -> bool:
     """Returns True if object is a non-parameterized collection alias type."""
-    return x in _COLLECTION_ALIASES
+    return _safe_isin(x, _COLLECTION_ALIASES)
 
 
 def is_special_form(x: Any) -> bool:
     """Returns True if object is a typing special form like `Any`."""
-    return x in _SPECIAL_FORMS
+    return _safe_isin(x, _SPECIAL_FORMS)
+
+
+def _safe_isin(x: Any, targets: Iterable) -> bool:
+    for alias in targets:
+        if (x == alias) is True:
+            return True
+    return False
