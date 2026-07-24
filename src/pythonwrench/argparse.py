@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import re
 from argparse import ArgumentParser
 from dataclasses import MISSING, fields
 from functools import partial
@@ -416,15 +417,7 @@ def _str_to_type_impl(
         else:
             raise ValueError
 
-        # TODO: improve this parsing
-        x = (
-            x.strip()
-            .removeprefix("[")
-            .removesuffix("]")
-            .strip()
-            .removesuffix(",")
-            .strip()
-        )
+        x = re.sub(r"^\s*\[\s*(|.*[^,\s])(|\s*,)\s*\]\s*$", r"\1", x)
         x_list = x.split(",")
 
         y_list = []
