@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.5.3] UNRELEASED
+## [0.6.0] 2026-07-24
 ### Added
 - Add `_fill_all_arguments` option to `filter_and_call`.
 - Add `parse_args_using_dataclass` function to parse program arguments using dataclass.
