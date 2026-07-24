@@ -550,6 +550,8 @@ def _disk_cache_impl(
             return output
 
         _disk_cache_wrapper.fn = fn  # type: ignore
+        _disk_cache_wrapper.cache_fn_dpath = cache_fn_dpath  # type: ignore
+
         return _disk_cache_wrapper
 
     return _disk_cache_impl_fn

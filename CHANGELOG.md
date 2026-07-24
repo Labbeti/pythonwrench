@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 
 ### Modified
 - Move CSV, JSON, JSONL and PICKLE functions to new `serialization` module.
+- Default value for `key_mode` in `dict_list_to_list_dict` is now `"same"` to match `list_dict_to_dict_list`.
 
 ### Fixed
 - `Ticker` class in global context.
