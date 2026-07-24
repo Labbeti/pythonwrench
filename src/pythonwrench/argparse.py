@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from argparse import ArgumentParser
+from dataclasses import MISSING, fields
 from functools import partial
 from typing import (
     Any,
     Callable,
+    Dict,
     Iterable,
     List,
+    Literal,
     Optional,
     Type,
     TypeVar,
@@ -21,18 +25,118 @@ except ImportError:
     # support older python versions
     UnionType = Any
 
-from pythonwrench.typing.classes import NoneType
+from pythonwrench.typing.classes import Dataclass, DataclassInstance, NoneType
 
 T = TypeVar("T")
+T_Dataclass = TypeVar("T_Dataclass", bound=Dataclass)
+T_DataclassInstance = TypeVar("T_DataclassInstance", bound=DataclassInstance)
+TargetType = Union[Type[T], UnionType, "Type[Literal]"]
 
 
 DEFAULT_TRUE_VALUES = ("True", "t", "yes", "y", "1")
 DEFAULT_FALSE_VALUES = ("False", "f", "no", "n", "0")
 DEFAULT_NONE_VALUES = ("None", "null")
 
+_SCALARS_TARGET_TYPES = (str, int, float, None, NoneType, bool)
+
+
+def parse_args_using_dataclass(
+    dataclass_type: Type[T_DataclassInstance],
+    args: Optional[Iterable[str]] = None,
+) -> T_DataclassInstance:
+    """Converts prog args to a typed dataclass using argparse.
+
+    Currently only supports dataclasses that contains only builtin scalars: str, int, float, None, bool OR list of builtin scalars.
+    """
+    parser = ArgumentParser(exit_on_error=False)
+    parser = new_parser_from_dataclass(dataclass_type, parser)
+    parsed, argv = parser.parse_known_args(args)
+    if len(argv) > 0:
+        raise ValueError(f"Found {len(argv)} unknown arguments: {argv}.")
+    instance = dataclass_type(**parsed.__dict__)
+    return instance
+
+
+def new_parser_from_dataclass(
+    dataclass_type: Type[T_DataclassInstance],
+    parser: Optional[ArgumentParser],
+) -> ArgumentParser:
+    if parser is None:
+        parser = ArgumentParser()
+
+    for field in fields(dataclass_type):
+        kwds = {}
+        posargs = [f"--{field.name}"]
+
+        if field.default is MISSING and field.default_factory is MISSING:
+            kwds["required"] = True
+        elif field.default is not MISSING:
+            kwds["default"] = field.default
+        elif field.default_factory is not MISSING:
+            kwds["default"] = field.default_factory()  # type: ignore
+
+        else:
+            msg = f"Invalid field {field.name}: found values for default and default_factory."
+            raise ValueError(msg)
+
+        kwds |= _get_kwds_for_type(field.type)
+        parser.add_argument(*posargs, **kwds)
+    return parser
+
+
+def _get_kwds_for_type(field_type: Any) -> Dict[str, Any]:
+    kwds = {}
+
+    type_origin = get_origin(field_type)
+    type_args = get_args(field_type)
+
+    # sanity checks
+    if type_origin is Literal:
+        if not all(type(arg) in _SCALARS_TARGET_TYPES for arg in type_args):
+            msg = f"Invalid argument {field_type=}. (expected homogeneous types in {type_origin})"
+            raise TypeError(msg)
+    elif type_origin in (UnionType, Union):
+        if not all(arg in _SCALARS_TARGET_TYPES for arg in type_args):
+            msg = f"Invalid argument {field_type=}. (expected homogeneous types in {type_origin})"
+            raise TypeError(msg)
+
+    if field_type in _SCALARS_TARGET_TYPES or type_origin in (
+        Literal,
+        Optional,
+        UnionType,
+        Union,
+    ):
+        kwds |= _get_kwds_for_scalar_type(field_type)
+    elif type_origin is list:
+        item_type = type_args[0]
+        kwds |= _get_kwds_for_scalar_type(item_type)
+        kwds["nargs"] = "*"
+    else:
+        msg = f"Unsupported type {field_type}."
+        raise TypeError(msg)
+
+    return kwds
+
+
+def _get_kwds_for_scalar_type(type_: Any) -> Dict[str, Any]:
+    type_origin = get_origin(type_)
+    kwds = {}
+
+    if type_ in _SCALARS_TARGET_TYPES or type_origin in (UnionType, Union, Optional):
+        pass
+    elif type_origin is Literal:
+        type_args = get_args(type_)
+        kwds["choices"] = type_args
+    else:
+        msg = f"Unsupported type {type_}."
+        raise TypeError(msg)
+
+    kwds["type"] = parse_to(type_)  # type: ignore
+    return kwds
+
 
 def parse_to(
-    target_type: Type[T],
+    target_type: TargetType[T],
     *,
     case_sensitive: bool = False,
     true_values: Union[str, Iterable[str]] = DEFAULT_TRUE_VALUES,
@@ -55,7 +159,7 @@ def parse_to(
 
 def str_to_type(
     x: str,
-    target_type: Union[Type[T], UnionType],
+    target_type: TargetType[T],
     *,
     case_sensitive: bool = False,
     true_values: Union[str, Iterable[str]] = DEFAULT_TRUE_VALUES,
@@ -117,7 +221,10 @@ def str_to_none(
     - Other raises ValueError.
     """
     return str_to_type(
-        x, NoneType, case_sensitive=case_sensitive, none_values=none_values
+        x,
+        NoneType,
+        case_sensitive=case_sensitive,
+        none_values=none_values,
     )
 
 
@@ -135,7 +242,10 @@ def str_to_optional_bool(
     - Other raises ValueError.
     """
     return str_to_type(
-        x, Optional[bool], case_sensitive=case_sensitive, none_values=none_values
+        x,
+        Optional[bool],
+        case_sensitive=case_sensitive,
+        none_values=none_values,
     )
 
 
@@ -147,7 +257,10 @@ def str_to_optional_float(
 ) -> Optional[float]:
     """Convert string values to optional float safely. Intended for argparse arguments."""
     return str_to_type(
-        x, Optional[float], case_sensitive=case_sensitive, none_values=none_values
+        x,
+        Optional[float],
+        case_sensitive=case_sensitive,
+        none_values=none_values,
     )
 
 
@@ -159,7 +272,10 @@ def str_to_optional_int(
 ) -> Optional[int]:
     """Convert string values to optional int safely. Intended for argparse arguments."""
     return str_to_type(
-        x, Optional[int], case_sensitive=case_sensitive, none_values=none_values
+        x,
+        Optional[int],
+        case_sensitive=case_sensitive,
+        none_values=none_values,
     )
 
 
@@ -171,31 +287,48 @@ def str_to_optional_str(
 ) -> Optional[str]:
     """Convert string values to optional str safely. Intended for argparse arguments."""
     return str_to_type(
-        x, Optional[str], case_sensitive=case_sensitive, none_values=none_values
+        x,
+        Optional[str],
+        case_sensitive=case_sensitive,
+        none_values=none_values,
     )
 
 
 def _str_to_type_impl(
     x: str,
-    target_type: Union[Type[T], UnionType],
+    target_type: TargetType[T],
     *,
     case_sensitive: bool = False,
     true_values: Union[str, Iterable[str]] = DEFAULT_TRUE_VALUES,
     false_values: Union[str, Iterable[str]] = DEFAULT_FALSE_VALUES,
     none_values: Union[str, Iterable[str]] = DEFAULT_NONE_VALUES,
 ) -> Union[T, Exception]:
-    if target_type in (str, int, float, None, NoneType, bool):
-        return _str_to_scalar_impl(
-            x,
-            target_type,
-            case_sensitive=case_sensitive,
-            true_values=true_values,
-            false_values=false_values,
-            none_values=none_values,
-        )
+    kwds: Dict[str, Any] = dict(
+        case_sensitive=case_sensitive,
+        true_values=true_values,
+        false_values=false_values,
+        none_values=none_values,
+    )
+    if target_type in _SCALARS_TARGET_TYPES:
+        return _str_to_scalar_impl(x, target_type, **kwds)
 
     origin = get_origin(target_type)
-    if getattr(target_type, "__name__", None) == "Optional":
+
+    if origin is Literal:
+        args = get_args(target_type)
+        literal_types = {type(value) for value in args}
+        if len(literal_types) != 1:
+            msg = f"Mixed Literal are not supported: {args}"
+            raise TypeError(msg)
+
+        literal_type = next(iter(literal_types))
+        scalar = _str_to_scalar_impl(x, literal_type, **kwds)
+        if scalar not in args:
+            msg = f"Cannot convert {x} to Literal[{', '.join(args)}]"
+            raise ValueError(msg)
+        return scalar
+
+    elif getattr(target_type, "__name__", None) == "Optional":
         args = (None,) + get_args(target_type)
     elif origin == Union or origin.__name__ in ("Union", "UnionType"):  # type: ignore
         args = get_args(target_type)
@@ -213,13 +346,7 @@ def _str_to_type_impl(
     args = sorted(args, key=key_fn)
 
     for arg in args:
-        result = _str_to_type_impl(
-            x,
-            arg,  # type: ignore
-            case_sensitive=case_sensitive,
-            true_values=true_values,
-            false_values=false_values,
-        )
+        result = _str_to_type_impl(x, arg, **kwds)  # type: ignore
         if not isinstance(result, Exception):
             return result
 
@@ -228,7 +355,7 @@ def _str_to_type_impl(
 
 def _str_to_scalar_impl(
     x: str,
-    target_type: Union[Type[T], UnionType],
+    target_type: TargetType[T],
     *,
     case_sensitive: bool = False,
     true_values: Union[str, Iterable[str]] = DEFAULT_TRUE_VALUES,

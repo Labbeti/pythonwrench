@@ -35,6 +35,7 @@ if TYPE_CHECKING or lazy is None:
         BuiltinCollection,
         BuiltinNumber,
         BuiltinScalar,
+        Dataclass,
         DataclassInstance,
         EllipsisType,
         ListOrTuple,

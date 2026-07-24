@@ -2,11 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from argparse import ArgumentParser
-from typing import Optional, Union
+from argparse import ArgumentError, ArgumentParser
+from dataclasses import dataclass, field
+from typing import List, Literal, Optional, Tuple, Union
 from unittest import TestCase
 
 from pythonwrench.argparse import (
+    parse_args_using_dataclass,
     parse_to,
     str_to_bool,
     str_to_none,
@@ -61,6 +63,72 @@ class TestArgparse(TestCase):
 
         with self.assertRaises(SystemExit):
             args = parser.parse_args(["--val", "2.5"])
+
+    def test_parse_args_using_dataclass_example_1(self) -> None:
+        @dataclass
+        class A:
+            a: int
+            b: str = "b"
+            c: float = 1.2
+
+        target = A(a=0, c=0.5)
+        args = ["--a", str(target.a), "--c", str(target.c)]
+        output = parse_args_using_dataclass(A, args=args)
+        assert output == target
+
+    def test_parse_args_using_dataclass_example_2(self) -> None:
+        @dataclass
+        class A:
+            arg1: None
+            arg2: Literal["winter", "summer", "fall", "spring"]
+            arg3: list[float] = field(default_factory=list)
+            arg4: Optional[str] = None
+            arg5: list[Literal["linux", "windows", "mac"]] = field(default_factory=list)
+            arg6: Union[int, str] = 0
+
+        target = A(arg1=None, arg2="fall", arg3=[99, 2])
+        args = [
+            "--arg1",
+            str(target.arg1),
+            "--arg2",
+            target.arg2,
+            "--arg3",
+            "99",
+            "2",
+            "--arg5",
+        ]
+        output = parse_args_using_dataclass(A, args=args)
+
+        assert output == target
+
+    def test_parse_args_using_dataclass_example_3(self) -> None:
+        @dataclass
+        class A:
+            arg_a: List[List[int]] = field(default_factory=list)
+
+        with self.assertRaises(TypeError):
+            _ = parse_args_using_dataclass(A, args=[])
+
+        @dataclass
+        class B:
+            arg_b: Union[str, List[str]] = ""
+
+        with self.assertRaises(TypeError):
+            _ = parse_args_using_dataclass(B, args=[])
+
+        @dataclass
+        class C:
+            arg_c: Tuple[str, ...] = ()
+
+        with self.assertRaises(TypeError):
+            _ = parse_args_using_dataclass(C, args=[])
+
+        @dataclass
+        class D:
+            arg_d: int = 0
+
+        with self.assertRaises(ArgumentError):
+            _ = parse_args_using_dataclass(D, args=["--arg_d", "1.1"])
 
 
 if __name__ == "__main__":

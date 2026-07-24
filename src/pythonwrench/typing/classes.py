@@ -10,6 +10,7 @@ from typing import (
     List,
     Protocol,
     Tuple,
+    Type,
     Union,
     runtime_checkable,
 )
@@ -49,6 +50,9 @@ SupportsIter = Iterable
 class DataclassInstance(Protocol):
     # Class meant for typing purpose only
     __dataclass_fields__: ClassVar[Dict[str, Any]]
+
+
+Dataclass = Type[DataclassInstance]
 
 
 @runtime_checkable
