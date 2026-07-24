@@ -5,7 +5,7 @@ from dataclasses import MISSING
 from typing import Any, Dict, TypeVar
 
 from pythonwrench.typing.checks import is_dataclass_instance  # noqa: F401
-from pythonwrench.typing.classes import DataclassInstance
+from pythonwrench.typing.classes import Dataclass, DataclassInstance  # noqa: F401
 
 T = TypeVar("T")
 

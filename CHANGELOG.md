@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.0] 2026-07-24
+### Added
+- Add `_fill_all_arguments` option to `filter_and_call`.
+- Add `parse_args_using_dataclass` function to parse program arguments using dataclass.
+
+### Modified
+- Move CSV, JSON, JSONL and PICKLE functions to new `serialization` module.
+- Default value for `key_mode` in `dict_list_to_list_dict` is now `"same"` to match `list_dict_to_dict_list`.
+
+### Fixed
+- `Ticker` class in global context.
+- `is_special_form` and `is_parametrized` now supports objects with custom `__contains__`, like ndarray or DataFrames.
+
 ## [0.5.2] 2026-07-02
 ### Modified
 - `lazy-loader` package is now optional.

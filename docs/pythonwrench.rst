@@ -13,6 +13,7 @@ Subpackages
    :maxdepth: 4
 
    pythonwrench.collections
+   pythonwrench.serialization
    pythonwrench.typing
 
 Submodules
@@ -31,7 +32,6 @@ Submodules
    pythonwrench.datetime
    pythonwrench.difflib
    pythonwrench.disk_cache
-   pythonwrench.entries
    pythonwrench.enum
    pythonwrench.functools
    pythonwrench.hashlib

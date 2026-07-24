@@ -380,21 +380,21 @@ def _disk_cache_impl(
             cache_saving_backend = "pickle"
 
     if cache_saving_backend == "pickle":
-        from pythonwrench.pickle import dump_pickle, load_pickle
+        from pythonwrench.serialization.pickle import dump_pickle, load_pickle
 
         suffix = ".pickle"
         cache_dump_fn = dump_pickle
         cache_load_fn = load_pickle
 
     elif cache_saving_backend == "json":
-        from pythonwrench.json import dump_json, load_json
+        from pythonwrench.serialization.json import dump_json, load_json
 
         suffix = ".json"
         cache_dump_fn = dump_json
         cache_load_fn = load_json
 
     elif cache_saving_backend == "csv":
-        from pythonwrench.csv import dump_csv, load_csv
+        from pythonwrench.serialization.csv import dump_csv, load_csv
 
         if cache_store_mode != "outputs_only":
             msg = f"Invalid combinaison of arguments {cache_saving_backend=} with {cache_store_mode=}."
@@ -550,6 +550,8 @@ def _disk_cache_impl(
             return output
 
         _disk_cache_wrapper.fn = fn  # type: ignore
+        _disk_cache_wrapper.cache_fn_dpath = cache_fn_dpath  # type: ignore
+
         return _disk_cache_wrapper
 
     return _disk_cache_impl_fn

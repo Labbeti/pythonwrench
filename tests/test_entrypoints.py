@@ -7,7 +7,8 @@ import unittest
 from pathlib import Path
 from unittest import TestCase
 
-from pythonwrench.entries import print_safe_rmdir, print_tree
+from pythonwrench.entrypoints.safe_rmdir import print_safe_rmdir
+from pythonwrench.entrypoints.tree import print_tree
 
 
 class TestEntries(TestCase):

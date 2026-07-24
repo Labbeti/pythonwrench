@@ -91,22 +91,22 @@ def contained(
 @overload
 def dict_list_to_list_dict(
     dic: Mapping[T, Iterable[U]],
-    key_mode: Literal["union"] = "union",
-    default_val: W = None,
-) -> List[Dict[T, Union[U, W]]]: ...
+    key_mode: Literal["same", "intersect"] = "same",
+    default_val: Any = None,
+) -> List[Dict[T, U]]: ...
 
 
 @overload
 def dict_list_to_list_dict(
     dic: Mapping[T, Iterable[U]],
-    key_mode: Literal["same", "intersect"],
-    default_val: Any = None,
-) -> List[Dict[T, U]]: ...
+    key_mode: Literal["union"],
+    default_val: W = None,
+) -> List[Dict[T, Union[U, W]]]: ...
 
 
 def dict_list_to_list_dict(
     dic: Mapping[T, Iterable[U]],
-    key_mode: KeyMode = "union",
+    key_mode: KeyMode = "same",
     default_val: W = None,
 ) -> List[Dict[T, Union[U, W]]]:
     """Convert dict of lists with same sizes to list of dicts.

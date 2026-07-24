@@ -21,6 +21,12 @@ class TestFunctools(TestCase):
         assert filter_and_call(A, a=1, b=2, c=0).c == 0
         assert filter_and_call(A, a=1, b=2, non_existent=0).c == 2
 
+        assert filter_and_call(A, a=3, b=9, _fill_all_arguments=False).a == 3
+        assert filter_and_call(A, a=0, b=0, c=0, d=0, e=0, _fill_all_arguments=True)
+
+        with self.assertRaises(ValueError):
+            assert filter_and_call(A, a=1, b=2, _fill_all_arguments=True)
+
     def test_example_2(self) -> None:
         def f(x, y):
             return x + y
