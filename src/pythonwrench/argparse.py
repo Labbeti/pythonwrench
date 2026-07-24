@@ -128,38 +128,47 @@ def _get_kwds_for_type(
             msg = f"Invalid argument {field_type=}. (expected homogeneous types in {type_origin})"
             raise TypeError(msg)
 
-    if field_type in _SCALARS_TARGET_TYPES or type_origin in (
-        Literal,
-        Optional,
-        UnionType,
-        Union,
+    if (
+        (field_type in _SCALARS_TARGET_TYPES)
+        or (
+            type_origin
+            in (
+                Literal,
+                Optional,
+                UnionType,
+                Union,
+            )
+        )
+        or (type_origin in (list, Iterable) and list_parsing == "brackets")
     ):
-        inner_kwds = _get_kwds_for_scalar_type(field_type, field_type)
+        inner_kwds = _get_kwds_for_scalar_type(field_type, field_type, list_parsing)
         kwds.update(inner_kwds)
 
     elif type_origin in (list, Iterable):
         item_type = type_args[0]
-        inner_kwds = _get_kwds_for_scalar_type(item_type, field_type)
+        inner_kwds = _get_kwds_for_scalar_type(item_type, field_type, list_parsing)
+        inner_kwds["nargs"] = "*"
 
-        if list_parsing == "argparse":
-            kwds["nargs"] = "*"
-        elif list_parsing == "brackets":
-            parse_fn = inner_kwds.pop("type")
+        # TODO: rm
+        # if list_parsing == "argparse":
+        #     kwds["nargs"] = "*"
+        # elif list_parsing == "brackets":
+        #     parse_fn = inner_kwds.pop("type")
 
-            def brackets_parse(x: str) -> Any:
-                x = (
-                    x.strip()
-                    .removeprefix("[")
-                    .removesuffix("]")
-                    .removesuffix(",")
-                    .strip()
-                )
-                return list(map(parse_fn, x.split(",")))
+        #     def brackets_parse(x: str) -> Any:
+        #         x = (
+        #             x.strip()
+        #             .removeprefix("[")
+        #             .removesuffix("]")
+        #             .removesuffix(",")
+        #             .strip()
+        #         )
+        #         return list(map(parse_fn, x.split(",")))
 
-            inner_kwds["type"] = brackets_parse
-        else:
-            msg = f"Invalid argument {list_parsing=}. (expected one of {get_args(ListParsing)})"
-            raise ValueError(msg)
+        #     inner_kwds["type"] = brackets_parse
+        # else:
+        #     msg = f"Invalid argument {list_parsing=}. (expected one of {get_args(ListParsing)})"
+        #     raise ValueError(msg)
 
         kwds.update(inner_kwds)
     else:
@@ -169,11 +178,20 @@ def _get_kwds_for_type(
     return kwds
 
 
-def _get_kwds_for_scalar_type(type_: Any, from_field_type: Any) -> Dict[str, Any]:
+def _get_kwds_for_scalar_type(
+    type_: Any, from_field_type: Any, list_parsing: ListParsing
+) -> Dict[str, Any]:
     type_origin = get_origin(type_)
     kwds = {}
 
-    if type_ in _SCALARS_TARGET_TYPES or type_origin in (UnionType, Union, Optional):
+    if (
+        type_ in _SCALARS_TARGET_TYPES
+        or type_origin in (UnionType, Union, Optional)
+        or (
+            get_origin(from_field_type) in (list, Iterable)
+            and list_parsing == "brackets"
+        )
+    ):
         pass
     elif type_origin is Literal:
         type_args = get_args(type_)
@@ -182,7 +200,7 @@ def _get_kwds_for_scalar_type(type_: Any, from_field_type: Any) -> Dict[str, Any
         msg = f"Unsupported dataclass member type {type_} from {from_field_type}."
         raise TypeError(msg)
 
-    kwds["type"] = parse_to(type_)  # type: ignore
+    kwds["type"] = parse_to(type_, list_parsing=list_parsing)  # type: ignore
     return kwds
 
 
@@ -193,6 +211,7 @@ def parse_to(
     true_values: Union[str, Iterable[str]] = DEFAULT_TRUE_VALUES,
     false_values: Union[str, Iterable[str]] = DEFAULT_FALSE_VALUES,
     none_values: Union[str, Iterable[str]] = DEFAULT_NONE_VALUES,
+    list_parsing: ListParsing = "argparse",
 ) -> Callable[[str], T]:
     """Returns a callable that convert string value to target type safely.
 
@@ -205,6 +224,7 @@ def parse_to(
         true_values=true_values,
         false_values=false_values,
         none_values=none_values,
+        list_parsing=list_parsing,
     )
 
 
@@ -216,6 +236,7 @@ def str_to_type(
     true_values: Union[str, Iterable[str]] = DEFAULT_TRUE_VALUES,
     false_values: Union[str, Iterable[str]] = DEFAULT_FALSE_VALUES,
     none_values: Union[str, Iterable[str]] = DEFAULT_NONE_VALUES,
+    list_parsing: ListParsing = "argparse",
 ) -> T:
     """Convert string values to target type safely. Intended for argparse arguments.
 
@@ -231,6 +252,7 @@ def str_to_type(
         true_values=true_values,
         false_values=false_values,
         none_values=none_values,
+        list_parsing=list_parsing,
     )
     if isinstance(result, Exception):
         raise result
@@ -353,12 +375,14 @@ def _str_to_type_impl(
     true_values: Union[str, Iterable[str]] = DEFAULT_TRUE_VALUES,
     false_values: Union[str, Iterable[str]] = DEFAULT_FALSE_VALUES,
     none_values: Union[str, Iterable[str]] = DEFAULT_NONE_VALUES,
+    list_parsing: ListParsing = "argparse",
 ) -> Union[T, Exception]:
     kwds: Dict[str, Any] = dict(
         case_sensitive=case_sensitive,
         true_values=true_values,
         false_values=false_values,
         none_values=none_values,
+        list_parsing=list_parsing,
     )
     if target_type in _SCALARS_TARGET_TYPES:
         return _str_to_scalar_impl(x, target_type, **kwds)
@@ -379,7 +403,38 @@ def _str_to_type_impl(
             raise ValueError(msg)
         return scalar
 
-    elif getattr(target_type, "__name__", None) == "Optional":
+    if origin in (list, Iterable):
+        if list_parsing != "brackets":
+            raise ValueError
+
+        args = get_args(target_type)
+
+        if len(args) == 0:
+            target_item_type = str
+        elif len(args) == 1:
+            target_item_type = args[0]
+        else:
+            raise ValueError
+
+        x = (
+            x.strip()
+            .removeprefix("[")
+            .removesuffix("]")
+            .strip()
+            .removesuffix(",")
+            .strip()
+        )
+        x_list = x.split(",")
+
+        y_list = []
+        for xi in x_list:
+            yi = _str_to_type_impl(xi, target_item_type, **kwds)  # type: ignore
+            if isinstance(yi, Exception):
+                return yi
+            y_list.append(yi)
+        return y_list  # type: ignore
+
+    if getattr(target_type, "__name__", None) == "Optional":
         args = (None,) + get_args(target_type)
     elif origin == Union or origin.__name__ in ("Union", "UnionType"):  # type: ignore
         args = get_args(target_type)
@@ -412,23 +467,31 @@ def _str_to_scalar_impl(
     true_values: Union[str, Iterable[str]] = DEFAULT_TRUE_VALUES,
     false_values: Union[str, Iterable[str]] = DEFAULT_FALSE_VALUES,
     none_values: Union[str, Iterable[str]] = DEFAULT_NONE_VALUES,
+    list_parsing: ListParsing = "argparse",
 ) -> Any:
+    del list_parsing
     if target_type is str:
         return x
+
     elif target_type is int:
         try:
             return int(x)
         except ValueError as err:
             return err
+
     elif target_type is float:
         try:
             return float(x)
         except ValueError as err:
             return err
+
     elif target_type in (None, NoneType):
         return _str_to_none_impl(
-            x, case_sensitive=case_sensitive, none_values=none_values
+            x,
+            case_sensitive=case_sensitive,
+            none_values=none_values,
         )
+
     elif target_type is bool:
         return _str_to_bool_impl(
             x,
@@ -437,7 +500,8 @@ def _str_to_scalar_impl(
             false_values=false_values,
         )
     else:
-        raise ValueError(f"Invalid argument {target_type=}. (unsupported type)")
+        msg = f"Invalid argument {target_type=}. (unsupported type)"
+        raise ValueError(msg)
 
 
 def _str_to_bool_impl(
