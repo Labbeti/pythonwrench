@@ -28,26 +28,23 @@ if TYPE_CHECKING or lazy is None:
     from . import checksum as checksum
     from . import collections as collections
     from . import concurrent as concurrent
-    from . import csv as csv
     from . import dataclasses as dataclasses
     from . import datetime as datetime
     from . import difflib as difflib
     from . import disk_cache as disk_cache
-    from . import entries as entries
+    from . import entrypoints as entrypoints
     from . import enum as enum
     from . import functools as functools
     from . import hashlib as hashlib
     from . import importlib as importlib
     from . import inspect as inspect
-    from . import json as json
-    from . import jsonl as jsonl
     from . import logging as logging
     from . import math as math
     from . import os as os
-    from . import pickle as pickle
     from . import random as random
     from . import re as re
     from . import semver as semver
+    from . import serialization as serialization
     from . import time as time
     from . import warnings as warnings
 
@@ -66,6 +63,7 @@ if TYPE_CHECKING or lazy is None:
     from .cast import as_builtin, register_as_builtin_fn
     from .checksum import checksum_any, checksum_object, register_checksum_fn
     from .collections import (
+        SizedGenerator,
         all_eq,
         all_ne,
         contained,
@@ -87,6 +85,7 @@ if TYPE_CHECKING or lazy is None:
         recursive_generator,
         reduce_add,
         reduce_and,
+        reduce_matmul,
         reduce_mul,
         reduce_or,
         shuffled,
@@ -99,7 +98,6 @@ if TYPE_CHECKING or lazy is None:
         union_lists,
         unzip,
     )
-    from .csv import dump_csv, dumps_csv, load_csv, loads_csv, read_csv, save_csv
     from .dataclasses import get_defaults_values
     from .datetime import get_now, get_now_iso8601
     from .difflib import find_closest_in_list, sequence_matcher_ratio
@@ -124,15 +122,6 @@ if TYPE_CHECKING or lazy is None:
         search_submodules,
     )
     from .inspect import get_argnames, get_current_fn_name, get_fullname
-    from .json import dump_json, dumps_json, load_json, loads_json, read_json, save_json
-    from .jsonl import (
-        dump_jsonl,
-        dumps_jsonl,
-        load_jsonl,
-        loads_jsonl,
-        read_jsonl,
-        save_jsonl,
-    )
     from .logging import (
         VERBOSE_DEBUG,
         VERBOSE_ERROR,
@@ -151,14 +140,6 @@ if TYPE_CHECKING or lazy is None:
     )
     from .math import argmax, argmin, argsort, clamp, clip
     from .os import get_num_cpus_available, safe_rmdir, tree_iter
-    from .pickle import (
-        dump_pickle,
-        dumps_pickle,
-        load_pickle,
-        loads_pickle,
-        read_pickle,
-        save_pickle,
-    )
     from .random import randstr
     from .re import (
         PatternLike,
@@ -171,6 +152,32 @@ if TYPE_CHECKING or lazy is None:
         sort_with_patterns,
     )
     from .semver import Version
+    from .serialization import (
+        dump_csv,
+        dump_json,
+        dump_jsonl,
+        dump_pickle,
+        dumps_csv,
+        dumps_json,
+        dumps_jsonl,
+        dumps_pickle,
+        load_csv,
+        load_json,
+        load_jsonl,
+        load_pickle,
+        loads_csv,
+        loads_json,
+        loads_jsonl,
+        loads_pickle,
+        read_csv,
+        read_json,
+        read_jsonl,
+        read_pickle,
+        save_csv,
+        save_json,
+        save_jsonl,
+        save_pickle,
+    )
     from .time import Ticker
     from .typing import (
         BuiltinCollection,
@@ -231,26 +238,23 @@ else:
             "checksum",
             "collections",
             "concurrent",
-            "csv",
             "dataclasses",
             "datetime",
             "difflib",
             "disk_cache",
-            "entries",
+            "entrypoints",
             "enum",
             "functools",
             "hashlib",
             "importlib",
             "inspect",
-            "json",
-            "jsonl",
             "logging",
             "math",
             "os",
-            "pickle",
             "random",
             "re",
             "semver",
+            "serialization",
             "time",
             "typing",
             "warnings",
@@ -270,6 +274,7 @@ else:
             "cast": ["as_builtin", "register_as_builtin_fn"],
             "checksum": ["checksum_any", "checksum_object", "register_checksum_fn"],
             "collections": [
+                "SizedGenerator",
                 "all_eq",
                 "all_ne",
                 "contained",
@@ -291,6 +296,7 @@ else:
                 "recursive_generator",
                 "reduce_add",
                 "reduce_and",
+                "reduce_matmul",
                 "reduce_mul",
                 "reduce_or",
                 "shuffled",
@@ -303,13 +309,31 @@ else:
                 "union_lists",
                 "unzip",
             ],
-            "csv": [
+            "serialization": [
                 "dump_csv",
+                "dump_json",
+                "dump_jsonl",
+                "dump_pickle",
                 "dumps_csv",
+                "dumps_json",
+                "dumps_jsonl",
+                "dumps_pickle",
                 "load_csv",
+                "load_json",
+                "load_jsonl",
+                "load_pickle",
                 "loads_csv",
+                "loads_json",
+                "loads_jsonl",
+                "loads_pickle",
                 "read_csv",
+                "read_json",
+                "read_jsonl",
+                "read_pickle",
                 "save_csv",
+                "save_json",
+                "save_jsonl",
+                "save_pickle",
             ],
             "dataclasses": ["get_defaults_values"],
             "datetime": ["get_now", "get_now_iso8601"],
@@ -335,22 +359,6 @@ else:
                 "Placeholder",
             ],
             "inspect": ["get_argnames", "get_current_fn_name", "get_fullname"],
-            "json": [
-                "dump_json",
-                "dumps_json",
-                "load_json",
-                "loads_json",
-                "read_json",
-                "save_json",
-            ],
-            "jsonl": [
-                "dump_jsonl",
-                "dumps_jsonl",
-                "load_jsonl",
-                "loads_jsonl",
-                "read_jsonl",
-                "save_jsonl",
-            ],
             "logging": [
                 "VERBOSE_DEBUG",
                 "VERBOSE_ERROR",
@@ -369,14 +377,6 @@ else:
             ],
             "math": ["argmax", "argmin", "argsort", "clamp", "clip"],
             "os": ["get_num_cpus_available", "safe_rmdir", "tree_iter"],
-            "pickle": [
-                "dump_pickle",
-                "dumps_pickle",
-                "load_pickle",
-                "loads_pickle",
-                "read_pickle",
-                "save_pickle",
-            ],
             "random": ["randstr"],
             "re": [
                 "PatternLike",
@@ -447,4 +447,4 @@ else:
 version = __version__
 version_info = Version(__version__)
 
-del Version, TYPE_CHECKING
+del TYPE_CHECKING, lazy

@@ -3,6 +3,9 @@
 All notable changes to this project will be documented in this file.
 
 ## [0.5.3] UNRELEASED
+### Modified
+- Move CSV, JSON, JSONL and PICKLE functions to new `serialization` module.
+
 ### Fixed
 - `Ticker` class in global context.
 
