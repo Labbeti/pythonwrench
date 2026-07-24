@@ -130,6 +130,25 @@ class TestArgparse(TestCase):
         with self.assertRaises(SystemExit):
             _ = parse_args_using_dataclass(D, args=["--arg_d", "1.1"])
 
+    def test_parse_args_using_dataclass_example_4(self) -> None:
+        @dataclass
+        class A:
+            nums: List[int] = field(default_factory=list)
+
+        target = A(nums=[1, -1, 10])
+
+        nums_args = list(map(str, target.nums))
+        result = parse_args_using_dataclass(
+            A, args=["--nums"] + nums_args, list_parsing="argparse"
+        )
+        assert target == result
+
+        nums_args = [f"[{','.join(map(str, target.nums))}]"]
+        result = parse_args_using_dataclass(
+            A, args=["--nums"] + nums_args, list_parsing="brackets"
+        )
+        assert target == result
+
 
 if __name__ == "__main__":
     unittest.main()

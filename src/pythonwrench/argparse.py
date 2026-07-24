@@ -25,13 +25,15 @@ except ImportError:
     # support older python versions
     UnionType = Any
 
+from pythonwrench.functools import filter_and_call
 from pythonwrench.typing.classes import Dataclass, DataclassInstance, NoneType
+from pythonwrench.warnings import deprecated_alias
 
 T = TypeVar("T")
 T_Dataclass = TypeVar("T_Dataclass", bound=Dataclass)
 T_DataclassInstance = TypeVar("T_DataclassInstance", bound=DataclassInstance)
 TargetType = Union[Type[T], UnionType, "Type[Literal]"]
-
+ListParsing = Literal["argparse", "brackets"]
 
 DEFAULT_TRUE_VALUES = ("True", "t", "yes", "y", "1")
 DEFAULT_FALSE_VALUES = ("False", "f", "no", "n", "0")
@@ -42,24 +44,41 @@ _SCALARS_TARGET_TYPES = (str, int, float, None, NoneType, bool)
 
 def parse_args_using_dataclass(
     dataclass_type: Type[T_DataclassInstance],
+    *,
     args: Optional[Iterable[str]] = None,
+    parser: Optional[ArgumentParser] = None,
+    list_parsing: ListParsing = "argparse",
 ) -> T_DataclassInstance:
     """Converts prog args to a typed dataclass using argparse.
 
     Currently only supports dataclasses that contains only builtin scalars: str, int, float, None, bool OR list of builtin scalars.
     """
-    parser = ArgumentParser()
-    parser = new_parser_from_dataclass(dataclass_type, parser)
+    init_parser = parser
+    parser = add_dataclass_fields_to_parser(
+        dataclass_type,
+        parser=parser,
+        list_parsing=list_parsing,
+    )
     parsed, argv = parser.parse_known_args(args)
     if len(argv) > 0:
         raise ValueError(f"Found {len(argv)} unknown arguments: {argv}.")
-    instance = dataclass_type(**parsed.__dict__)
+
+    if init_parser is None:
+        instance = dataclass_type(**parsed.__dict__)
+    else:
+        instance = filter_and_call(
+            dataclass_type,
+            _fill_all_arguments=True,
+            **parsed.__dict__,
+        )
     return instance
 
 
-def new_parser_from_dataclass(
+def add_dataclass_fields_to_parser(
     dataclass_type: Type[T_DataclassInstance],
+    *,
     parser: Optional[ArgumentParser],
+    list_parsing: ListParsing = "argparse",
 ) -> ArgumentParser:
     if parser is None:
         parser = ArgumentParser()
@@ -79,13 +98,21 @@ def new_parser_from_dataclass(
             msg = f"Invalid field {field.name}: found values for default and default_factory."
             raise ValueError(msg)
 
-        kwds.update(_get_kwds_for_type(field.type))
+        inner_kwds = _get_kwds_for_type(field.type, list_parsing)
+        kwds.update(inner_kwds)
         parser.add_argument(*posargs, **kwds)
 
     return parser
 
 
-def _get_kwds_for_type(field_type: Any) -> Dict[str, Any]:
+@deprecated_alias(add_dataclass_fields_to_parser)
+def new_parser_from_dataclass(*args, **kwargs): ...
+
+
+def _get_kwds_for_type(
+    field_type: Any,
+    list_parsing: ListParsing = "argparse",
+) -> Dict[str, Any]:
     kwds = {}
 
     type_origin = get_origin(field_type)
@@ -107,11 +134,34 @@ def _get_kwds_for_type(field_type: Any) -> Dict[str, Any]:
         UnionType,
         Union,
     ):
-        kwds.update(_get_kwds_for_scalar_type(field_type, field_type))
-    elif type_origin is list:
+        inner_kwds = _get_kwds_for_scalar_type(field_type, field_type)
+        kwds.update(inner_kwds)
+
+    elif type_origin in (list, Iterable):
         item_type = type_args[0]
-        kwds.update(_get_kwds_for_scalar_type(item_type, field_type))
-        kwds["nargs"] = "*"
+        inner_kwds = _get_kwds_for_scalar_type(item_type, field_type)
+
+        if list_parsing == "argparse":
+            kwds["nargs"] = "*"
+        elif list_parsing == "brackets":
+            parse_fn = inner_kwds.pop("type")
+
+            def brackets_parse(x: str) -> Any:
+                x = (
+                    x.strip()
+                    .removeprefix("[")
+                    .removesuffix("]")
+                    .removesuffix(",")
+                    .strip()
+                )
+                return list(map(parse_fn, x.split(",")))
+
+            inner_kwds["type"] = brackets_parse
+        else:
+            msg = f"Invalid argument {list_parsing=}. (expected one of {get_args(ListParsing)})"
+            raise ValueError(msg)
+
+        kwds.update(inner_kwds)
     else:
         msg = f"Unsupported type {field_type}."
         raise TypeError(msg)

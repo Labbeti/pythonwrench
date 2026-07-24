@@ -51,6 +51,7 @@ if TYPE_CHECKING or lazy is None:
     # Global library imports
     from .abc import Singleton
     from .argparse import (
+        add_dataclass_fields_to_parser,
         new_parser_from_dataclass,
         parse_args_using_dataclass,
         parse_to,
@@ -264,6 +265,7 @@ else:
         ],
         submod_attrs={
             "argparse": [
+                "add_dataclass_fields_to_parser",
                 "new_parser_from_dataclass",
                 "parse_args_using_dataclass",
                 "parse_to",

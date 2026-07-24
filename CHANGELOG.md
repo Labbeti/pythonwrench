@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.1] UNRELEASED
+### Added
+- `list_parsing` argument value `"brackets"` to `add_dataclass_fields_to_parser`.
+
 ## [0.6.0] 2026-07-24
 ### Added
 - Add `_fill_all_arguments` option to `filter_and_call`.
