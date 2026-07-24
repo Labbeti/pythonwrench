@@ -81,9 +81,9 @@ class TestArgparse(TestCase):
         class A:
             arg1: None
             arg2: Literal["winter", "summer", "fall", "spring"]
-            arg3: list[float] = field(default_factory=list)
+            arg3: List[float] = field(default_factory=list)
             arg4: Optional[str] = None
-            arg5: list[Literal["linux", "windows", "mac"]] = field(default_factory=list)
+            arg5: List[Literal["linux", "windows", "mac"]] = field(default_factory=list)
             arg6: Union[int, str] = 0
 
         target = A(arg1=None, arg2="fall", arg3=[99, 2])

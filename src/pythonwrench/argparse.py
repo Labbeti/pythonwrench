@@ -79,8 +79,9 @@ def new_parser_from_dataclass(
             msg = f"Invalid field {field.name}: found values for default and default_factory."
             raise ValueError(msg)
 
-        kwds |= _get_kwds_for_type(field.type)
+        kwds.update(_get_kwds_for_type(field.type))
         parser.add_argument(*posargs, **kwds)
+
     return parser
 
 
@@ -106,10 +107,10 @@ def _get_kwds_for_type(field_type: Any) -> Dict[str, Any]:
         UnionType,
         Union,
     ):
-        kwds |= _get_kwds_for_scalar_type(field_type, field_type)
+        kwds.update(_get_kwds_for_scalar_type(field_type, field_type))
     elif type_origin is list:
         item_type = type_args[0]
-        kwds |= _get_kwds_for_scalar_type(item_type, field_type)
+        kwds.update(_get_kwds_for_scalar_type(item_type, field_type))
         kwds["nargs"] = "*"
     else:
         msg = f"Unsupported type {field_type}."
