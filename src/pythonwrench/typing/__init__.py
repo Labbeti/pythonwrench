@@ -94,6 +94,7 @@ else:
                 "BuiltinCollection",
                 "BuiltinNumber",
                 "BuiltinScalar",
+                "Dataclass",
                 "DataclassInstance",
                 "EllipsisType",
                 "ListOrTuple",
