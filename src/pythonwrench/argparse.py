@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from functools import partial
-from types import UnionType
 from typing import (
     Any,
     Callable,
@@ -15,6 +14,12 @@ from typing import (
     get_args,
     get_origin,
 )
+
+try:
+    from types import UnionType
+except ImportError:
+    # support older python versions
+    UnionType = Any
 
 from pythonwrench.typing.classes import NoneType
 
