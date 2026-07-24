@@ -3,6 +3,9 @@
 All notable changes to this project will be documented in this file.
 
 ## [0.5.3] UNRELEASED
+### Added
+- Add `_fill_all_arguments` option to `filter_and_call`.
+
 ### Modified
 - Move CSV, JSON, JSONL and PICKLE functions to new `serialization` module.
 

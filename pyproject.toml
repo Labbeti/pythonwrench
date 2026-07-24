@@ -93,6 +93,8 @@ testpaths = ["tests"]
 source = ["src"]
 
 [tool.ruff.lint.extend-per-file-ignores]
+# F401: module imported but unused
+# F403: ‘from module import *’ used; unable to detect undefined names
 "__init__.py" = ["F401", "F403"]
 
 [tool.uv.sources]

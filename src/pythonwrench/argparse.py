@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from functools import partial
+from types import UnionType
 from typing import (
     Any,
     Callable,
@@ -49,7 +50,7 @@ def parse_to(
 
 def str_to_type(
     x: str,
-    target_type: Type[T],
+    target_type: Union[Type[T], UnionType],
     *,
     case_sensitive: bool = False,
     true_values: Union[str, Iterable[str]] = DEFAULT_TRUE_VALUES,
@@ -171,7 +172,7 @@ def str_to_optional_str(
 
 def _str_to_type_impl(
     x: str,
-    target_type: Type[T],
+    target_type: Union[Type[T], UnionType],
     *,
     case_sensitive: bool = False,
     true_values: Union[str, Iterable[str]] = DEFAULT_TRUE_VALUES,
@@ -222,7 +223,7 @@ def _str_to_type_impl(
 
 def _str_to_scalar_impl(
     x: str,
-    target_type: Type[T],
+    target_type: Union[Type[T], UnionType],
     *,
     case_sensitive: bool = False,
     true_values: Union[str, Iterable[str]] = DEFAULT_TRUE_VALUES,

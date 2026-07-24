@@ -16,7 +16,7 @@ from typing import (
 from typing_extensions import ParamSpec
 
 from pythonwrench._core import _decorator_factory, return_none  # noqa: F401
-from pythonwrench.inspect import get_argnames
+from pythonwrench.inspect import get_argnames, get_fullname
 from pythonwrench.typing import isinstance_generic
 
 T = TypeVar("T")
@@ -112,11 +112,19 @@ class Compose(Generic[T, U]):
 compose = Compose  # type: ignore
 
 
-def filter_and_call(fn: Callable[..., T], **kwargs: Any) -> T:
+def filter_and_call(
+    fn: Callable[..., T], _fill_all_arguments: bool = False, **kwargs: Any
+) -> T:
     """Call object only with the valid keyword arguments. Non-valid arguments are ignored.
 
-    Examples
-    --------
+    Arguments:
+        fn: Callable to call.
+        _fill_all_arguments: If True, all arguments of fn must be provided in kwargs. defaults to False.
+        **kwargs: Superset of arguments to pass to fn.
+            Name that does not match any argument of fn are ignored.
+
+    Examples:
+    ---------
     >>> def f(x, y):
     >>>     return x + y
     >>> filter_and_call(f, y=2, x=1)
@@ -125,16 +133,28 @@ def filter_and_call(fn: Callable[..., T], **kwargs: Any) -> T:
     ... 3
     """
     argnames = get_argnames(fn)
-    code, start = _get_code_and_start(fn)
+    code, _start = _get_code_and_start(fn)
+
+    if "_fill_all_arguments" in argnames:
+        msg = f"Invalid argument {get_fullname(fn)}, because it has argument '_fill_all_arguments'."
+        raise RuntimeError(msg)
+
+    if _fill_all_arguments:
+        missing = set(argnames).difference(kwargs)
+        if len(missing) > 0:
+            msg = f"Missing {len(missing)}/{len(argnames)} arguments: {tuple(missing)}. (with {_fill_all_arguments=})"
+            raise ValueError(msg)
 
     pos_argnames = argnames[: code.co_posonlyargcount]
     other_argnames = argnames[code.co_posonlyargcount :]
 
-    posonly_args = [value for name, value in kwargs.items() if name in pos_argnames]
+    posonly_args = {
+        name: value for name, value in kwargs.items() if name in pos_argnames
+    }
     other_kwds = {
         name: value for name, value in kwargs.items() if name in other_argnames
     }
-    result = fn(*posonly_args, **other_kwds)
+    result = fn(*posonly_args.values(), **other_kwds)
     return result
 
 
