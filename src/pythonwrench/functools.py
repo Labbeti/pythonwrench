@@ -8,6 +8,7 @@ from typing import (
     Callable,
     Generic,
     Iterable,
+    Optional,
     Tuple,
     TypeVar,
     overload,
@@ -158,7 +159,12 @@ def filter_and_call(
     return result
 
 
-def function_alias(alternative: Callable[P, U]) -> Callable[..., Callable[P, U]]:
+def function_alias(
+    alternative: Callable[P, U],
+    *,
+    pre_fn: Optional[Callable[..., Any]] = None,
+    post_fn: Optional[Callable[..., Any]] = None,
+) -> Callable[..., Callable[P, U]]:
     """Decorator to wrap function aliases.
 
     Example
@@ -173,7 +179,7 @@ def function_alias(alternative: Callable[P, U]) -> Callable[..., Callable[P, U]]
     ... "bbb"
 
     """
-    return _decorator_factory(alternative)
+    return _decorator_factory(alternative, pre_fn=pre_fn, post_fn=post_fn)
 
 
 def identity(x: T, **kwargs) -> T:

@@ -416,6 +416,7 @@ def _str_to_type_impl(
         else:
             raise ValueError
 
+        # TODO: improve this parsing
         x = (
             x.strip()
             .removeprefix("[")

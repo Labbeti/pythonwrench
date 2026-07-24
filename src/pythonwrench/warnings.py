@@ -7,7 +7,7 @@ from typing import Any, Callable, Optional, Type, TypeVar, Union, overload
 
 from typing_extensions import ParamSpec
 
-from pythonwrench._core import _decorator_factory
+from pythonwrench._core import _decorator_factory, return_none
 
 P = ParamSpec("P")
 U = TypeVar("U")
@@ -46,15 +46,21 @@ def deprecated_alias(
     alternative: Callable[P, U],
     msg_fmt: str = "Deprecated call to '{fn_name}', use '{alternative_name}' instead.",
     warn_fn: Callable[[str], Any] = partial(warn_once, category=DeprecationWarning),
+    *,
+    pre_fn: Optional[Callable[..., Any]] = None,
+    post_fn: Optional[Callable[..., Any]] = None,
 ) -> Callable[..., Callable[P, U]]:
     """Decorator to wrap deprecated function aliases."""
     alternative_name = alternative.__name__ if alternative is not None else "None"
+    if pre_fn is None:
+        pre_fn = return_none
 
-    def pre_fn(fn, *args, **kwargs):
+    def inner_pre_fn(fn, *args, **kwargs) -> None:
         msg = msg_fmt.format(fn_name=fn.__name__, alternative_name=alternative_name)
         warn_fn(msg)
+        pre_fn(fn, *args, **kwargs)
 
-    return _decorator_factory(alternative, pre_fn=pre_fn)
+    return _decorator_factory(alternative, pre_fn=inner_pre_fn, post_fn=post_fn)
 
 
 @overload
@@ -83,14 +89,19 @@ def deprecated_function(
     *,
     msg_fmt: str = "Deprecated call to '{fn_name}'.",
     warn_fn: Callable[[str], Any] = partial(warn_once, category=DeprecationWarning),
+    pre_fn: Optional[Callable[..., Any]] = None,
+    post_fn: Optional[Callable[..., Any]] = None,
 ) -> Callable:
     """Decorator to wrap deprecated functions."""
+    if pre_fn is None:
+        pre_fn = return_none
 
-    def pre_fn(fn, *args, **kwargs):
+    def inner_pre_fn(fn, *args, **kwargs):
         msg = msg_fmt.format(fn_name=fn.__qualname__)
         warn_fn(msg)
+        pre_fn(fn, *args, **kwargs)
 
-    decorator = _decorator_factory(None, pre_fn=pre_fn)
+    decorator = _decorator_factory(None, pre_fn=inner_pre_fn, post_fn=post_fn)
     if fn is None:
         return decorator
     else:
