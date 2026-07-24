@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from argparse import ArgumentError, ArgumentParser
+from argparse import ArgumentParser
 from dataclasses import dataclass, field
 from typing import List, Literal, Optional, Tuple, Union
 from unittest import TestCase
@@ -127,7 +127,7 @@ class TestArgparse(TestCase):
         class D:
             arg_d: int = 0
 
-        with self.assertRaises(ArgumentError):
+        with self.assertRaises(SystemExit):
             _ = parse_args_using_dataclass(D, args=["--arg_d", "1.1"])
 
 

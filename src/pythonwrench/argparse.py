@@ -48,7 +48,7 @@ def parse_args_using_dataclass(
 
     Currently only supports dataclasses that contains only builtin scalars: str, int, float, None, bool OR list of builtin scalars.
     """
-    parser = ArgumentParser(exit_on_error=False)
+    parser = ArgumentParser()
     parser = new_parser_from_dataclass(dataclass_type, parser)
     parsed, argv = parser.parse_known_args(args)
     if len(argv) > 0:
@@ -106,10 +106,10 @@ def _get_kwds_for_type(field_type: Any) -> Dict[str, Any]:
         UnionType,
         Union,
     ):
-        kwds |= _get_kwds_for_scalar_type(field_type)
+        kwds |= _get_kwds_for_scalar_type(field_type, field_type)
     elif type_origin is list:
         item_type = type_args[0]
-        kwds |= _get_kwds_for_scalar_type(item_type)
+        kwds |= _get_kwds_for_scalar_type(item_type, field_type)
         kwds["nargs"] = "*"
     else:
         msg = f"Unsupported type {field_type}."
@@ -118,7 +118,7 @@ def _get_kwds_for_type(field_type: Any) -> Dict[str, Any]:
     return kwds
 
 
-def _get_kwds_for_scalar_type(type_: Any) -> Dict[str, Any]:
+def _get_kwds_for_scalar_type(type_: Any, from_field_type: Any) -> Dict[str, Any]:
     type_origin = get_origin(type_)
     kwds = {}
 
@@ -128,7 +128,7 @@ def _get_kwds_for_scalar_type(type_: Any) -> Dict[str, Any]:
         type_args = get_args(type_)
         kwds["choices"] = type_args
     else:
-        msg = f"Unsupported type {type_}."
+        msg = f"Unsupported dataclass member type {type_} from {from_field_type}."
         raise TypeError(msg)
 
     kwds["type"] = parse_to(type_)  # type: ignore
