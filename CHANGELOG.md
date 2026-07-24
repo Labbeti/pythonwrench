@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - `Ticker` class in global context.
+- `is_special_form` and `is_parametrized` now supports objects with custom `__contains__`, like ndarray or DataFrames.
 
 ## [0.5.2] 2026-07-02
 ### Modified
