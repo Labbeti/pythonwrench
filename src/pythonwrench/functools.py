@@ -114,7 +114,9 @@ compose = Compose  # type: ignore
 
 
 def filter_and_call(
-    fn: Callable[..., T], _fill_all_arguments: bool = False, **kwargs: Any
+    fn: Callable[..., T],
+    _fill_all_arguments: bool = False,
+    **kwargs: Any,
 ) -> T:
     """Call object only with the valid keyword arguments. Non-valid arguments are ignored.
 

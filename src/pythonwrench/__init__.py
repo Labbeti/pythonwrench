@@ -116,7 +116,9 @@ if TYPE_CHECKING or lazy is None:
     )
     from .hashlib import hash_file
     from .importlib import (
+        ModulePlaceholder,
         Placeholder,
+        import_if_available,
         is_available_package,
         is_editable_package,
         reload_editable_packages,
@@ -357,6 +359,8 @@ else:
             ],
             "hashlib": ["hash_file"],
             "importlib": [
+                "import_if_available",
+                "ModulePlaceholder",
                 "is_available_package",
                 "is_editable_package",
                 "reload_editable_packages",

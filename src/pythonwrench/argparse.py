@@ -33,7 +33,7 @@ from pythonwrench.warnings import deprecated_alias
 T = TypeVar("T")
 T_Dataclass = TypeVar("T_Dataclass", bound=Dataclass)
 T_DataclassInstance = TypeVar("T_DataclassInstance", bound=DataclassInstance)
-TargetType = Union[Type[T], UnionType, "Type[Literal]", Optional]
+TargetType = Union[Type[T], UnionType, "Type[Literal]", "Type[Optional]"]
 ListParsing = Literal["argparse", "brackets"]
 
 DEFAULT_TRUE_VALUES = ("True", "t", "yes", "y", "1")

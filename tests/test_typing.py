@@ -22,10 +22,10 @@ from typing import (
 )
 from unittest import TestCase
 
-import pandas as pd
 import typing_extensions
 from typing_extensions import NotRequired
 
+from pythonwrench.importlib import import_if_available, is_available_package
 from pythonwrench.typing import (
     NoneType,
     check_args_types,
@@ -38,6 +38,8 @@ from pythonwrench.typing import (
     is_typed_dict,
     isinstance_generic,
 )
+
+pd = import_if_available("pandas")
 
 
 class ExampleDict(TypedDict):
@@ -125,7 +127,8 @@ class TestChecks(TestCase):
         assert is_special_form(Any)
         assert is_special_form(typing_extensions.Any)
 
-        assert not is_special_form(pd.DataFrame({"a": [1, 2, 3]}))
+        if is_available_package("pandas"):
+            assert not is_special_form(pd.DataFrame({"a": [1, 2, 3]}))
 
 
 class TestIsInstanceGuard(TestCase):
@@ -313,6 +316,12 @@ class TestIsInstanceGuard(TestCase):
 
         with self.assertRaises(NotImplementedError):
             assert isinstance_generic(Path, Callable[[str], Path])
+
+    def test_check_only_first(self) -> None:
+        assert isinstance_generic([1, 2], List[int], check_only_first=True)
+        assert isinstance_generic([1, "2", 1], List[int], check_only_first=True)
+        assert isinstance_generic([], List[int], check_only_first=True)
+        assert isinstance_generic([1, 2], List, check_only_first=True)
 
 
 class TestCheckArgsType(TestCase):
