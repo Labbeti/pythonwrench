@@ -1,6 +1,8 @@
 #!/bin/bash
 # -*- coding: utf-8 -*-
 
+pkg_name="pythonwrench"
+
 docs_dpath=`dirname $0`
 cd "$docs_dpath"
 
@@ -15,7 +17,7 @@ fi
 export LANG="$locale_name"
 export LC_ALL="$locale_name"
 
-rm pythonwrench.*rst 2> /dev/null
-uv run sphinx-apidoc -e -M -o . ../src/pythonwrench && uv run make clean && uv run make html
+rm ${pkg_name}.*rst 2> /dev/null
+uv run sphinx-apidoc -e -M -o . ../src/${pkg_name} && uv run make clean && uv run make html
 
 exit $?

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import copy
 import logging
 from concurrent.futures import Future, ThreadPoolExecutor
 from typing import Any, Callable, Dict, Generic, Iterable, List, Optional, TypeVar
@@ -42,8 +43,11 @@ class ThreadPoolExecutorHelper(Generic[P, T]):
                 executor_kwds = {}
             self.executor = ThreadPoolExecutor(**executor_kwds)
 
-        kwargs = self.default_kwargs | kwargs  # type: ignore
-        future = self.executor.submit(self.fn, *args, **kwargs)
+        default_kwargs = copy.copy(self.default_kwargs)
+        default_kwargs.update(kwargs)
+        del kwargs
+
+        future = self.executor.submit(self.fn, *args, **default_kwargs)
         self.futures.append(future)
         return future
 

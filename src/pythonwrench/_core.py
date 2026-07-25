@@ -39,10 +39,14 @@ def return_none(*args, **kwargs) -> None:
 def _decorator_factory(
     inner_fn: Optional[Callable[P, U]],
     *,
-    pre_fn: Callable[..., Any] = return_none,
-    post_fn: Callable[..., Any] = return_none,
+    pre_fn: Optional[Callable[..., Any]] = None,
+    post_fn: Optional[Callable[..., Any]] = None,
 ) -> Callable[[Callable[P, U]], Callable[P, U]]:
     """Deprecated decorator for function aliases."""
+    if pre_fn is None:
+        pre_fn = return_none
+    if post_fn is None:
+        post_fn = return_none
 
     def wrapper_factory(fn: Callable[P, U]) -> Callable[P, U]:
         if inner_fn is None:

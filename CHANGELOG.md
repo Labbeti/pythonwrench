@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.1] 2026-07-25
+### Added
+- `list_parsing` argument value `"brackets"` to `add_dataclass_fields_to_parser`.
+- `pre_fn` and `post_fn` args to `function_alias`, `deprecated_alias` and `deprecated_function`.
+- `ModulePlacerholder` and `import_if_available`
+
+### Fixed
+- Minor compatibilities with python 3.8.
+
+
 ## [0.6.0] 2026-07-24
 ### Added
 - Add `_fill_all_arguments` option to `filter_and_call`.
@@ -15,6 +25,7 @@ All notable changes to this project will be documented in this file.
 - `Ticker` class in global context.
 - `is_special_form` and `is_parametrized` now supports objects with custom `__contains__`, like ndarray or DataFrames.
 
+
 ## [0.5.2] 2026-07-02
 ### Modified
 - `lazy-loader` package is now optional.
@@ -22,6 +33,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - `Placeholder` and `requires_packages` in global context.
 - `as_builtin`  now support conversions of dataclasses attributes, without converting to dict with `dataclasses.asdict`.
+
 
 ## [0.5.1] 2026-06-19
 ### Added
@@ -33,26 +45,32 @@ All notable changes to this project will be documented in this file.
 ### Modified
 - Checksum can apply to `date`, `datetime`, parametrized types, collections aliases and special forms.
 
+
 ## [0.5.0] 2026-03-05
 ### Modified
 - Change default store mode to `"outputs_only"` in disk cache.
 - Change default `fn_name` to function name instead of fully qualified name in disk cache.
 - Lazily load imports if `lazy_loader` package is available.
 
+
 ## [0.4.10] 2026-02-09
 ### Fixed
 - Disk cache custom keywords arguments for cache filename.
+
 
 ## [0.4.9] 2026-02-06
 ### Fixed
 - `Version` now ignores buildmetadata when comparing versions.
 
+
 ## [0.4.8] 2026-02-06
 ### Added
 - `checksum_any` now supports `Enum` instances.
 
+
 ### Fixed
 - Missing global typing imports.
+
 
 ## [0.4.7] 2026-02-01
 ### Modified
@@ -61,19 +79,23 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - `Callable` in `isinstance_generic` check.
 
+
 ## [0.4.6] 2026-01-09
 ### Added
 - `cache_fname_fmt` can now be a custom callable formatter.
 
+
 ## [0.4.5] 2026-01-09
 ### Fixed
 - Documentation build with constraint `sphinx<9.0.0`.
+
 
 ## [0.4.4] 2026-01-09
 ### Added
 - `SizedGenerator` class wrapper.
 - `executor_kwds` argument to `ThreadPoolExecutorHelper` class.
 - `cache_fname_fmt` argument in `disk_cache` now supports inputs arguments values to name the cache file.
+
 
 ## [0.4.3] 2025-12-13
 ### Added
@@ -87,9 +109,11 @@ All notable changes to this project will be documented in this file.
 - `SupportsMatmul` typing class.
 - `reduce_matmul` function.
 
+
 ## [0.4.2] 2025-10-16
 ### Fixed
 - `get_argnames` and `filter_and_call` functions when argument `fn` contains arguments with default values.
+
 
 ## [0.4.1] 2025-09-11
 ### Added
@@ -103,6 +127,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Default value for `T_Index` typevar for protocol that specify `__getitem__` method.
 - `reload_editable_submodules` when no editable submodule is imported.
+
 
 ## [0.4.0] 2025-07-18
 ### Added
@@ -120,6 +145,7 @@ All notable changes to this project will be documented in this file.
 - `priority` argument in `register` method of `_FunctionRegistry` class.
 - `get_argnames` returns when function contains local variables.
 
+
 ## [0.3.0] 2025-06-29
 ### Added
 - `check_args_type` decorator.
@@ -131,6 +157,7 @@ All notable changes to this project will be documented in this file.
 - `as_builtin` now converts correctly `Mapping` instances.
 - `register_checksum_fn` now accepts `priority` arg.
 
+
 ## [0.2.0] 2025-06-25
 ### Added
 - Python 3.8 support.
@@ -141,6 +168,7 @@ All notable changes to this project will be documented in this file.
 
 ### Modified
 - `disk_cache_decorator` now supports custom saving backend fns.
+
 
 ## [0.1.0] 2025-06-21
 ### Added

@@ -199,7 +199,10 @@ def isinstance_generic(
             return False
 
         if check_only_first:
-            return isinstance_generic(next(iter(obj)), args[0])
+            try:
+                return isinstance_generic(next(iter(obj)), args[0])
+            except StopIteration:
+                return True
         else:
             return all(isinstance_generic(xi, args[0]) for xi in obj)
 

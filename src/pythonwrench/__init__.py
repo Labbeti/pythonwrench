@@ -9,7 +9,7 @@ __author_email__ = "labbeti.pub@gmail.com"
 __license__ = "MIT"
 __maintainer__ = "Étienne Labbé (Labbeti)"
 __status__ = "Development"
-__version__ = "0.6.0"
+__version__ = "0.6.1"
 
 
 from typing import TYPE_CHECKING
@@ -51,6 +51,7 @@ if TYPE_CHECKING or lazy is None:
     # Global library imports
     from .abc import Singleton
     from .argparse import (
+        add_dataclass_fields_to_parser,
         new_parser_from_dataclass,
         parse_args_using_dataclass,
         parse_to,
@@ -115,7 +116,9 @@ if TYPE_CHECKING or lazy is None:
     )
     from .hashlib import hash_file
     from .importlib import (
+        ModulePlaceholder,
         Placeholder,
+        import_if_available,
         is_available_package,
         is_editable_package,
         reload_editable_packages,
@@ -264,6 +267,7 @@ else:
         ],
         submod_attrs={
             "argparse": [
+                "add_dataclass_fields_to_parser",
                 "new_parser_from_dataclass",
                 "parse_args_using_dataclass",
                 "parse_to",
@@ -355,6 +359,8 @@ else:
             ],
             "hashlib": ["hash_file"],
             "importlib": [
+                "import_if_available",
+                "ModulePlaceholder",
                 "is_available_package",
                 "is_editable_package",
                 "reload_editable_packages",

@@ -153,27 +153,6 @@ def reload_editable_packages(*, verbose: int = 0) -> List[ModuleType]:
     )
 
 
-class Placeholder:
-    """Placeholder object. All instances attributes always returns the object itself."""
-
-    def __init__(self, *args, **kwargs) -> None: ...
-
-    def __getattr__(self, name: str) -> Any:
-        return self
-
-    def __call__(self, *args, **kwargs) -> Any:
-        return self
-
-    def __getitem__(self, *args, **kwargs) -> Any:
-        return self
-
-    def __eq__(self, other) -> Any:
-        return self == other
-
-    def __ne__(self, other) -> Any:
-        return self != other
-
-
 def requires_packages(
     arg0: Union[Iterable[str], str],
     /,
@@ -213,3 +192,42 @@ def requires_packages(
         return _impl
 
     return _wrap
+
+
+class Placeholder:
+    """Placeholder object. All instances attributes always returns the object itself."""
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__()
+        self.__excluded_self_attrs = [
+            "__file__",
+            "__eq__",
+            "__ne__",
+            "__str__",
+            "__repr__",
+        ]
+
+    def __getattr__(self, name: str) -> Any:
+        if name in self.__excluded_self_attrs:
+            return self.__getattribute__(name)
+        else:
+            return self
+
+    def __call__(self, *args, **kwargs) -> Any:
+        return self
+
+    def __getitem__(self, *args, **kwargs) -> Any:
+        return self
+
+
+class ModulePlaceholder(ModuleType, Placeholder):
+    def __init__(self, *args, **kwargs) -> None:
+        Placeholder.__init__(self, *args, **kwargs)
+        ModuleType.__init__(self, *args, **kwargs)
+
+
+def import_if_available(name: str) -> ModuleType:
+    if is_available_package(name):
+        return __import__(name)
+    else:
+        return ModulePlaceholder(name)
