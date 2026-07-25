@@ -13,8 +13,9 @@ from typing import (
 @overload
 def _setup_output_fpath(
     fpath: Union[str, Path, os.PathLike],
-    overwrite: bool,
-    make_parents: bool,
+    *,
+    overwrite: bool = True,
+    make_parents: bool = True,
     absolute: bool = True,
 ) -> Path: ...
 
@@ -22,8 +23,9 @@ def _setup_output_fpath(
 @overload
 def _setup_output_fpath(
     fpath: TextIOWrapper,
-    overwrite: bool,
-    make_parents: bool,
+    *,
+    overwrite: bool = True,
+    make_parents: bool = True,
     absolute: bool = True,
 ) -> TextIOWrapper: ...
 
@@ -31,16 +33,18 @@ def _setup_output_fpath(
 @overload
 def _setup_output_fpath(
     fpath: None,
-    overwrite: bool,
-    make_parents: bool,
+    *,
+    overwrite: bool = True,
+    make_parents: bool = True,
     absolute: bool = True,
 ) -> None: ...
 
 
 def _setup_output_fpath(
     fpath: Union[str, Path, os.PathLike, TextIOWrapper, None],
-    overwrite: bool,
-    make_parents: bool,
+    *,
+    overwrite: bool = True,
+    make_parents: bool = True,
     absolute: bool = True,
 ) -> Union[Path, None, TextIOWrapper]:
     """Resolve path, expand path and create intermediate parents."""
