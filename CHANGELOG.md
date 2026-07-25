@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.6.1] UNRELEASED
+## [0.6.1] 2026-07-25
 ### Added
 - `list_parsing` argument value `"brackets"` to `add_dataclass_fields_to_parser`.
 - `pre_fn` and `post_fn` args to `function_alias`, `deprecated_alias` and `deprecated_function`.
