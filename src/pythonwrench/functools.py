@@ -16,13 +16,13 @@ from typing import (
 
 from typing_extensions import ParamSpec
 
-from pythonwrench._core import _decorator_factory, return_none  # noqa: F401
+from pythonwrench._core import T_Function, _decorator_factory, return_none  # noqa: F401
 from pythonwrench.inspect import get_argnames, get_fullname
 from pythonwrench.typing import isinstance_generic
 
 T = TypeVar("T")
-P = ParamSpec("P")
 U = TypeVar("U")
+P = ParamSpec("P")
 
 
 class Compose(Generic[T, U]):
@@ -162,12 +162,14 @@ def filter_and_call(
 
 
 def function_alias(
-    alternative: Callable[P, U],
+    alternative: T_Function,
     *,
     pre_fn: Optional[Callable[..., Any]] = None,
     post_fn: Optional[Callable[..., Any]] = None,
-) -> Callable[..., Callable[P, U]]:
+) -> Callable[..., T_Function]:
     """Decorator to wrap function aliases.
+
+    Unlike setting directly an alias, this preserve the nature of the alias for language server.
 
     Example
     -------

@@ -7,7 +7,7 @@ from typing import Any, Callable, Optional, Type, TypeVar, Union, overload
 
 from typing_extensions import ParamSpec
 
-from pythonwrench._core import _decorator_factory, return_none
+from pythonwrench._core import T_Function, _decorator_factory, return_none
 
 P = ParamSpec("P")
 U = TypeVar("U")
@@ -43,13 +43,13 @@ def warn_once(
 
 
 def deprecated_alias(
-    alternative: Callable[P, U],
+    alternative: T_Function,
     msg_fmt: str = "Deprecated call to '{fn_name}', use '{alternative_name}' instead.",
     warn_fn: Callable[[str], Any] = partial(warn_once, category=DeprecationWarning),
     *,
     pre_fn: Optional[Callable[..., Any]] = None,
     post_fn: Optional[Callable[..., Any]] = None,
-) -> Callable[..., Callable[P, U]]:
+) -> Callable[..., T_Function]:
     """Decorator to wrap deprecated function aliases."""
     alternative_name = alternative.__name__ if alternative is not None else "None"
     if pre_fn is None:
@@ -70,28 +70,28 @@ def deprecated_function(
     *,
     msg_fmt: str = "Deprecated call to '{fn_name}'.",
     warn_fn: Callable[[str], Any] = partial(warn_once, category=DeprecationWarning),
-) -> Callable[[Callable[P, U]], Callable[P, U]]: ...
+) -> Callable[[T_Function], T_Function]: ...
 
 
 @overload
 def deprecated_function(
-    fn: Callable[P, U],
+    fn: T_Function,
     /,
     *,
     msg_fmt: str = "Deprecated call to '{fn_name}'.",
     warn_fn: Callable[[str], Any] = partial(warn_once, category=DeprecationWarning),
-) -> Callable[P, U]: ...
+) -> T_Function: ...
 
 
 def deprecated_function(
-    fn: Optional[Callable[P, U]] = None,
+    fn: Optional[T_Function] = None,
     /,
     *,
     msg_fmt: str = "Deprecated call to '{fn_name}'.",
     warn_fn: Callable[[str], Any] = partial(warn_once, category=DeprecationWarning),
     pre_fn: Optional[Callable[..., Any]] = None,
     post_fn: Optional[Callable[..., Any]] = None,
-) -> Callable:
+) -> Union[Callable[[T_Function], T_Function], T_Function]:
     """Decorator to wrap deprecated functions."""
     if pre_fn is None:
         pre_fn = return_none
