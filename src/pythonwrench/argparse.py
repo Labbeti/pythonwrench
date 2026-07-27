@@ -49,6 +49,7 @@ def parse_args_using_dataclass(
     args: Optional[Iterable[str]] = None,
     parser: Optional[ArgumentParser] = None,
     list_parsing: ListParsing = "argparse",
+    add_dashed_arg: bool = True,
 ) -> T_DataclassInstance:
     """Converts prog args to a typed dataclass using argparse.
 
@@ -59,6 +60,7 @@ def parse_args_using_dataclass(
         dataclass_type,
         parser=parser,
         list_parsing=list_parsing,
+        add_dashed_arg=add_dashed_arg,
     )
     parsed, argv = parser.parse_known_args(args)
     if len(argv) > 0:
@@ -80,6 +82,7 @@ def add_dataclass_fields_to_parser(
     *,
     parser: Optional[ArgumentParser],
     list_parsing: ListParsing = "argparse",
+    add_dashed_arg: bool = True,
 ) -> ArgumentParser:
     if parser is None:
         parser = ArgumentParser()
@@ -87,6 +90,9 @@ def add_dataclass_fields_to_parser(
     for field in fields(dataclass_type):
         kwds = {}
         posargs = [f"--{field.name}"]
+        if add_dashed_arg and "_" in field.name:
+            dashed_arg_name = field.name.replace("_", "-")
+            posargs.append(dashed_arg_name)
 
         if field.default is MISSING and field.default_factory is MISSING:
             kwds["required"] = True
