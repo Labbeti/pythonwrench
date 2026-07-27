@@ -45,7 +45,7 @@ def dump_pickle(
     )
 
     if isinstance(file, (str, Path, PathLike)):
-        file = _setup_output_fpath(file, overwrite, make_parents)
+        file = _setup_output_fpath(file, overwrite=overwrite, make_parents=make_parents)
         with open(file, "wb") as opened_file:
             opened_file.write(content)
     elif isinstance(file, BinaryIO):

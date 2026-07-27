@@ -2,11 +2,15 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from dataclasses import dataclass, field, is_dataclass
+from dataclasses import asdict, dataclass, field, is_dataclass
 from typing import List, Tuple
 from unittest import TestCase
 
-from pythonwrench.dataclasses import get_defaults_values, is_dataclass_instance
+from pythonwrench.dataclasses import (
+    dataclassdict,
+    get_defaults_values,
+    is_dataclass_instance,
+)
 
 
 @dataclass
@@ -27,6 +31,36 @@ class TestDataclass(TestCase):
         assert not is_dataclass_instance(Dummy)
 
         assert get_defaults_values(dummy) == {"b": "b", "c": (), "d": []}
+
+    def test_dataclassdict(self) -> None:
+        @dataclassdict
+        class Point:
+            x: int
+            y: int = 0
+
+        point = Point(1)
+        assert is_dataclass(point)
+        assert isinstance(point, dict)
+        assert dict(point) == {"x": 1, "y": 0}
+        assert len(point) == 2
+        assert asdict(point) == {"x": 1, "y": 0}
+
+        point.x = 2
+        assert point["x"] == 2
+
+        point["y"] = 3
+        assert point.y == 3
+
+        point.update(x=4, extra=True)
+        assert point.x == 4
+        assert point["extra"] is True
+
+    def test_dataclassdict_rejects_dict_attribute_as_field(self) -> None:
+        with self.assertRaisesRegex(RuntimeError, "'keys'"):
+
+            @dataclassdict
+            class Invalid:
+                keys: float = 0.0
 
 
 if __name__ == "__main__":
