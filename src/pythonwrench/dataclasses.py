@@ -17,15 +17,19 @@ T = TypeVar("T")
 
 @dataclass_transform()
 def dataclassdict(cls: Type[T]) -> Type[T]:
-    """Decorate a class as a dataclass whose instances are also dictionaries.
+    """Decorate a class so it becomes both a dataclass and a dictionary."""
+    return add_dict_methods(dataclass(cls))
 
-    Dataclass fields can be read and assigned using either attribute or mapping
-    syntax. Non-field dictionary keys are allowed, but do not become attributes.
 
-    The decorator returns a subclass of *cls*, because Python cannot safely add
-    ``dict`` to an existing class' bases.
+def add_dict_methods(cls: Type[T]) -> Type[T]:
+    """Return a dictionary subclass of an already-defined dataclass.
+
+    Field values are kept synchronized between attribute and mapping access.
     """
-    dataclass_cls = dataclass(cls)
+    if not is_dataclass_type(cls):
+        raise TypeError("add_dict_methods expects a dataclass type.")
+
+    dataclass_cls = cls
     conflicting_fields = sorted(
         set(dataclass_cls.__dataclass_fields__).intersection(dir(dict))  # type: ignore
     )

@@ -101,7 +101,7 @@ if TYPE_CHECKING or lazy is None:
         union_lists,
         unzip,
     )
-    from .dataclasses import dataclassdict, get_defaults_values
+    from .dataclasses import add_dict_methods, dataclassdict, get_defaults_values
     from .datetime import get_now, get_now_iso8601
     from .difflib import find_closest_in_list, sequence_matcher_ratio
     from .disk_cache import disk_cache_call, disk_cache_decorator
@@ -345,7 +345,7 @@ else:
                 "save_jsonl",
                 "save_pickle",
             ],
-            "dataclasses": ["dataclassdict", "get_defaults_values"],
+            "dataclasses": ["add_dict_methods", "dataclassdict", "get_defaults_values"],
             "datetime": ["get_now", "get_now_iso8601"],
             "difflib": ["find_closest_in_list", "sequence_matcher_ratio"],
             "disk_cache": ["disk_cache_call", "disk_cache_decorator"],
