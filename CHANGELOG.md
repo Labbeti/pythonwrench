@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.6.2] UNRELEASED
 ### Added
-- `dataclassdict` decorator.
+- `dataclassdict` decorator and `add_dict_method` function to create dataclass+dict classes.
 
 ### Fixed
 - Typing for `function_alias`, `deprecated_alias` and `deprecated_function` decorators.
