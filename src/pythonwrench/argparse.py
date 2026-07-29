@@ -416,7 +416,7 @@ def _str_to_type_impl(
         pattern = r"^\s*\[\s*(|.*[^,\s])(|\s*,)\s*\]\s*$"
         if re.match(pattern, x) is None:
             msg = f"Cannot convert value to list: '{x}'. (with {list_parsing=})"
-            raise ValueError(msg)
+            return ValueError(msg)
 
         x = re.sub(pattern, r"\1", x)
         if x == "":
