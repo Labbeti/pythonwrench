@@ -3,6 +3,7 @@
 
 import re
 from argparse import ArgumentParser
+from collections.abc import Iterable as _Iterable
 from dataclasses import MISSING, fields
 from functools import partial
 from typing import (
@@ -13,6 +14,7 @@ from typing import (
     List,
     Literal,
     Optional,
+    Tuple,
     Type,
     TypeVar,
     Union,
@@ -33,7 +35,9 @@ from pythonwrench.warnings import deprecated_alias
 T = TypeVar("T")
 T_Dataclass = TypeVar("T_Dataclass", bound=Dataclass)
 T_DataclassInstance = TypeVar("T_DataclassInstance", bound=DataclassInstance)
-TargetType = Union[Type[T], UnionType, "Type[Literal]", "Type[Optional]"]
+TargetType = Union[
+    Type[T], UnionType, "Type[Literal]", "Type[Optional]", Tuple[type, ...]
+]
 ListParsing = Literal["argparse", "brackets"]
 
 DEFAULT_TRUE_VALUES = ("True", "t", "yes", "y", "1")
@@ -92,7 +96,7 @@ def add_dataclass_fields_to_parser(
         posargs = [f"--{field.name}"]
         if add_dashed_arg and "_" in field.name:
             dashed_arg_name = field.name.replace("_", "-")
-            posargs.append(dashed_arg_name)
+            posargs.append(f"--{dashed_arg_name}")
 
         if field.default is MISSING and field.default_factory is MISSING:
             kwds["required"] = True
@@ -105,7 +109,12 @@ def add_dataclass_fields_to_parser(
             msg = f"Invalid field {field.name}: found values for default and default_factory."
             raise ValueError(msg)
 
-        inner_kwds = _get_kwds_for_type(field.type, list_parsing)
+        try:
+            inner_kwds = _get_kwds_for_type(field.type, list_parsing)
+        except (ValueError, TypeError, RuntimeError) as err:
+            msg = f"Invalid field {field.name}: field type '{field.type}' is not supported."
+            raise type(err)(msg) from err
+
         kwds.update(inner_kwds)
         parser.add_argument(*posargs, **kwds)
 
@@ -130,10 +139,6 @@ def _get_kwds_for_type(
         if not all(type(arg) in _SCALARS_TARGET_TYPES for arg in type_args):
             msg = f"Invalid argument {field_type=}. (expected homogeneous types in {type_origin})"
             raise TypeError(msg)
-    elif type_origin in (UnionType, Union):
-        if not all(arg in _SCALARS_TARGET_TYPES for arg in type_args):
-            msg = f"Invalid argument {field_type=}. (expected homogeneous types in {type_origin})"
-            raise TypeError(msg)
 
     if (
         (field_type in _SCALARS_TARGET_TYPES)
@@ -146,47 +151,27 @@ def _get_kwds_for_type(
                 Union,
             )
         )
-        or (type_origin in (list, Iterable) and list_parsing == "brackets")
+        or (_is_iterable_type_like(type_origin) and list_parsing == "brackets")
     ):
         inner_kwds = _get_kwds_for_scalar_type(field_type, field_type, list_parsing)
         kwds.update(inner_kwds)
 
-    elif type_origin in (list, Iterable):
+    elif _is_iterable_type_like(type_origin):
         item_type = type_args[0]
         inner_kwds = _get_kwds_for_scalar_type(item_type, field_type, list_parsing)
         inner_kwds["nargs"] = "*"
-
-        # TODO: rm
-        # if list_parsing == "argparse":
-        #     kwds["nargs"] = "*"
-        # elif list_parsing == "brackets":
-        #     parse_fn = inner_kwds.pop("type")
-
-        #     def brackets_parse(x: str) -> Any:
-        #         x = (
-        #             x.strip()
-        #             .removeprefix("[")
-        #             .removesuffix("]")
-        #             .removesuffix(",")
-        #             .strip()
-        #         )
-        #         return list(map(parse_fn, x.split(",")))
-
-        #     inner_kwds["type"] = brackets_parse
-        # else:
-        #     msg = f"Invalid argument {list_parsing=}. (expected one of {get_args(ListParsing)})"
-        #     raise ValueError(msg)
-
         kwds.update(inner_kwds)
     else:
-        msg = f"Unsupported type {field_type}."
+        msg = f"Unsupported type {field_type}. (with {type_origin=})"
         raise TypeError(msg)
 
     return kwds
 
 
 def _get_kwds_for_scalar_type(
-    type_: Any, from_field_type: Any, list_parsing: ListParsing
+    type_: Any,
+    from_field_type: Any,
+    list_parsing: ListParsing,
 ) -> Dict[str, Any]:
     type_origin = get_origin(type_)
     kwds = {}
@@ -195,11 +180,12 @@ def _get_kwds_for_scalar_type(
         type_ in _SCALARS_TARGET_TYPES
         or type_origin in (UnionType, Union, Optional)
         or (
-            get_origin(from_field_type) in (list, Iterable)
+            _is_iterable_type_like(get_origin(from_field_type))
             and list_parsing == "brackets"
         )
     ):
         pass
+
     elif type_origin is Literal:
         type_args = get_args(type_)
         kwds["choices"] = type_args
@@ -399,18 +385,22 @@ def _str_to_type_impl(
     if origin is Literal:
         args = get_args(target_type)
         literal_types = {type(value) for value in args}
-        if len(literal_types) != 1:
-            msg = f"Mixed Literal are not supported: {args}"
-            raise TypeError(msg)
 
-        literal_type = next(iter(literal_types))
-        scalar = _str_to_scalar_impl(x, literal_type, **kwds)
+        if len(literal_types) == 0:
+            msg = "Invalid number of arguments in Literal. (expected at least 1)"
+            raise ValueError(msg)
+        elif len(literal_types) == 1:
+            literal_type = next(iter(literal_types))
+            scalar = _str_to_scalar_impl(x, literal_type, **kwds)
+        else:
+            scalar = _str_to_type_impl(x, tuple(literal_types), **kwds)
+
         if scalar not in args:
             msg = f"Cannot convert {x} to Literal[{', '.join(args)}]"
             raise ValueError(msg)
         return scalar
 
-    if origin in (list, Iterable):
+    if _is_iterable_type_like(origin):
         if list_parsing != "brackets":
             raise ValueError
 
@@ -423,18 +413,28 @@ def _str_to_type_impl(
         else:
             raise ValueError
 
-        x = re.sub(r"^\s*\[\s*(|.*[^,\s])(|\s*,)\s*\]\s*$", r"\1", x)
+        pattern = r"^\s*\[\s*(|.*[^,\s])(|\s*,)\s*\]\s*$"
+        if re.match(pattern, x) is None:
+            msg = f"Cannot convert value to list: '{x}'. (with {list_parsing=})"
+            raise ValueError(msg)
+
+        x = re.sub(pattern, r"\1", x)
+        if x == "":
+            return []  # type: ignore
+
         x_list = x.split(",")
 
-        y_list = []
+        output_list = []
         for xi in x_list:
-            yi = _str_to_type_impl(xi, target_item_type, **kwds)  # type: ignore
-            if isinstance(yi, Exception):
-                return yi
-            y_list.append(yi)
-        return y_list  # type: ignore
+            output_i = _str_to_type_impl(xi, target_item_type, **kwds)  # type: ignore
+            if isinstance(output_i, Exception):
+                return output_i
+            output_list.append(output_i)
+        return output_list  # type: ignore
 
-    if getattr(target_type, "__name__", None) == "Optional":
+    if isinstance(target_type, tuple):
+        args = target_type
+    elif getattr(target_type, "__name__", None) == "Optional":
         args = (None,) + get_args(target_type)
     elif origin == Union or origin.__name__ in ("Union", "UnionType"):  # type: ignore
         args = get_args(target_type)
@@ -457,6 +457,10 @@ def _str_to_type_impl(
             return result
 
     return ValueError(f"Invalid argument {x=} with {target_type=}.")
+
+
+def _is_iterable_type_like(x: Any) -> bool:
+    return x in (list, Iterable, _Iterable)
 
 
 def _str_to_scalar_impl(

@@ -6,6 +6,9 @@ All notable changes to this project will be documented in this file.
 ### Added
 - `dataclassdict` decorator and `add_dict_method` function to create dataclass+dict classes.
 
+### Modified
+- `add_dataclass_fields_to_parser` now supports mixed union and literals types.
+
 ### Fixed
 - Typing for `function_alias`, `deprecated_alias` and `deprecated_function` decorators.
 
