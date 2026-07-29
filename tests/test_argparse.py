@@ -113,7 +113,7 @@ class TestArgparse(TestCase):
         class B:
             arg_b: Union[str, List[str]] = ""
 
-        with self.assertRaises(TypeError):
+        with self.assertRaises(SystemExit):
             _ = parse_args_using_dataclass(B, args=[])
 
         @dataclass
