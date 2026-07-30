@@ -72,7 +72,7 @@ tests = [
     "pytest>=8.3.5",
 ]
 lazy = [
-    "lazy-loader>=0.4,<0.5",
+    "lazy-loader>=0.4,<1",
 ]
 
 [tool.pyright]
