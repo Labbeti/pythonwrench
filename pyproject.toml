@@ -55,7 +55,6 @@ pyw-safe-rmdir = "pythonwrench.entrypoints.safe_rmdir:main_safe_rmdir"
 [project.optional-dependencies]
 dev = [
     "pandas>=2.0.3",
-    "coverage[toml]>=7.6.1",
     "ruff>=0.12.0",
     "sphinx<9.0.0",
     "sphinx-immaterial>=0.11.14",
@@ -63,9 +62,13 @@ dev = [
     "ipykernel>=6.29.5",
     "ipython>=8.12.3",
     "pre-commit>=3.5.0",
-    "pytest>=8.3.5",
     "setuptools>=75.3.2",
     "twine>=6.1.0",
+    "pythonwrench[tests]",
+]
+tests = [
+    "coverage[toml]>=7.6.1",
+    "pytest>=8.3.5",
 ]
 lazy = [
     "lazy-loader>=0.4,<0.5",
