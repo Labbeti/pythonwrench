@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.6.2] UNRELEASED
+## [0.6.2] 2026-07-30
 ### Added
 - `dataclassdict` decorator and `add_dict_method` function to create dataclass+dict classes.
 
