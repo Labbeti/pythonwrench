@@ -71,19 +71,6 @@ lazy = [
     "lazy-loader>=0.4,<0.5",
 ]
 
-[build-system]
-requires = ["setuptools >= 61.0"]
-build-backend = "setuptools.build_meta"
-
-[tool.setuptools.packages.find]
-where = ["src"]  # list of folders that contain the packages (["."] by default)
-# package names should match these glob patterns (["*"] by default)
-# note: star after package names is required to work
-include = ["pythonwrench*"]
-
-[tool.setuptools.dynamic]
-version = {attr = "pythonwrench.__version__"}
-
 [tool.pyright]
 include = ["src"]
 exclude = ["**/__pycache__", '**/node_modules', '**/.*', '.venv']
@@ -102,3 +89,19 @@ source = ["src"]
 
 [tool.uv.sources]
 pythonwrench = { workspace = true }
+
+# --- Build backend
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+# This tells Hatch to find 'chicasr' inside the 'src' directory
+packages = ["src/pythonwrench"]
+
+[tool.hatch.build.targets.wheel.sources]
+# Ensure the 'src' directory itself is treated as the root
+"src" = ""
+
+[tool.hatch.version]
+path = "src/pythonwrench/__init__.py"
