@@ -5,6 +5,7 @@ import inspect
 import logging
 import sys
 import typing
+from dataclasses import is_dataclass
 from numbers import Integral
 from types import FunctionType, MethodType
 from typing import (
@@ -309,6 +310,10 @@ def is_dataclass_instance(x: Any) -> TypeIs[DataclassInstance]:
     Unlike function `dataclasses.is_dataclass`, this function returns False for a dataclass type.
     """
     return not isinstance(x, type) and isinstance_generic(x, DataclassInstance)
+
+
+def is_dataclass_type(x: Any) -> TypeIs[Type[DataclassInstance]]:
+    return isinstance(x, type) and is_dataclass(x)
 
 
 def is_iterable_bool(

@@ -22,6 +22,7 @@ T = TypeVar("T", covariant=True)
 U = TypeVar("U", covariant=True)
 T_Output = TypeVar("T_Output")
 T_Any = TypeVar("T_Any", contravariant=True, default=Any)
+T_Function = TypeVar("T_Function", bound=Callable[..., Any])
 
 UnkMode = Literal["identity", "error"]
 ClassOrTuple = Union[type, Tuple[type, ...]]
@@ -37,31 +38,31 @@ def return_none(*args, **kwargs) -> None:
 
 
 def _decorator_factory(
-    inner_fn: Optional[Callable[P, U]],
+    inner_fn: Optional[T_Function],
     *,
     pre_fn: Optional[Callable[..., Any]] = None,
     post_fn: Optional[Callable[..., Any]] = None,
-) -> Callable[[Callable[P, U]], Callable[P, U]]:
-    """Deprecated decorator for function aliases."""
+) -> Callable[[T_Function], T_Function]:
+    """Decorator for function aliases."""
     if pre_fn is None:
         pre_fn = return_none
     if post_fn is None:
         post_fn = return_none
 
-    def wrapper_factory(fn: Callable[P, U]) -> Callable[P, U]:
+    def wrapper_factory(fn: T_Function) -> T_Function:
         if inner_fn is None:
             _inner_fn = fn
         else:
             _inner_fn = inner_fn
 
         @wraps(_inner_fn)
-        def wrapped(*args: P.args, **kwargs: P.kwargs) -> U:
+        def wrapped(*args, **kwargs):
             pre_fn(fn, *args, **kwargs)
             result = _inner_fn(*args, **kwargs)
             post_fn(fn, *args, **kwargs)
             return result
 
-        return wrapped
+        return wrapped  # type: ignore
 
     return wrapper_factory
 

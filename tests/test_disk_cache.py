@@ -48,7 +48,8 @@ class TestDiskCache(TestCase):
         )
         def disk_cache_example_3(num: int) -> List[Dict[str, str]]:
             return pw.dict_list_to_list_dict(
-                {"a": ["a"] * num, "b": ["b"] * num}, "same"
+                {"a": ["a"] * num, "b": ["b"] * num},
+                "same",
             )
 
         outputs = disk_cache_example_3(10)

@@ -9,7 +9,7 @@ __author_email__ = "labbeti.pub@gmail.com"
 __license__ = "MIT"
 __maintainer__ = "Étienne Labbé (Labbeti)"
 __status__ = "Development"
-__version__ = "0.6.1"
+__version__ = "0.6.2"
 
 
 from typing import TYPE_CHECKING
@@ -101,7 +101,7 @@ if TYPE_CHECKING or lazy is None:
         union_lists,
         unzip,
     )
-    from .dataclasses import get_defaults_values
+    from .dataclasses import add_dict_methods, dataclassdict, get_defaults_values
     from .datetime import get_now, get_now_iso8601
     from .difflib import find_closest_in_list, sequence_matcher_ratio
     from .disk_cache import disk_cache_call, disk_cache_decorator
@@ -219,6 +219,7 @@ if TYPE_CHECKING or lazy is None:
         is_builtin_scalar,
         is_collection_alias,
         is_dataclass_instance,
+        is_dataclass_type,
         is_iterable_bool,
         is_iterable_bytes_or_list,
         is_iterable_float,
@@ -344,7 +345,7 @@ else:
                 "save_jsonl",
                 "save_pickle",
             ],
-            "dataclasses": ["get_defaults_values"],
+            "dataclasses": ["add_dict_methods", "dataclassdict", "get_defaults_values"],
             "datetime": ["get_now", "get_now_iso8601"],
             "difflib": ["find_closest_in_list", "sequence_matcher_ratio"],
             "disk_cache": ["disk_cache_call", "disk_cache_decorator"],
@@ -436,6 +437,7 @@ else:
                 "is_builtin_scalar",
                 "is_collection_alias",
                 "is_dataclass_instance",
+                "is_dataclass_type",
                 "is_iterable_bool",
                 "is_iterable_bytes_or_list",
                 "is_iterable_float",

@@ -4,7 +4,7 @@
 import unittest
 from argparse import ArgumentParser
 from dataclasses import dataclass, field
-from typing import List, Literal, Optional, Tuple, Union
+from typing import Iterable, List, Literal, Optional, Tuple, Union
 from unittest import TestCase
 
 from pythonwrench.argparse import (
@@ -113,7 +113,7 @@ class TestArgparse(TestCase):
         class B:
             arg_b: Union[str, List[str]] = ""
 
-        with self.assertRaises(TypeError):
+        with self.assertRaises(SystemExit):
             _ = parse_args_using_dataclass(B, args=[])
 
         @dataclass
@@ -148,6 +148,93 @@ class TestArgparse(TestCase):
             A, args=["--nums"] + nums_args, list_parsing="brackets"
         )
         assert target == result
+
+    def test_parse_args_using_dataclass_example_5(self) -> None:
+        @dataclass
+        class A:
+            seed: int
+
+        @dataclass
+        class B(A):
+            constraint_names: Optional[Iterable[str]] = ("b",)
+
+        result = parse_args_using_dataclass(
+            B,
+            args=["--seed", "42"],
+            list_parsing="brackets",
+        )
+        assert result == B(42, ("b",))
+
+        result = parse_args_using_dataclass(
+            B,
+            args=["--constraint_names", "[a,b]", "--seed", "42"],
+            list_parsing="brackets",
+        )
+        assert result == B(42, ["a", "b"]), f"{result=}"
+
+        result = parse_args_using_dataclass(
+            B,
+            args=["--constraint_names", "[a]", "--seed", "42"],
+            list_parsing="brackets",
+        )
+        assert result == B(42, ["a"])
+
+        result = parse_args_using_dataclass(
+            B,
+            args=["--constraint_names", "[]", "--seed", "42"],
+            list_parsing="brackets",
+        )
+        assert result == B(42, [])
+
+        result = parse_args_using_dataclass(
+            B,
+            args=["--constraint_names", "none", "--seed", "42"],
+            list_parsing="brackets",
+        )
+        assert result == B(42, None)
+
+        with self.assertRaises(SystemExit):
+            result = parse_args_using_dataclass(
+                B,
+                args=["--constraint_names", "truc", "--seed", "42"],
+                list_parsing="brackets",
+            )
+            assert result == B(42, "truc")
+
+    def test_parse_args_using_dataclass_example_6(self) -> None:
+        @dataclass
+        class A:
+            seed: Optional[Iterable[Literal[0, "a"]]] = None
+
+        result = parse_args_using_dataclass(
+            A,
+            args=[],
+            list_parsing="brackets",
+        )
+        assert result == A()
+
+        result = parse_args_using_dataclass(
+            A,
+            args=["--seed", "[0,a]"],
+            list_parsing="brackets",
+        )
+        assert result == A([0, "a"])
+
+        with self.assertRaises(SystemExit):
+            result = parse_args_using_dataclass(
+                A,
+                args=["--seed", "[b]"],
+                list_parsing="brackets",
+            )
+            assert result == A(["b"])  # type: ignore
+
+        with self.assertRaises(SystemExit):
+            result = parse_args_using_dataclass(
+                A,
+                args=["--seed", "[1]"],
+                list_parsing="brackets",
+            )
+            assert result == A([1])  # type: ignore
 
 
 if __name__ == "__main__":
