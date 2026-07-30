@@ -3228,7 +3228,7 @@ requires-dist = [
     { name = "coverage", extras = ["toml"], marker = "extra == 'tests'", specifier = ">=7.6.1" },
     { name = "ipykernel", marker = "extra == 'dev'", specifier = ">=6.29.5" },
     { name = "ipython", marker = "extra == 'dev'", specifier = ">=8.12.3" },
-    { name = "lazy-loader", marker = "extra == 'lazy'", specifier = ">=0.4,<0.5" },
+    { name = "lazy-loader", marker = "extra == 'lazy'", specifier = ">=0.4,<1" },
     { name = "pandas", marker = "extra == 'dev'", specifier = ">=2.0.3" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=3.5.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.5" },
