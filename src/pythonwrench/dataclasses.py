@@ -39,30 +39,36 @@ def add_dict_methods(cls: Type[T]) -> Type[T]:
         raise RuntimeError(msg)
 
     def setattr_(self: Any, name: str, value: Any) -> None:
+        """Perform the setattr operation."""
         object.__setattr__(self, name, value)
         if name in self.__dataclass_fields__:
             dict.__setitem__(self, name, value)
 
     def setitem(self: Any, key: Any, value: Any) -> None:
+        """Perform the setitem operation."""
         dict.__setitem__(self, key, value)
         if key in self.__dataclass_fields__:
             object.__setattr__(self, key, value)
 
     def delitem(self: Any, key: Any) -> None:
+        """Perform the delitem operation."""
         dict.__delitem__(self, key)
         if key in self.__dataclass_fields__ and hasattr(self, key):
             object.__delattr__(self, key)
 
     def update(self: Any, *args: Any, **kwargs: Any) -> None:
+        """Perform the update operation."""
         for key, value in dict(*args, **kwargs).items():
             setitem(self, key, value)
 
     def setdefault(self: Any, key: Any, default: Any = None) -> Any:
+        """Perform the setdefault operation."""
         if key not in self:
             setitem(self, key, default)
         return self[key]
 
     def pop(self: Any, key: Any, *default: Any) -> Any:
+        """Perform the pop operation."""
         if len(default) > 1:
             raise TypeError("pop expected at most 2 arguments")
         if key not in self:
@@ -74,6 +80,7 @@ def add_dict_methods(cls: Type[T]) -> Type[T]:
         return value
 
     def clear(self: Any) -> None:
+        """Perform the clear operation."""
         for key in list(self):
             delitem(self, key)
 
@@ -95,6 +102,7 @@ def add_dict_methods(cls: Type[T]) -> Type[T]:
 
 
 def get_defaults_values(obj: DataclassInstance) -> Dict[str, Any]:
+    """Return defaults values."""
     defaults = {}
 
     for field in obj.__dataclass_fields__.values():

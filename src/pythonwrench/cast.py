@@ -44,7 +44,9 @@ def register_as_builtin_fn(
     *,
     custom_predicate: None = None,
     priority: int = 0,
-) -> Callable: ...
+) -> Callable:
+    """Perform the register as builtin fn operation."""
+    ...
 
 
 @overload
@@ -53,7 +55,9 @@ def register_as_builtin_fn(
     *,
     custom_predicate: Predicate,
     priority: int = 0,
-) -> Callable: ...
+) -> Callable:
+    """Perform the register as builtin fn operation."""
+    ...
 
 
 def register_as_builtin_fn(
@@ -88,37 +92,44 @@ _AS_BUILTIN_REGISTRY.register(
 
 @register_as_builtin_fn(Counter)
 def _counter_to_builtin(x: Counter, **kwargs) -> Dict[Any, int]:
+    """Perform the counter to builtin operation."""
     return dict(x)
 
 
 @register_as_builtin_fn(date)
 def _date_to_builtin(x: date, **kwargs) -> str:
+    """Perform the date to builtin operation."""
     return str(x)
 
 
 @register_as_builtin_fn(Path)
 def _path_to_builtin(x: Path, **kwargs) -> str:
+    """Perform the path to builtin operation."""
     return str(x)
 
 
 @register_as_builtin_fn(Enum)
 def _enum_to_builtin(x: Enum, **kwargs) -> str:
+    """Perform the enum to builtin operation."""
     return x.name
 
 
 @register_as_builtin_fn(Pattern)
 def _pattern_to_builtin(x: Pattern, **kwargs) -> str:
+    """Perform the pattern to builtin operation."""
     return x.pattern
 
 
 @register_as_builtin_fn(Namespace)
 def _namespace_to_builtin(x: Namespace, **kwargs) -> Any:
+    """Perform the namespace to builtin operation."""
     return as_builtin(x.__dict__, **kwargs)
 
 
 @register_as_builtin_fn(DataclassInstance)
 def _dataclass_to_builtin(x: DataclassInstance, **kwargs) -> Any:
     # IMPORTANT note : we do not use dataclasses.asdict() because it also converts attributes like Counter, but not do dicts
+    """Perform the dataclass to builtin operation."""
     field_names = x.__dataclass_fields__.keys()
     xdict = {name: as_builtin(getattr(x, name), **kwargs) for name in field_names}
     return xdict
@@ -126,61 +137,86 @@ def _dataclass_to_builtin(x: DataclassInstance, **kwargs) -> Any:
 
 @register_as_builtin_fn(NamedTupleInstance)
 def _namedtuple_to_builtin(x: NamedTupleInstance, **kwargs) -> Any:
+    """Perform the namedtuple to builtin operation."""
     return as_builtin(x._asdict(), **kwargs)
 
 
 @register_as_builtin_fn(Mapping, priority=-100)
 def _mapping_to_builtin(x: Mapping, **kwargs) -> Any:
+    """Perform the mapping to builtin operation."""
     return {as_builtin(k, **kwargs): as_builtin(v, **kwargs) for k, v in x.items()}
 
 
 @register_as_builtin_fn(Iterable, priority=-200)
 def _iterable_to_builtin(x: Iterable, **kwargs) -> Any:
+    """Perform the iterable to builtin operation."""
     return [as_builtin(xi, **kwargs) for xi in x]
 
 
 @overload
-def as_builtin(x: Counter, **kwargs) -> Dict[Any, int]: ...
+def as_builtin(x: Counter, **kwargs) -> Dict[Any, int]:
+    """Perform the as builtin operation."""
+    ...
 
 
 @overload
-def as_builtin(x: date, **kwargs) -> str: ...
+def as_builtin(x: date, **kwargs) -> str:
+    """Perform the as builtin operation."""
+    ...
 
 
 @overload
-def as_builtin(x: Enum, **kwargs) -> str: ...
+def as_builtin(x: Enum, **kwargs) -> str:
+    """Perform the as builtin operation."""
+    ...
 
 
 @overload
-def as_builtin(x: Path, **kwargs) -> str: ...
+def as_builtin(x: Path, **kwargs) -> str:
+    """Perform the as builtin operation."""
+    ...
 
 
 @overload
-def as_builtin(x: Pattern, **kwargs) -> str: ...
+def as_builtin(x: Pattern, **kwargs) -> str:
+    """Perform the as builtin operation."""
+    ...
 
 
 @overload
-def as_builtin(x: Namespace, **kwargs) -> Dict[str, Any]: ...
+def as_builtin(x: Namespace, **kwargs) -> Dict[str, Any]:
+    """Perform the as builtin operation."""
+    ...
 
 
 @overload
-def as_builtin(x: Mapping[K, V], **kwargs) -> Dict[K, V]: ...
+def as_builtin(x: Mapping[K, V], **kwargs) -> Dict[K, V]:
+    """Perform the as builtin operation."""
+    ...
 
 
 @overload
-def as_builtin(x: DataclassInstance, **kwargs) -> Dict[str, Any]: ...
+def as_builtin(x: DataclassInstance, **kwargs) -> Dict[str, Any]:
+    """Perform the as builtin operation."""
+    ...
 
 
 @overload
-def as_builtin(x: NamedTupleInstance, **kwargs) -> Dict[str, Any]: ...
+def as_builtin(x: NamedTupleInstance, **kwargs) -> Dict[str, Any]:
+    """Perform the as builtin operation."""
+    ...
 
 
 @overload
-def as_builtin(x: T_BuiltinScalar, **kwargs) -> T_BuiltinScalar: ...
+def as_builtin(x: T_BuiltinScalar, **kwargs) -> T_BuiltinScalar:
+    """Perform the as builtin operation."""
+    ...
 
 
 @overload
-def as_builtin(x: Any, **kwargs) -> Any: ...
+def as_builtin(x: Any, **kwargs) -> Any:
+    """Perform the as builtin operation."""
+    ...
 
 
 def as_builtin(x: Any, **kwargs) -> Any:

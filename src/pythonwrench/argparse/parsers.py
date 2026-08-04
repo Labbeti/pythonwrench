@@ -58,20 +58,25 @@ class ParseError(ValueError): ...
 def register_parser_fn(
     type_: Union[TargetType, Predicate, None],
     fn: None = None,
-) -> Callable[[T_Callable], T_Callable]: ...
+) -> Callable[[T_Callable], T_Callable]:
+    """Perform the register parser fn operation."""
+    ...
 
 
 @overload
 def register_parser_fn(
     type_: Union[TargetType, Predicate, None],
     fn: T_Callable,
-) -> T_Callable: ...
+) -> T_Callable:
+    """Perform the register parser fn operation."""
+    ...
 
 
 def register_parser_fn(
     type_: Union[TargetType, Predicate, None],
     fn: Optional[Callable] = None,
 ) -> Callable:
+    """Perform the register parser fn operation."""
     global _PARSER_REGISTRY
     if type_ is None:
         type_ = NoneType
@@ -174,6 +179,7 @@ def parse_to_bool(
     handle_exception: HandleException = "raise",
     **kwds,
 ) -> bool:
+    """Parse to bool."""
     true_values = _sanitize_values(true_values)
     if _str_in(x, true_values, case_sensitive):
         return True
@@ -191,6 +197,7 @@ def parse_to_bool(
 def parse_to_float(
     x: str, handle_exception: HandleException = "raise", **kwds
 ) -> float:
+    """Parse to float."""
     try:
         return float(x)
     except ValueError as err:
@@ -199,6 +206,7 @@ def parse_to_float(
 
 @register_parser_fn(int)
 def parse_to_int(x: str, handle_exception: HandleException = "raise", **kwds) -> int:
+    """Parse to int."""
     try:
         return int(x)
     except ValueError as err:
@@ -230,6 +238,7 @@ def parse_to_none(
 
 @register_parser_fn(Path)
 def _parse_to_path(x: str, handle_exception: HandleException = "raise", **kwds) -> Path:
+    """Parse to path."""
     try:
         return Path(x)
     except (ValueError, TypeError) as err:
@@ -238,10 +247,12 @@ def _parse_to_path(x: str, handle_exception: HandleException = "raise", **kwds) 
 
 @register_parser_fn(str)
 def _parse_to_str(x: str, **kwds) -> str:
+    """Parse to str."""
     return x
 
 
 def _is_enum_for_parsing(x: Any, **kwds) -> bool:
+    """Perform the is enum for parsing operation."""
     return isinstance(x, type) and issubclass(x, Enum)
 
 
@@ -251,18 +262,22 @@ def _is_iterable_type_like_for_parsing(
     list_parsing: ListParsing = "argparse",
     **kwds,
 ) -> bool:
+    """Perform the is iterable type like for parsing operation."""
     return (list_parsing == "brackets") and _is_iterable_type_like(x)
 
 
 def _is_literal_for_parsing(x: Any, **kwds) -> bool:
+    """Perform the is literal for parsing operation."""
     return _is_literal_type(x)
 
 
 def _is_optional_for_parsing(x: Any, **kwds) -> bool:
+    """Perform the is optional for parsing operation."""
     return _is_optional_type(x)
 
 
 def _is_union_for_parsing(x: Any, **kwds) -> bool:
+    """Perform the is union for parsing operation."""
     return _is_union_type(x)
 
 
@@ -275,6 +290,7 @@ def _parse_to_enum(
     handle_exception: HandleException = "raise",
     **kwds,
 ) -> T_Enum:
+    """Parse to enum."""
     for enum_value in target_type:
         candidates = [enum_value.name, str(enum_value.value)]
         if _str_in(x, candidates, case_sensitive):
@@ -294,6 +310,7 @@ def _parse_to_list(
     handle_exception: HandleException = "raise",
     **kwds,
 ) -> T:
+    """Parse to list."""
     if list_parsing != "brackets":
         msg = f"Cannot convert {x=} to list with {list_parsing=}. (excepted list_parsing='brackets')"
         raise ValueError(msg)
@@ -339,6 +356,7 @@ def _parse_to_literal(
     handle_exception: HandleException = "raise",
     **kwds,
 ) -> Any:
+    """Parse to literal."""
     args = get_args(target_type)
     literal_types = {type(value) for value in args}
     scalar = _parse_to_one_of(tuple(literal_types), target_type, x, **kwds)
@@ -353,12 +371,14 @@ def _parse_to_literal(
 
 @register_parser_fn(_is_optional_for_parsing)
 def _parse_to_optional(target_type: TargetType, x: str, **kwds) -> Any:
+    """Parse to optional."""
     args = (NoneType,) + get_args(target_type)
     return _parse_to_one_of(args, target_type, x, **kwds)  # type: ignore
 
 
 @register_parser_fn(_is_union_for_parsing)
 def _parse_to_union(target_type: TargetType, x: str, **kwds) -> Any:
+    """Parse to union."""
     args = get_args(target_type)
     return _parse_to_one_of(args, target_type, x, **kwds)
 
@@ -371,7 +391,10 @@ def _parse_to_one_of(
     handle_exception: HandleException = "raise",
     **kwds,
 ) -> Any:
+    """Parse to one of."""
+
     def key_fn(xi: Any) -> int:
+        """Perform the key fn operation."""
         if xi is str:
             return 1
         else:
@@ -472,6 +495,7 @@ def parse_to_optional_str(
 
 
 def _handle_output(x: str, handle_exception: HandleException, output: Any) -> Any:
+    """Perform the handle output operation."""
     if not isinstance(output, Exception):
         return output
     elif handle_exception == "ignore":
@@ -486,6 +510,7 @@ def _handle_output(x: str, handle_exception: HandleException, output: Any) -> An
 
 
 def _sanitize_values(values: Union[str, Iterable[str]]) -> List[str]:
+    """Perform the sanitize values operation."""
     if isinstance(values, str):
         values = [values]
     else:
@@ -496,6 +521,7 @@ def _sanitize_values(values: Union[str, Iterable[str]]) -> List[str]:
 def _str_in(
     x: str, values: Union[List[str], Tuple[str, ...]], case_sensitive: bool
 ) -> bool:
+    """Perform the str in operation."""
     if case_sensitive:
         return x in values
     else:
@@ -504,28 +530,60 @@ def _str_in(
 
 # ALIASES
 @deprecated_alias(get_parse_fn)
-def parse_to(*args, **kwds): ...
+def parse_to(*args, **kwds):
+    """Parse to."""
+    ...
 
 
 @deprecated_alias(parse_to_type)
-def str_to_type(*args, **kwds): ...
+def str_to_type(*args, **kwds):
+    """Perform the str to type operation."""
+    ...
 
 
 @deprecated_alias(parse_to_bool)
-def str_to_bool(*args, **kwds): ...
+def str_to_bool(*args, **kwds):
+    """Perform the str to bool operation."""
+    ...
+
+
 @deprecated_alias(parse_to_float)
-def str_to_float(*args, **kwds): ...
+def str_to_float(*args, **kwds):
+    """Perform the str to float operation."""
+    ...
+
+
 @deprecated_alias(parse_to_int)
-def str_to_int(*args, **kwds): ...
+def str_to_int(*args, **kwds):
+    """Perform the str to int operation."""
+    ...
+
+
 @deprecated_alias(parse_to_none)
-def str_to_none(*args, **kwds): ...
+def str_to_none(*args, **kwds):
+    """Perform the str to none operation."""
+    ...
 
 
 @deprecated_alias(parse_to_optional_bool)
-def str_to_optional_bool(*args, **kwds): ...
+def str_to_optional_bool(*args, **kwds):
+    """Perform the str to optional bool operation."""
+    ...
+
+
 @deprecated_alias(parse_to_optional_float)
-def str_to_optional_float(*args, **kwds): ...
+def str_to_optional_float(*args, **kwds):
+    """Perform the str to optional float operation."""
+    ...
+
+
 @deprecated_alias(parse_to_optional_int)
-def str_to_optional_int(*args, **kwds): ...
+def str_to_optional_int(*args, **kwds):
+    """Perform the str to optional int operation."""
+    ...
+
+
 @deprecated_alias(parse_to_optional_str)
-def str_to_optional_str(*args, **kwds): ...
+def str_to_optional_str(*args, **kwds):
+    """Perform the str to optional str operation."""
+    ...

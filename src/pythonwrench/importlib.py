@@ -77,6 +77,7 @@ def search_submodules(
         root: ModuleType,
         accumulator: Dict[ModuleType, None],
     ) -> Dict[ModuleType, None]:
+        """Perform the impl operation."""
         attrs = [getattr(root, attr_name) for attr_name in dir(root)]
         submodules = [
             attr
@@ -175,8 +176,11 @@ def requires_packages(
         raise TypeError(f"Invalid arguments types {(arg0,) + args}.")
 
     def _wrap(fn: Callable[P, T]) -> Callable[P, T]:
+        """Perform the wrap operation."""
+
         @wraps(fn)
         def _impl(*args: P.args, **kwargs: P.kwargs) -> T:
+            """Perform the impl operation."""
             missing = [pkg for pkg in packages if not is_available_package(pkg)]
             if len(missing) == 0:
                 return fn(*args, **kwargs)
@@ -198,6 +202,7 @@ class Placeholder:
     """Placeholder object. All instances attributes always returns the object itself."""
 
     def __init__(self, *args, **kwargs) -> None:
+        """Initialize the instance."""
         super().__init__()
         self.__excluded_self_attrs = [
             "__file__",
@@ -208,25 +213,30 @@ class Placeholder:
         ]
 
     def __getattr__(self, name: str) -> Any:
+        """Return a dynamically imported attribute."""
         if name in self.__excluded_self_attrs:
             return self.__getattribute__(name)
         else:
             return self
 
     def __call__(self, *args, **kwargs) -> Any:
+        """Call the instance."""
         return self
 
     def __getitem__(self, *args, **kwargs) -> Any:
+        """Return the item at the requested index or key."""
         return self
 
 
 class ModulePlaceholder(ModuleType, Placeholder):
     def __init__(self, *args, **kwargs) -> None:
+        """Initialize the instance."""
         Placeholder.__init__(self, *args, **kwargs)
         ModuleType.__init__(self, *args, **kwargs)
 
 
 def import_if_available(name: str) -> ModuleType:
+    """Perform the import if available operation."""
     if is_available_package(name):
         return __import__(name)
     else:

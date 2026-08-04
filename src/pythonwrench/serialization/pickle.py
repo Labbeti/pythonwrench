@@ -136,6 +136,7 @@ def _serialize_pickle(
     to_builtins: bool = False,
     **pkl_dump_kwds,
 ) -> None:
+    """Perform the serialize pickle operation."""
     if to_builtins:
         data = as_builtin(data)
     return pickle.dump(data, buffer, **pkl_dump_kwds)
@@ -175,8 +176,11 @@ def loads_pickle(content: bytes, /, **pkl_loads_kwds) -> Any:
 
 
 @function_alias(load_pickle)
-def read_pickle(*args, **kwargs): ...
+def read_pickle(*args, **kwargs):
+    """Read pickle."""
+    ...
 
 
 def _parse_pickle(buffer: BinaryIO, **pkl_loads_kwds) -> Any:
+    """Parse pickle."""
     return pickle.load(buffer, **pkl_loads_kwds)

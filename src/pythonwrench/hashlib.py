@@ -24,9 +24,13 @@ class Hasher(Protocol):
     block_size: int
     name: str
 
-    def hexdigest(self) -> str: ...
+    def hexdigest(self) -> str:
+        """Perform the hexdigest operation."""
+        ...
 
-    def update(self, data: Buffer, /) -> None: ...
+    def update(self, data: Buffer, /) -> None:
+        """Perform the update operation."""
+        ...
 
 
 def hash_file(

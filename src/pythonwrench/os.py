@@ -156,6 +156,7 @@ def _tree_impl(
     tee: str,
     last: str,
 ) -> Generator[str, Any, None]:
+    """Perform the tree impl operation."""
     walker = _walker_impl(
         root,
         [],
@@ -186,6 +187,7 @@ def _walker_impl(
     skipfiles: bool,
     sort: bool,
 ) -> Generator[Tuple[Path, bool, List[Tuple[int, int]]], Any, None]:
+    """Perform the walker impl operation."""
     candidates_paths = root.iterdir()
 
     if sort:

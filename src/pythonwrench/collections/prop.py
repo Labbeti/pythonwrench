@@ -69,7 +69,9 @@ def all_ne(
 
 
 @function_alias(all_eq)
-def is_full(*args, **kwargs): ...
+def is_full(*args, **kwargs):
+    """Return whether full."""
+    ...
 
 
 def is_sorted(
@@ -78,6 +80,7 @@ def is_sorted(
     reverse: bool = False,
     strict: bool = False,
 ) -> bool:
+    """Return whether sorted."""
     it = iter(x)
     try:
         prev = next(it)
@@ -96,4 +99,6 @@ def is_sorted(
 
 
 @function_alias(all_ne)
-def is_unique(*args, **kwargs): ...
+def is_unique(*args, **kwargs):
+    """Return whether unique."""
+    ...

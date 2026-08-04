@@ -95,6 +95,7 @@ def sort_with_patterns(
     match_fn: Callable[[PatternLike, str], Any] = re.search,
     reverse: bool = False,
 ) -> List[str]:
+    """Perform the sort with patterns operation."""
     key_fn = get_key_fn(patterns, match_fn=match_fn)
     x = sorted(x, key=key_fn, reverse=reverse)
     return x
@@ -107,6 +108,7 @@ def filter_with_patterns(
     exclude: Optional[PatternListLike] = (),
     match_fn: Callable[[PatternLike, str], Any] = re.search,
 ) -> List[str]:
+    """Perform the filter with patterns operation."""
     if include is None:
         include = ".*"
     if exclude is None:

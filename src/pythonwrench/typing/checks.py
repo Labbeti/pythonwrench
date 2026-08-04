@@ -73,6 +73,7 @@ def check_args_types(fn: Callable[P, T]) -> Callable[P, T]:
     argnames = list(annotations.keys())
 
     def _wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
+        """Perform the wrapper operation."""
         num_positional = len(args)
         given_kwargs = dict(zip(argnames[:num_positional], args))
         given_kwargs.update(kwargs)
@@ -238,6 +239,7 @@ def isinstance_generic(
 
 
 def _isinstance_generic_typed_dict(x: Any, target_type: type) -> bool:
+    """Perform the isinstance generic typed dict operation."""
     if not isinstance_generic(x, Dict[str, Any]):
         return False
 
@@ -339,6 +341,7 @@ def is_dataclass_instance(x: Any) -> TypeIs[DataclassInstance]:
 
 
 def is_dataclass_type(x: Any) -> TypeIs[Type[DataclassInstance]]:
+    """Return whether dataclass type."""
     return isinstance(x, type) and is_dataclass(x)
 
 
@@ -347,6 +350,7 @@ def is_iterable_bool(
     *,
     accept_generator: bool = True,
 ) -> TypeIs[Iterable[bool]]:
+    """Return whether iterable bool."""
     if not accept_generator and isinstance(x, Generator):
         return False
     return isinstance_generic(x, Iterable[bool])
@@ -357,6 +361,7 @@ def is_iterable_bytes_or_list(
     *,
     accept_generator: bool = True,
 ) -> TypeIs[Iterable[Union[bytes, list]]]:
+    """Return whether iterable bytes or list."""
     if not accept_generator and isinstance(x, Generator):
         return False
     return isinstance_generic(x, Iterable[Union[bytes, list]])
@@ -367,6 +372,7 @@ def is_iterable_float(
     *,
     accept_generator: bool = True,
 ) -> TypeIs[Iterable[float]]:
+    """Return whether iterable float."""
     if not accept_generator and isinstance(x, Generator):
         return False
     return isinstance_generic(x, Iterable[float])
@@ -378,6 +384,7 @@ def is_iterable_int(
     accept_bool: bool = True,
     accept_generator: bool = True,
 ) -> TypeIs[Iterable[int]]:
+    """Return whether iterable int."""
     if not accept_generator and isinstance(x, Generator):
         return False
     return isinstance_generic(x, Iterable[int]) and (
@@ -390,6 +397,7 @@ def is_iterable_integral(
     *,
     accept_generator: bool = True,
 ) -> TypeIs[Iterable[Integral]]:
+    """Return whether iterable integral."""
     if not accept_generator and isinstance(x, Generator):
         return False
     return isinstance_generic(x, Iterable[Integral])
@@ -401,6 +409,7 @@ def is_iterable_str(
     accept_str: bool = True,
     accept_generator: bool = True,
 ) -> TypeGuard[Iterable[str]]:
+    """Return whether iterable str."""
     if isinstance(x, str):
         return accept_str
     if isinstance(x, Generator):
@@ -418,6 +427,7 @@ def is_sequence_str(
     *,
     accept_str: bool = True,
 ) -> TypeGuard[Sequence[str]]:
+    """Return whether sequence str."""
     return (accept_str and isinstance(x, str)) or (
         not isinstance(x, str)
         and isinstance(x, Sequence)
@@ -426,6 +436,7 @@ def is_sequence_str(
 
 
 def is_typed_dict(x: Any) -> TypeGuard[type]:
+    """Return whether typed dict."""
     if sys.version_info.major == 3 and sys.version_info.minor < 9:
         return x.__class__.__name__ == "_TypedDictMeta"
     else:
@@ -529,6 +540,7 @@ def is_special_form(x: Any) -> bool:
 
 
 def _safe_isin(x: Any, targets: Iterable) -> bool:
+    """Perform the safe isin operation."""
     for alias in targets:
         if (x == alias) is True:
             return True
@@ -536,23 +548,28 @@ def _safe_isin(x: Any, targets: Iterable) -> bool:
 
 
 def _is_callable_type(x: Any) -> bool:
+    """Perform the is callable type operation."""
     return x in (Callable, _RuntimeCallable)
 
 
 def _is_iterable_type_like(x: Any) -> bool:
+    """Perform the is iterable type like operation."""
     return any(xi in (list, Iterable, _RuntimeIterable) for xi in (x, get_origin(x)))
 
 
 def _is_literal_type(x: Any) -> bool:
+    """Perform the is literal type operation."""
     origin = get_origin(x)
     return origin is Literal
 
 
 def _is_optional_type(x: Any) -> bool:
+    """Perform the is optional type operation."""
     return getattr(x, "__name__", None) == "Optional"
 
 
 def _is_union_type(x: Any) -> bool:
+    """Perform the is union type operation."""
     origin = get_origin(x)
     return origin == Union or getattr(origin, "__name__", None) in (
         "Union",

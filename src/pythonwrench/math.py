@@ -17,6 +17,7 @@ def clip(
     xmin: Optional[T_Real] = None,
     xmax: Optional[T_Real] = None,
 ) -> T_Real:
+    """Perform the clip operation."""
     if xmin is not None:
         x = max(x, xmin)
     if xmax is not None:
@@ -25,15 +26,19 @@ def clip(
 
 
 @function_alias(clip)
-def clamp(*args, **kwargs): ...
+def clamp(*args, **kwargs):
+    """Perform the clamp operation."""
+    ...
 
 
 def argmax(x: Iterable) -> int:
+    """Perform the argmax operation."""
     max_index, _max_value = max(enumerate(x), key=lambda t: t[1])
     return max_index
 
 
 def argmin(x: Iterable) -> int:
+    """Perform the argmin operation."""
     min_index, _max_value = min(enumerate(x), key=lambda t: t[1])
     return min_index
 
@@ -44,7 +49,10 @@ def argsort(
     key: Optional[Callable[[T], Any]] = None,
     reverse: bool = False,
 ) -> List[int]:
+    """Perform the argsort operation."""
+
     def get_second(t: Tuple[int, T]) -> T:
+        """Return second."""
         return t[1]
 
     if key is None:
@@ -58,6 +66,7 @@ def argsort(
 
 
 def nextdown(x: float) -> float:
+    """Perform the nextdown operation."""
     return -_nextup(-x)
 
 
@@ -82,6 +91,7 @@ def nextafter(x: float, y: float) -> float:
 
 def _nextup(x: float) -> float:
     # NaNs and positive infinity map to themselves.
+    """Perform the nextup operation."""
     if math.isnan(x) or (math.isinf(x) and x > 0):
         return x
 

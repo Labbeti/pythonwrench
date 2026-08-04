@@ -79,6 +79,7 @@ def add_dataclass_fields_to_parser(
     list_parsing: ListParsing = "argparse",
     add_dashed_arg: bool = True,
 ) -> ArgumentParser:
+    """Perform the add dataclass fields to parser operation."""
     if parser is None:
         parser = ArgumentParser()
 
@@ -115,6 +116,7 @@ def _get_kwds_for_type(
     field_type: Any,
     list_parsing: ListParsing = "argparse",
 ) -> Dict[str, Any]:
+    """Perform the get kwds for type operation."""
     kwds = {}
 
     type_origin = get_origin(field_type)
@@ -156,6 +158,7 @@ def _get_kwds_for_scalar_type(
     from_field_type: Any,
     list_parsing: ListParsing,
 ) -> Dict[str, Any]:
+    """Perform the get kwds for scalar type operation."""
     kwds = {}
 
     if (
@@ -182,4 +185,6 @@ def _get_kwds_for_scalar_type(
 
 # ALIASES
 @deprecated_alias(add_dataclass_fields_to_parser)
-def new_parser_from_dataclass(*args, **kwargs): ...
+def new_parser_from_dataclass(*args, **kwargs):
+    """Perform the new parser from dataclass operation."""
+    ...

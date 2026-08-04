@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 def main_tree() -> None:
+    """Perform the main tree operation."""
     parser = ArgumentParser()
     parser.add_argument(
         "root",
