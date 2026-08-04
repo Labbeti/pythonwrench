@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [0.6.3] UNRELEASED
 ### Added
 - Handle `Enum`, `Path`, and add `register_parser_fn` decorator for `parse_to_type`.
+- `isinstance_generic` now supports parametrized `Callable`.
 
 ### Modified
 - Replace build backend `setuptools` by `hatchling`.
