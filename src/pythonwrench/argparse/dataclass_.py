@@ -1,20 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import re
 from argparse import ArgumentParser
-from collections.abc import Iterable as _Iterable
 from dataclasses import MISSING, fields
-from functools import partial
 from typing import (
     Any,
-    Callable,
     Dict,
     Iterable,
-    List,
     Literal,
     Optional,
-    Tuple,
     Type,
     TypeVar,
     Union,
@@ -22,20 +16,23 @@ from typing import (
     get_origin,
 )
 
-try:
-    from types import UnionType
-except ImportError:
-    # support older python versions
-    UnionType = Any
-
-from pythonwrench._core import _FunctionRegistry, _insert_in_dict
-from pythonwrench.functools import filter_and_call, function_alias
-from pythonwrench.typing.classes import Dataclass, DataclassInstance, NoneType
+from pythonwrench.functools import filter_and_call
+from pythonwrench.typing.classes import (
+    Dataclass,
+    DataclassInstance,
+    NoneType,
+    UnionType,
+)
 from pythonwrench.warnings import deprecated_alias
 from pythonwrench.argparse.parsers import (
     ListParsing,
     get_parse_fn,
+)
+from pythonwrench.argparse._core import (
     _is_iterable_type_like,
+    _is_optional,
+    _is_literal,
+    _is_union,
 )
 
 T_Dataclass = TypeVar("T_Dataclass", bound=Dataclass)
@@ -101,7 +98,6 @@ def add_dataclass_fields_to_parser(
             kwds["default"] = field.default
         elif field.default_factory is not MISSING:
             kwds["default"] = field.default_factory()  # type: ignore
-
         else:
             msg = f"Invalid field {field.name}: found values for default and default_factory."
             raise ValueError(msg)
@@ -118,10 +114,6 @@ def add_dataclass_fields_to_parser(
     return parser
 
 
-@deprecated_alias(add_dataclass_fields_to_parser)
-def new_parser_from_dataclass(*args, **kwargs): ...
-
-
 def _get_kwds_for_type(
     field_type: Any,
     list_parsing: ListParsing = "argparse",
@@ -132,7 +124,7 @@ def _get_kwds_for_type(
     type_args = get_args(field_type)
 
     # sanity checks
-    if type_origin is Literal:
+    if _is_literal(field_type):
         if not all(type(arg) in _SCALARS_TARGET_TYPES for arg in type_args):
             msg = f"Invalid argument {field_type=}. (expected homogeneous types in {type_origin})"
             raise TypeError(msg)
@@ -140,13 +132,7 @@ def _get_kwds_for_type(
     if (
         (field_type in _SCALARS_TARGET_TYPES)
         or (
-            type_origin
-            in (
-                Literal,
-                Optional,
-                UnionType,
-                Union,
-            )
+            _is_literal(field_type) or _is_optional(field_type) or _is_union(field_type)
         )
         or (_is_iterable_type_like(type_origin) and list_parsing == "brackets")
     ):
@@ -158,6 +144,7 @@ def _get_kwds_for_type(
         inner_kwds = _get_kwds_for_scalar_type(item_type, field_type, list_parsing)
         inner_kwds["nargs"] = "*"
         kwds.update(inner_kwds)
+
     else:
         msg = f"Unsupported type {field_type}. (with {type_origin=})"
         raise TypeError(msg)
@@ -175,7 +162,8 @@ def _get_kwds_for_scalar_type(
 
     if (
         type_ in _SCALARS_TARGET_TYPES
-        or type_origin in (UnionType, Union, Optional)
+        or _is_optional(type_)
+        or _is_union(type_)
         or (
             _is_iterable_type_like(get_origin(from_field_type))
             and list_parsing == "brackets"
@@ -183,12 +171,17 @@ def _get_kwds_for_scalar_type(
     ):
         pass
 
-    elif type_origin is Literal:
+    elif _is_literal(type_):
         type_args = get_args(type_)
         kwds["choices"] = type_args
     else:
         msg = f"Unsupported dataclass member type {type_} from {from_field_type}."
         raise TypeError(msg)
 
-    kwds["type"] = parse_to(type_, list_parsing=list_parsing)  # type: ignore
+    kwds["type"] = get_parse_fn(type_, list_parsing=list_parsing)  # type: ignore
     return kwds
+
+
+# ALIASES
+@deprecated_alias(add_dataclass_fields_to_parser)
+def new_parser_from_dataclass(*args, **kwargs): ...

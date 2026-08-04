@@ -15,6 +15,12 @@ from typing import (
     runtime_checkable,
 )
 
+try:
+    from types import UnionType  # type: ignore
+except ImportError:
+    # support older python versions
+    UnionType = type(Union)
+
 from typing_extensions import TypeAlias, TypeVar
 
 NoneType: TypeAlias = type(None)  # type: ignore

@@ -11,13 +11,14 @@ from unittest import TestCase
 
 from pythonwrench.argparse import (
     parse_args_using_dataclass,
-    parse_to,
-    str_to_bool,
-    str_to_none,
-    str_to_optional_bool,
-    str_to_optional_float,
-    str_to_optional_int,
-    str_to_optional_str,
+    get_parse_fn,
+    parse_to_type,
+    parse_to_bool,
+    parse_to_none,
+    parse_to_optional_bool,
+    parse_to_optional_float,
+    parse_to_optional_int,
+    parse_to_optional_str,
 )
 from pythonwrench.typing import NoneType
 
@@ -30,32 +31,34 @@ class State(Enum):
 
 class TestArgparse(TestCase):
     def test_scalars_examples(self) -> None:
-        assert str_to_optional_str("None") is None
-        assert str_to_optional_str("null") is None
+        assert parse_to_optional_str("None") is None
+        assert parse_to_optional_str("null") is None
 
-        assert str_to_optional_bool("T")
-        assert str_to_optional_bool("false") == False  # noqa: E712
-        assert str_to_optional_bool("none") is None
+        assert parse_to_optional_bool("T")
+        assert parse_to_optional_bool("false") is False
+        assert parse_to_optional_bool("none") is None
 
-        assert str_to_bool("f") == False  # noqa: E712
+        assert parse_to_bool("f") is False
         with self.assertRaises(ValueError):
-            assert str_to_bool("none")
+            assert parse_to_bool("none")
 
-        assert str_to_optional_int("1") == 1
-        assert str_to_optional_int("10") == 10
+        assert parse_to_optional_int("1") == 1
+        assert parse_to_optional_int("10") == 10
         with self.assertRaises(ValueError):
-            assert str_to_optional_int("1.")
+            assert parse_to_optional_int("1.")
 
-        assert str_to_optional_float("1") == 1.0
-        assert str_to_optional_float("1.5") == 1.5
+        assert parse_to_optional_float("1") == 1.0
+        assert parse_to_optional_float("1.5") == 1.5
 
-        assert str_to_none("None") is None
+        assert parse_to_none("None") is None
         with self.assertRaises(ValueError):
-            assert str_to_none("")
+            assert parse_to_none("")
 
     def test_parser(self) -> None:
         parser = ArgumentParser()
-        parser.add_argument("--val", type=parse_to(Optional[Union[bool, int]]))
+        target_type = Optional[Union[bool, int]]
+        parse_fn = get_parse_fn(target_type)
+        parser.add_argument("--val", type=parse_fn)
 
         args = parser.parse_args(["--val", "2"])
         assert isinstance(args.val, int)
@@ -63,7 +66,7 @@ class TestArgparse(TestCase):
 
         args = parser.parse_args(["--val", "f"])
         assert isinstance(args.val, bool)
-        assert not args.val
+        assert args.val is False
 
         args = parser.parse_args(["--val", "null"])
         assert isinstance(args.val, NoneType)
@@ -72,9 +75,19 @@ class TestArgparse(TestCase):
         with self.assertRaises(SystemExit):
             args = parser.parse_args(["--val", "2.5"])
 
-    def test_parse_special_types(self) -> None:
+    def test_path(self) -> None:
         path = "/a/b.txt"
-        assert parse_to(Path)(path) == Path(path)
+        assert get_parse_fn(Path)(path) == Path(path)
+
+    def test_literal(self) -> None:
+        type_ = Literal["winter", "summer", "fall", "spring"]
+        assert get_parse_fn(type_)("summer") == "summer"
+
+        with self.assertRaises(ValueError):
+            assert get_parse_fn(type_)("something else") == "summer"
+
+    def test_enum(self) -> None:
+        assert parse_to_type("SLEEPING", State) == State.SLEEPING
 
 
 class TestDataclassParser(TestCase):

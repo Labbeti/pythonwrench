@@ -2,14 +2,12 @@
 # -*- coding: utf-8 -*-
 
 import re
-from argparse import ArgumentParser
-from collections.abc import Iterable as _Iterable
-from dataclasses import MISSING, fields
+from enum import Enum
+from pathlib import Path
 from functools import partial
 from typing import (
     Any,
     Callable,
-    Dict,
     Iterable,
     List,
     Literal,
@@ -19,21 +17,20 @@ from typing import (
     TypeVar,
     Union,
     get_args,
-    get_origin,
 )
 
-try:
-    from types import UnionType  # type: ignore
-except ImportError:
-    # support older python versions
-    UnionType = type(Union)
-
-from pythonwrench._core import _FunctionRegistry, _insert_in_dict, Predicate
-from pythonwrench.functools import filter_and_call, function_alias
-from pythonwrench.typing.classes import Dataclass, DataclassInstance, NoneType
+from pythonwrench._core import Predicate
+from pythonwrench.typing.classes import NoneType, UnionType
 from pythonwrench.warnings import deprecated_alias
+from pythonwrench.argparse._core import (
+    _is_iterable_type_like,
+    _is_union,
+    _is_literal,
+    _is_optional,
+)
 
 T = TypeVar("T")
+T_Enum = TypeVar("T_Enum", bound=Enum)
 TargetType = Union[
     Type[T],
     UnionType,
@@ -41,28 +38,36 @@ TargetType = Union[
     "Type[Optional]",
     Tuple[type, ...],
 ]
+
 ListParsing = Literal["argparse", "brackets"]
+HandleException = Literal["return", "raise", "ignore"]
 
 DEFAULT_TRUE_VALUES = ("True", "t", "yes", "y", "1")
 DEFAULT_FALSE_VALUES = ("False", "f", "no", "n", "0")
 DEFAULT_NONE_VALUES = ("None", "null")
 
-
 _PARSER_REGISTRY: List[Tuple[Union[TargetType, Predicate], Callable]] = []
 
 
+class ParseError(ValueError): ...
+
+
 def register_parser_fn(
-    type_: Union[TargetType, Predicate],
+    type_: Union[TargetType, Predicate, None],
     fn: Optional[Callable] = None,
 ) -> Any:
     global _PARSER_REGISTRY
+    if type_ is None:
+        type_ = NoneType
+
     if fn is None:
         return partial(register_parser_fn, type_)
     else:
         for type_or_pred, _ in _PARSER_REGISTRY:
             if type_or_pred is type_:
                 return None
-        _PARSER_REGISTRY.append((type_, fn))
+        _PARSER_REGISTRY.append((type_, fn))  # type: ignore
+        return fn
 
 
 def parse_to_type(
@@ -74,13 +79,14 @@ def parse_to_type(
     false_values: Union[str, Iterable[str]] = DEFAULT_FALSE_VALUES,
     none_values: Union[str, Iterable[str]] = DEFAULT_NONE_VALUES,
     list_parsing: ListParsing = "argparse",
+    handle_exception: HandleException = "raise",
 ) -> T:
     """Convert string values to target type safely. Intended for argparse arguments.
 
     - True values: 'True', 'T', 'yes', 'y', '1'.
     - False values: 'False', 'F', 'no', 'n', '0'.
     - None values: 'None', 'null'
-    - Other raises ValueError.
+    - Other raises ParseError.
     """
     parse_fn = get_parse_fn(
         target_type,
@@ -89,12 +95,10 @@ def parse_to_type(
         false_values=false_values,
         none_values=none_values,
         list_parsing=list_parsing,
+        handle_exception=handle_exception,
     )
     output = parse_fn(x)
-    if isinstance(output, Exception):
-        raise output
-    else:
-        return output
+    return output
 
 
 def get_parse_fn(
@@ -105,6 +109,7 @@ def get_parse_fn(
     false_values: Union[str, Iterable[str]] = DEFAULT_FALSE_VALUES,
     none_values: Union[str, Iterable[str]] = DEFAULT_NONE_VALUES,
     list_parsing: ListParsing = "argparse",
+    handle_exception: HandleException = "raise",
 ) -> Callable[[str], T]:
     """Returns a callable that convert string value to target type safely.
 
@@ -116,20 +121,28 @@ def get_parse_fn(
         false_values=false_values,
         none_values=none_values,
         list_parsing=list_parsing,
+        handle_exception=handle_exception,
     )
+    if type_ is None:
+        type_ = NoneType
 
     parse_fn = None
-    for type_or_pred, parse_fn in _PARSER_REGISTRY:
-        if isinstance(type_or_pred, type):
-            if type_ == type_or_pred:
+    for type_or_pred_i, parse_fn_i in _PARSER_REGISTRY:
+        if isinstance(type_or_pred_i, type):
+            if type_ == type_or_pred_i:
+                parse_fn = parse_fn_i
                 break
-        elif callable(type_or_pred) and type_or_pred(type_, **kwds) is True:
-            parse_fn = partial(parse_fn, type_)
+        elif isinstance(type_or_pred_i, Predicate):
+            if type_or_pred_i(type_, **kwds) is True:
+                parse_fn = partial(parse_fn_i, type_)
+                break
         else:
-            raise TypeError
+            msg = f"Invalid argument {type_or_pred_i=}. (excepted type or predicate function)"
+            raise ValueError(msg)
 
     if parse_fn is None:
-        raise ValueError("TODO")
+        msg = f"Invalid argument {type_=}. (no valid type or typing found in registry)"
+        raise ValueError(msg)
 
     parse_fn = partial(parse_fn, **kwds)
     return parse_fn
@@ -142,6 +155,7 @@ def parse_to_bool(
     case_sensitive: bool = False,
     true_values: Union[str, Iterable[str]] = DEFAULT_TRUE_VALUES,
     false_values: Union[str, Iterable[str]] = DEFAULT_FALSE_VALUES,
+    handle_exception: HandleException = "raise",
     **kwds,
 ) -> Union[bool, Exception]:
     true_values = _sanitize_values(true_values)
@@ -153,18 +167,26 @@ def parse_to_bool(
         return False
 
     values = tuple(true_values + false_values)
-    err = ValueError(f"Invalid argument '{x}'. (expected one of {values})")
-    return err
+    output = ParseError(f"Invalid argument '{x}'. (expected one of {values})")
+    return _handle_output(x, handle_exception, output)
 
 
 @register_parser_fn(float)
-def parse_to_float(x: str, **kwds) -> float:
-    return float(x)
+def parse_to_float(
+    x: str, handle_exception: HandleException = "raise", **kwds
+) -> float:
+    try:
+        return float(x)
+    except ValueError as err:
+        return _handle_output(x, handle_exception, err)
 
 
 @register_parser_fn(int)
-def parse_to_int(x: str, **kwds) -> int:
-    return int(x)
+def parse_to_int(x: str, handle_exception: HandleException = "raise", **kwds) -> int:
+    try:
+        return int(x)
+    except ValueError as err:
+        return _handle_output(x, handle_exception, err)
 
 
 @register_parser_fn(NoneType)
@@ -173,6 +195,7 @@ def parse_to_none(
     *,
     case_sensitive: bool = False,
     none_values: Union[str, Iterable[str]] = DEFAULT_NONE_VALUES,
+    handle_exception: HandleException = "raise",
     **kwds,
 ) -> Union[None, Exception]:
     """Convert string values to None safely. Intended for argparse arguments.
@@ -185,39 +208,79 @@ def parse_to_none(
         return None
 
     values = tuple(none_values)
-    err = ValueError(f"Invalid argument '{x}'. (expected one of {values})")
-    return err
+    output = ValueError(f"Invalid argument '{x}'. (expected one of {values})")
+    return _handle_output(x, handle_exception, output)
 
 
-def _is_iterable_type_like(
-    x: Any, *, list_parsing: ListParsing = "argparse", **kwds
+@register_parser_fn(Path)
+def _parse_to_path(x: str, handle_exception: HandleException = "raise", **kwds) -> Path:
+    try:
+        return Path(x)
+    except (ValueError, TypeError) as err:
+        return _handle_output(x, handle_exception, err)
+
+
+@register_parser_fn(str)
+def _parse_to_str(x: str, **kwds) -> str:
+    return x
+
+
+def _is_enum_for_parsing(x: Any, **kwds) -> bool:
+    return isinstance(x, type) and issubclass(x, Enum)
+
+
+def _is_iterable_type_like_for_parsing(
+    x: Any,
+    *,
+    list_parsing: ListParsing = "argparse",
+    **kwds,
 ) -> bool:
-    return x in (list, Iterable, _Iterable)
+    return (list_parsing == "brackets") and _is_iterable_type_like(x)
 
 
-def _is_literal(x: Any, **kwds) -> bool:
-    origin = get_origin(x)
-    return origin is Literal
+def _is_literal_for_parsing(x: Any, **kwds) -> bool:
+    return _is_literal(x)
 
 
-def _is_optional(x: Any, **kwds) -> bool:
-    return getattr(x, "__name__", None) == "Optional"
+def _is_optional_for_parsing(x: Any, **kwds) -> bool:
+    return _is_optional(x)
 
 
-def _is_union(x: Any, **kwds) -> bool:
-    origin = get_origin(x)
-    return origin == Union or getattr(origin, "__name__", None) in (
-        "Union",
-        "UnionType",
-    )
+def _is_union_for_parsing(x: Any, **kwds) -> bool:
+    return _is_union(x)
 
 
-@register_parser_fn(_is_iterable_type_like)
+@register_parser_fn(_is_enum_for_parsing)
+def _parse_to_enum(
+    target_type: Type[T_Enum],
+    x: str,
+    *,
+    case_sensitive: bool = False,
+    handle_exception: HandleException = "raise",
+    **kwds,
+) -> T_Enum:
+    for enum_value in target_type:
+        candidates = [enum_value.name, str(enum_value.value)]
+        if _str_in(x, candidates, case_sensitive):
+            return enum_value
+
+    msg = f"Invalid argument {x=}. (excepted one of {tuple(target_type)})"
+    output = ValueError(msg)
+    return _handle_output(x, handle_exception, output)
+
+
+@register_parser_fn(_is_iterable_type_like_for_parsing)
 def _parse_to_list(
-    target_type: TargetType, x: str, *, list_parsing: ListParsing = "argparse", **kwds
-) -> Any:
+    target_type: TargetType[T],
+    x: str,
+    *,
+    list_parsing: ListParsing = "argparse",
+    handle_exception: HandleException = "raise",
+    **kwds,
+) -> T:
     if list_parsing != "brackets":
-        raise ValueError
+        msg = f"Cannot convert {x=} to list with {list_parsing=}. (excepted list_parsing='brackets')"
+        raise ValueError(msg)
 
     args = get_args(target_type)
 
@@ -231,7 +294,8 @@ def _parse_to_list(
     pattern = r"^\s*\[\s*(|.*[^,\s])(|\s*,)\s*\]\s*$"
     if re.match(pattern, x) is None:
         msg = f"Cannot convert value to list: '{x}'. (with {list_parsing=})"
-        return ValueError(msg)
+        output = ValueError(msg)
+        return _handle_output(x, handle_exception, output)
 
     x = re.sub(pattern, r"\1", x)
     if x == "":
@@ -239,35 +303,45 @@ def _parse_to_list(
 
     x_list = x.split(",")
 
-    output_list = []
+    output = []
     for xi in x_list:
-        output_i = parse_to_type(xi, target_item_type, **kwds)  # type: ignore
+        output_i = parse_to_type(
+            xi, target_item_type, handle_exception="return", **kwds
+        )  # type: ignore
         if isinstance(output_i, Exception):
-            return output_i
-        output_list.append(output_i)
+            output = output_i
+            break
+        output.append(output_i)
 
-    return output_list  # type: ignore
+    return _handle_output(x, handle_exception, output)
 
 
-@register_parser_fn(_is_literal)
-def _parse_to_literal(target_type: TargetType, x: str, **kwds) -> Any:
+@register_parser_fn(_is_literal_for_parsing)
+def _parse_to_literal(
+    target_type: TargetType,
+    x: str,
+    handle_exception: HandleException = "raise",
+    **kwds,
+) -> Any:
     args = get_args(target_type)
     literal_types = {type(value) for value in args}
     scalar = _parse_to_one_of(tuple(literal_types), target_type, x, **kwds)
 
     if scalar not in args:
         msg = f"Cannot convert {x} to Literal[{', '.join(args)}]"
-        raise ValueError(msg)
-    return scalar
+        output = ValueError(msg)
+    else:
+        output = scalar
+    return _handle_output(x, handle_exception, output)
 
 
-@register_parser_fn(_is_optional)
+@register_parser_fn(_is_optional_for_parsing)
 def _parse_to_optional(target_type: TargetType, x: str, **kwds) -> Any:
-    args = (None,) + get_args(target_type)
+    args = (NoneType,) + get_args(target_type)
     return _parse_to_one_of(args, target_type, x, **kwds)  # type: ignore
 
 
-@register_parser_fn(_is_union)
+@register_parser_fn(_is_union_for_parsing)
 def _parse_to_union(target_type: TargetType, x: str, **kwds) -> Any:
     args = get_args(target_type)
     return _parse_to_one_of(args, target_type, x, **kwds)
@@ -277,6 +351,8 @@ def _parse_to_one_of(
     target_types: Iterable[TargetType],
     src_type: TargetType,
     x: str,
+    *,
+    handle_exception: HandleException = "raise",
     **kwds,
 ) -> Any:
     def key_fn(xi: Any) -> int:
@@ -292,12 +368,13 @@ def _parse_to_one_of(
         raise ValueError(msg)
 
     for target_type in target_types:
-        output = parse_to_type(x, target_type, **kwds)  # type: ignore
+        output = parse_to_type(x, target_type, handle_exception="return", **kwds)  # type: ignore
         if not isinstance(output, Exception):
-            return output
+            return _handle_output(x, handle_exception, output)
 
     msg = f"Invalid argument {x=}. (cannot be parsed to {src_type})"
-    return ValueError(msg)
+    output = ValueError(msg)
+    return _handle_output(x, handle_exception, output)
 
 
 def parse_to_optional_bool(
@@ -316,9 +393,9 @@ def parse_to_optional_bool(
     - None values: 'None', 'null'
     - Other raises ValueError.
     """
-    return parse_to_type(
-        x,
+    return _parse_to_optional(
         Optional[bool],
+        x,
         case_sensitive=case_sensitive,
         true_values=true_values,
         false_values=false_values,
@@ -335,9 +412,9 @@ def parse_to_optional_float(
     **kwds,
 ) -> Optional[float]:
     """Convert string values to optional float safely. Intended for argparse arguments."""
-    return parse_to_type(
-        x,
+    return _parse_to_optional(
         Optional[float],
+        x,
         case_sensitive=case_sensitive,
         none_values=none_values,
         **kwds,
@@ -352,9 +429,9 @@ def parse_to_optional_int(
     **kwds,
 ) -> Optional[int]:
     """Convert string values to optional int safely. Intended for argparse arguments."""
-    return parse_to_type(
-        x,
+    return _parse_to_optional(
         Optional[int],
+        x,
         case_sensitive=case_sensitive,
         none_values=none_values,
         **kwds,
@@ -369,13 +446,27 @@ def parse_to_optional_str(
     **kwds,
 ) -> Optional[str]:
     """Convert string values to optional str safely. Intended for argparse arguments."""
-    return parse_to_type(
-        x,
+    return _parse_to_optional(
         Optional[str],
+        x,
         case_sensitive=case_sensitive,
         none_values=none_values,
         **kwds,
     )
+
+
+def _handle_output(x: str, handle_exception: HandleException, output: Any) -> Any:
+    if not isinstance(output, Exception):
+        return output
+    elif handle_exception == "ignore":
+        return x  # type: ignore
+    elif handle_exception == "raise":
+        raise output
+    elif handle_exception == "return":
+        return output
+    else:
+        msg = f"Invalid argument {handle_exception=}. (expected one of {get_args(HandleException)})"
+        raise ValueError(msg)
 
 
 def _sanitize_values(values: Union[str, Iterable[str]]) -> List[str]:
@@ -386,7 +477,9 @@ def _sanitize_values(values: Union[str, Iterable[str]]) -> List[str]:
     return values
 
 
-def _str_in(x: str, values: List[str], case_sensitive: bool) -> bool:
+def _str_in(
+    x: str, values: Union[List[str], Tuple[str, ...]], case_sensitive: bool
+) -> bool:
     if case_sensitive:
         return x in values
     else:

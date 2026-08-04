@@ -12,7 +12,7 @@ from typing import (
     Protocol,
     Tuple,
     Union,
-    Iterable,
+    runtime_checkable,
     get_args,
 )
 
@@ -22,15 +22,16 @@ P = ParamSpec("P")
 T = TypeVar("T", covariant=True)
 U = TypeVar("U", covariant=True)
 T_Output = TypeVar("T_Output", default=Any)
-T_Any = TypeVar("T_Any", contravariant=True, default=Any)
+T_PredicateArg = TypeVar("T_PredicateArg", contravariant=True, default=Any)
 T_Function = TypeVar("T_Function", bound=Callable[..., Any])
 
 UnkMode = Literal["identity", "error"]
 ClassOrTuple = Union[type, Tuple[type, ...]]
 
 
-class Predicate(Protocol[T_Any]):
-    def __call__(self, /, x: T_Any) -> bool: ...
+@runtime_checkable
+class Predicate(Protocol[T_PredicateArg]):
+    def __call__(self, /, x: T_PredicateArg) -> bool: ...
 
 
 def return_none(*args, **kwargs) -> None:
