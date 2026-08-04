@@ -5,11 +5,11 @@ import logging
 import sys
 from argparse import ArgumentParser
 from pathlib import Path
-from typing import Iterable, Union
+from typing import Union
 
 from pythonwrench.argparse import str_to_bool
 from pythonwrench.os import tree_iter
-from pythonwrench.re import PatternLike
+from pythonwrench.re import PatternListLike
 
 logger = logging.getLogger(__name__)
 
@@ -78,8 +78,8 @@ def main_tree() -> None:
 def print_tree(
     root: Union[str, Path],
     *,
-    include: Union[PatternLike, Iterable[PatternLike]] = ".*",
-    exclude: Union[PatternLike, Iterable[PatternLike]] = (),
+    include: PatternListLike = ".*",
+    exclude: PatternListLike = (),
     max_depth: int = sys.maxsize,
     followlinks: bool = False,
     skipfiles: bool = False,
