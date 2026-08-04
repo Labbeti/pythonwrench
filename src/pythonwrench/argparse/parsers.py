@@ -21,11 +21,11 @@ from typing import (
 )
 
 from pythonwrench._core import Predicate
-from pythonwrench.argparse._core import (
+from pythonwrench.typing.checks import (
     _is_iterable_type_like,
-    _is_literal,
-    _is_optional,
-    _is_union,
+    _is_literal_type,
+    _is_optional_type,
+    _is_union_type,
 )
 from pythonwrench.typing.classes import NoneType, UnionType
 from pythonwrench.warnings import deprecated_alias
@@ -255,15 +255,15 @@ def _is_iterable_type_like_for_parsing(
 
 
 def _is_literal_for_parsing(x: Any, **kwds) -> bool:
-    return _is_literal(x)
+    return _is_literal_type(x)
 
 
 def _is_optional_for_parsing(x: Any, **kwds) -> bool:
-    return _is_optional(x)
+    return _is_optional_type(x)
 
 
 def _is_union_for_parsing(x: Any, **kwds) -> bool:
-    return _is_union(x)
+    return _is_union_type(x)
 
 
 @register_parser_fn(_is_enum_for_parsing)

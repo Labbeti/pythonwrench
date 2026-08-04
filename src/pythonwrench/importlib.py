@@ -55,7 +55,7 @@ def is_available_package(package: str) -> bool:
 
 def is_editable_package(package: str) -> bool:
     """Returns True if package is installed in editable mode in the current python environment."""
-    # TODO: check if this works with package containing - or _
+    package = package.replace("_", "-")
     try:
         direct_url = Distribution.from_name(package).read_text("direct_url.json")
     except PackageNotFoundError:

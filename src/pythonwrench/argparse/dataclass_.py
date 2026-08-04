@@ -14,17 +14,17 @@ from typing import (
     get_origin,
 )
 
-from pythonwrench.argparse._core import (
-    _is_iterable_type_like,
-    _is_literal,
-    _is_optional,
-    _is_union,
-)
 from pythonwrench.argparse.parsers import (
     ListParsing,
     get_parse_fn,
 )
 from pythonwrench.functools import filter_and_call
+from pythonwrench.typing.checks import (
+    _is_iterable_type_like,
+    _is_literal_type,
+    _is_optional_type,
+    _is_union_type,
+)
 from pythonwrench.typing.classes import (
     Dataclass,
     DataclassInstance,
@@ -121,7 +121,7 @@ def _get_kwds_for_type(
     type_args = get_args(field_type)
 
     # sanity checks
-    if _is_literal(field_type):
+    if _is_literal_type(field_type):
         if not all(type(arg) in _SCALARS_TARGET_TYPES for arg in type_args):
             msg = f"Invalid argument {field_type=}. (expected homogeneous types in {type_origin})"
             raise TypeError(msg)
@@ -129,7 +129,9 @@ def _get_kwds_for_type(
     if (
         (field_type in _SCALARS_TARGET_TYPES)
         or (
-            _is_literal(field_type) or _is_optional(field_type) or _is_union(field_type)
+            _is_literal_type(field_type)
+            or _is_optional_type(field_type)
+            or _is_union_type(field_type)
         )
         or (_is_iterable_type_like(type_origin) and list_parsing == "brackets")
     ):
@@ -158,8 +160,8 @@ def _get_kwds_for_scalar_type(
 
     if (
         type_ in _SCALARS_TARGET_TYPES
-        or _is_optional(type_)
-        or _is_union(type_)
+        or _is_optional_type(type_)
+        or _is_union_type(type_)
         or (
             _is_iterable_type_like(get_origin(from_field_type))
             and list_parsing == "brackets"
@@ -167,7 +169,7 @@ def _get_kwds_for_scalar_type(
     ):
         pass
 
-    elif _is_literal(type_):
+    elif _is_literal_type(type_):
         type_args = get_args(type_)
         kwds["choices"] = type_args
     else:

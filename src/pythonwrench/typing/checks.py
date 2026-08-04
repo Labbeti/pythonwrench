@@ -5,6 +5,8 @@ import inspect
 import logging
 import sys
 import typing
+from collections.abc import Callable as _RuntimeCallable
+from collections.abc import Iterable as _RuntimeIterable
 from dataclasses import is_dataclass
 from numbers import Integral
 from types import FunctionType, MethodType
@@ -147,13 +149,37 @@ def isinstance_generic(
         return obj == ()
 
     args = get_args(class_or_tuple)
-    if origin is Callable:
+
+    if _is_callable_type(origin):
+        if not callable(obj):
+            return False
         if len(args) == 0:
-            return callable(obj)
-        else:
-            # TODO: impl
-            msg = "Function `isinstance_generic` currently does not support parametrized Callable."
-            raise NotImplementedError(msg)
+            return True
+        elif len(args) != 2:
+            msg = f"Invalid number of parameters in Callable. (found {len(args)} but expected 0 or 2)"
+            raise RuntimeError(msg)
+
+        sign = inspect.signature(obj)
+        type_params_annots, type_return_annot = args
+        obj_return_annot = sign.return_annotation
+
+        if obj_return_annot != type_return_annot:
+            return False
+
+        obj_params_annots = [param.annotation for param in sign.parameters.values()]
+        if type_params_annots is ...:
+            return True
+
+        if len(obj_params_annots) != len(type_params_annots):
+            return False
+
+        for obj_param_annot, type_param_annot in zip(
+            obj_params_annots, type_params_annots
+        ):
+            if obj_param_annot != type_param_annot:
+                return False
+
+        return True
 
     if len(args) == 0:
         return isinstance_generic(obj, origin)
@@ -507,3 +533,28 @@ def _safe_isin(x: Any, targets: Iterable) -> bool:
         if (x == alias) is True:
             return True
     return False
+
+
+def _is_callable_type(x: Any) -> bool:
+    return x in (Callable, _RuntimeCallable)
+
+
+def _is_iterable_type_like(x: Any) -> bool:
+    return any(xi in (list, Iterable, _RuntimeIterable) for xi in (x, get_origin(x)))
+
+
+def _is_literal_type(x: Any) -> bool:
+    origin = get_origin(x)
+    return origin is Literal
+
+
+def _is_optional_type(x: Any) -> bool:
+    return getattr(x, "__name__", None) == "Optional"
+
+
+def _is_union_type(x: Any) -> bool:
+    origin = get_origin(x)
+    return origin == Union or getattr(origin, "__name__", None) in (
+        "Union",
+        "UnionType",
+    )
