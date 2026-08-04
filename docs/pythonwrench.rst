@@ -12,6 +12,7 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   pythonwrench.argparse
    pythonwrench.collections
    pythonwrench.serialization
    pythonwrench.typing
@@ -23,7 +24,6 @@ Submodules
    :maxdepth: 4
 
    pythonwrench.abc
-   pythonwrench.argparse
    pythonwrench.cast
    pythonwrench.checksum
    pythonwrench.concurrent
