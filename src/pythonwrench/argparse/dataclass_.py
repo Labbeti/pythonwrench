@@ -7,33 +7,30 @@ from typing import (
     Any,
     Dict,
     Iterable,
-    Literal,
     Optional,
     Type,
     TypeVar,
-    Union,
     get_args,
     get_origin,
 )
 
+from pythonwrench.argparse._core import (
+    _is_iterable_type_like,
+    _is_literal,
+    _is_optional,
+    _is_union,
+)
+from pythonwrench.argparse.parsers import (
+    ListParsing,
+    get_parse_fn,
+)
 from pythonwrench.functools import filter_and_call
 from pythonwrench.typing.classes import (
     Dataclass,
     DataclassInstance,
     NoneType,
-    UnionType,
 )
 from pythonwrench.warnings import deprecated_alias
-from pythonwrench.argparse.parsers import (
-    ListParsing,
-    get_parse_fn,
-)
-from pythonwrench.argparse._core import (
-    _is_iterable_type_like,
-    _is_optional,
-    _is_literal,
-    _is_union,
-)
 
 T_Dataclass = TypeVar("T_Dataclass", bound=Dataclass)
 T_DataclassInstance = TypeVar("T_DataclassInstance", bound=DataclassInstance)
@@ -157,7 +154,6 @@ def _get_kwds_for_scalar_type(
     from_field_type: Any,
     list_parsing: ListParsing,
 ) -> Dict[str, Any]:
-    type_origin = get_origin(type_)
     kwds = {}
 
     if (
