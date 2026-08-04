@@ -3,8 +3,8 @@
 
 import re
 from enum import Enum
-from pathlib import Path
 from functools import partial
+from pathlib import Path
 from typing import (
     Any,
     Callable,
@@ -17,20 +17,22 @@ from typing import (
     TypeVar,
     Union,
     get_args,
+    overload,
 )
 
 from pythonwrench._core import Predicate
-from pythonwrench.typing.classes import NoneType, UnionType
-from pythonwrench.warnings import deprecated_alias
 from pythonwrench.argparse._core import (
     _is_iterable_type_like,
-    _is_union,
     _is_literal,
     _is_optional,
+    _is_union,
 )
+from pythonwrench.typing.classes import NoneType, UnionType
+from pythonwrench.warnings import deprecated_alias
 
 T = TypeVar("T")
 T_Enum = TypeVar("T_Enum", bound=Enum)
+T_Callable = TypeVar("T_Callable", bound=Callable)
 TargetType = Union[
     Type[T],
     UnionType,
@@ -52,10 +54,24 @@ _PARSER_REGISTRY: List[Tuple[Union[TargetType, Predicate], Callable]] = []
 class ParseError(ValueError): ...
 
 
+@overload
+def register_parser_fn(
+    type_: Union[TargetType, Predicate, None],
+    fn: None = None,
+) -> Callable[[T_Callable], T_Callable]: ...
+
+
+@overload
+def register_parser_fn(
+    type_: Union[TargetType, Predicate, None],
+    fn: T_Callable,
+) -> T_Callable: ...
+
+
 def register_parser_fn(
     type_: Union[TargetType, Predicate, None],
     fn: Optional[Callable] = None,
-) -> Any:
+) -> Callable:
     global _PARSER_REGISTRY
     if type_ is None:
         type_ = NoneType
@@ -65,7 +81,7 @@ def register_parser_fn(
     else:
         for type_or_pred, _ in _PARSER_REGISTRY:
             if type_or_pred is type_:
-                return None
+                return fn
         _PARSER_REGISTRY.append((type_, fn))  # type: ignore
         return fn
 
@@ -157,7 +173,7 @@ def parse_to_bool(
     false_values: Union[str, Iterable[str]] = DEFAULT_FALSE_VALUES,
     handle_exception: HandleException = "raise",
     **kwds,
-) -> Union[bool, Exception]:
+) -> bool:
     true_values = _sanitize_values(true_values)
     if _str_in(x, true_values, case_sensitive):
         return True
