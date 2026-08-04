@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import unittest
+from enum import Enum, auto
 from argparse import ArgumentParser
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Iterable, List, Literal, Optional, Tuple, Union
 from unittest import TestCase
 
@@ -18,6 +20,12 @@ from pythonwrench.argparse import (
     str_to_optional_str,
 )
 from pythonwrench.typing import NoneType
+
+
+class State(Enum):
+    RUNNING = auto()
+    PENDING = auto()
+    SLEEPING = auto()
 
 
 class TestArgparse(TestCase):
@@ -64,6 +72,12 @@ class TestArgparse(TestCase):
         with self.assertRaises(SystemExit):
             args = parser.parse_args(["--val", "2.5"])
 
+    def test_parse_special_types(self) -> None:
+        path = "/a/b.txt"
+        assert parse_to(Path)(path) == Path(path)
+
+
+class TestDataclassParser(TestCase):
     def test_parse_args_using_dataclass_example_1(self) -> None:
         @dataclass
         class A:

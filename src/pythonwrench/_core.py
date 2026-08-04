@@ -12,6 +12,7 @@ from typing import (
     Protocol,
     Tuple,
     Union,
+    Iterable,
     get_args,
 )
 
@@ -20,7 +21,7 @@ from typing_extensions import ParamSpec, TypeVar
 P = ParamSpec("P")
 T = TypeVar("T", covariant=True)
 U = TypeVar("U", covariant=True)
-T_Output = TypeVar("T_Output")
+T_Output = TypeVar("T_Output", default=Any)
 T_Any = TypeVar("T_Any", contravariant=True, default=Any)
 T_Function = TypeVar("T_Function", bound=Callable[..., Any])
 
@@ -103,31 +104,14 @@ class _FunctionRegistry(Generic[T_Output]):
             raise ValueError(msg)
 
         def _impl(new_fn: Callable[[T], T_Output]) -> Callable[[T], T_Output]:
-            new_fns = {}
-            inserted = False
-
-            for fn_i, (
-                class_or_tuple_i,
-                custom_predicate_i,
-                priority_i,
-            ) in self.fns.items():
-                if new_fn == fn_i:
-                    continue
-
-                if not inserted and priority >= priority_i:
-                    new_fns[new_fn] = (class_or_tuple, custom_predicate, priority)
-                    inserted = True
-
-                new_fns[fn_i] = (class_or_tuple_i, custom_predicate_i, priority_i)
-
-            if not inserted:
-                assert all(
-                    priority < priority_i for _, _, priority_i in self.fns.values()
-                )
-                new_fns[new_fn] = (class_or_tuple, custom_predicate, priority)
-
-            assert new_fn in new_fns
-            self.fns = new_fns
+            new_value = (class_or_tuple, custom_predicate, priority)
+            self.fns = _insert_in_dict(
+                self.fns,
+                new_fn,
+                new_value,
+                priority,
+                priority_key=2,
+            )
             return new_fn
 
         return _impl
@@ -170,3 +154,26 @@ class _FunctionRegistry(Generic[T_Output]):
         else:
             msg = f"Invalid argument {unk_mode=}. (expected one of {get_args(UnkMode)})"
             raise ValueError(msg)
+
+
+def _insert_in_dict(
+    dic: Dict,
+    key: Any,
+    value: Any,
+    priority: int,
+    priority_key: int,
+) -> Dict:
+    if key in dic:
+        return dic
+    insert_index = _get_insertion_index(list(dic.values()), priority, priority_key)
+    items = list(dic.items())
+    items.insert(insert_index, (key, value))
+    return dict(items)
+
+
+def _get_insertion_index(lst: list, priority: int, priority_key: int) -> int:
+    for i, item in enumerate(lst):
+        other_priority = item[priority_key]
+        if priority >= other_priority:
+            return i
+    return len(lst)
