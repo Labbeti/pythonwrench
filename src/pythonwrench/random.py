@@ -14,7 +14,9 @@ def randstr(
     *,
     letters: Iterable[str] = string.ascii_letters,
     seed: Optional[int] = None,
-) -> str: ...
+) -> str:
+    """Perform the randstr operation."""
+    ...
 
 
 @overload
@@ -25,7 +27,9 @@ def randstr(
     *,
     letters: Iterable[str] = string.ascii_letters,
     seed: Optional[int] = None,
-) -> str: ...
+) -> str:
+    """Perform the randstr operation."""
+    ...
 
 
 def randstr(

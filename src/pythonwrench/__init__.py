@@ -9,7 +9,7 @@ __author_email__ = "labbeti.pub@gmail.com"
 __license__ = "MIT"
 __maintainer__ = "Étienne Labbé (Labbeti)"
 __status__ = "Development"
-__version__ = "0.6.2"
+__version__ = "0.6.3"
 
 
 from typing import TYPE_CHECKING
@@ -52,10 +52,23 @@ if TYPE_CHECKING or lazy is None:
     from .abc import Singleton
     from .argparse import (
         add_dataclass_fields_to_parser,
+        get_parse_fn,
         new_parser_from_dataclass,
         parse_args_using_dataclass,
         parse_to,
+        parse_to_bool,
+        parse_to_float,
+        parse_to_int,
+        parse_to_none,
+        parse_to_optional_bool,
+        parse_to_optional_float,
+        parse_to_optional_int,
+        parse_to_optional_str,
+        parse_to_type,
+        register_parser_fn,
         str_to_bool,
+        str_to_float,
+        str_to_int,
         str_to_none,
         str_to_optional_bool,
         str_to_optional_float,
@@ -269,10 +282,23 @@ else:
         submod_attrs={
             "argparse": [
                 "add_dataclass_fields_to_parser",
+                "get_parse_fn",
                 "new_parser_from_dataclass",
                 "parse_args_using_dataclass",
                 "parse_to",
+                "parse_to_bool",
+                "parse_to_float",
+                "parse_to_int",
+                "parse_to_none",
+                "parse_to_optional_bool",
+                "parse_to_optional_float",
+                "parse_to_optional_int",
+                "parse_to_optional_str",
+                "parse_to_type",
+                "register_parser_fn",
                 "str_to_bool",
+                "str_to_float",
+                "str_to_int",
                 "str_to_none",
                 "str_to_optional_bool",
                 "str_to_optional_float",

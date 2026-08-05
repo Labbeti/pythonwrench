@@ -21,6 +21,7 @@ def print_safe_rmdir(
     dry_run: bool = False,
     verbose: int = 0,
 ) -> None:
+    """Perform the print safe rmdir operation."""
     deleted, reviewed = safe_rmdir(
         root=root,
         rm_root=rm_root,
@@ -40,6 +41,7 @@ def print_safe_rmdir(
 
 
 def main_safe_rmdir() -> None:
+    """Perform the main safe rmdir operation."""
     parser = ArgumentParser()
     parser.add_argument(
         "root",

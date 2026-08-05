@@ -21,16 +21,15 @@ class TestImportlib(TestCase):
 
         assert is_available_package("pythonwrench")
         assert len(search_submodules(pw)) > 0
+        assert is_available_package("pytest")
 
         assert not is_editable_package("typing_extensions")
         assert not is_editable_package("typing-extensions")
 
-        assert is_available_package("pre_commit")
         assert is_available_package("typing_extensions")
 
         # ignore the UserWarning
         warnings.filterwarnings("ignore", category=UserWarning)
-        assert is_available_package("pre-commit")
         assert is_available_package("typing-extensions")
         warnings.filterwarnings("default", category=UserWarning)
 

@@ -27,6 +27,7 @@ class ThreadPoolExecutorHelper(Generic[P, T]):
         futures: "Iterable[Future[T]]" = (),
         **default_fn_kwds,
     ) -> None:
+        """Initialize the instance."""
         futures = list(futures)
 
         super().__init__()
@@ -37,6 +38,7 @@ class ThreadPoolExecutorHelper(Generic[P, T]):
         self.default_kwargs = default_fn_kwds
 
     def submit(self, *args: P.args, **kwargs: P.kwargs) -> "Future[T]":
+        """Perform the submit operation."""
         if self.executor is None:
             executor_kwds = self.executor_kwds
             if executor_kwds is None:
@@ -52,6 +54,7 @@ class ThreadPoolExecutorHelper(Generic[P, T]):
         return future
 
     def wait_all(self, shutdown: bool = True, verbose: bool = True) -> List[T]:
+        """Perform the wait all operation."""
         futures = self.futures
         if verbose:
             try:

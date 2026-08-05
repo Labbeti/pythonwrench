@@ -186,6 +186,7 @@ def _serialize_csv(
     replace_newline_by: Optional[str] = "\\n",
     **csv_writer_kwds,
 ) -> None:
+    """Perform the serialize csv operation."""
     if to_builtins:
         data = as_builtin(data)
 
@@ -249,6 +250,7 @@ def _serialize_csv(
     if replace_newline_by is not None:
 
         def _replace_newline(s):
+            """Perform the replace newline operation."""
             if not isinstance(s, str):
                 return s
             else:
@@ -272,6 +274,7 @@ def _serialize_csv(
 
 
 def _stringify(x: Any) -> Any:
+    """Perform the stringify operation."""
     if isinstance(x, str):
         return x
     elif isinstance(x, dict):
@@ -297,7 +300,9 @@ def load_csv(
     # CSV reader kwargs
     delimiter: Optional[str] = None,
     **csv_reader_kwds,
-) -> List[Dict[str, Any]]: ...
+) -> List[Dict[str, Any]]:
+    """Load csv."""
+    ...
 
 
 @overload
@@ -312,7 +317,9 @@ def load_csv(
     # CSV reader kwargs
     delimiter: Optional[str] = None,
     **csv_reader_kwds,
-) -> Dict[str, List[Any]]: ...
+) -> Dict[str, List[Any]]:
+    """Load csv."""
+    ...
 
 
 def load_csv(
@@ -375,7 +382,9 @@ def loads_csv(
     # CSV reader kwargs
     delimiter: Optional[str] = ",",
     **csv_reader_kwds,
-) -> List[Dict[str, Any]]: ...
+) -> List[Dict[str, Any]]:
+    """Load s csv."""
+    ...
 
 
 @overload
@@ -390,7 +399,9 @@ def loads_csv(
     # CSV reader kwargs
     delimiter: Optional[str] = ",",
     **csv_reader_kwds,
-) -> Dict[str, List[Any]]: ...
+) -> Dict[str, List[Any]]:
+    """Load s csv."""
+    ...
 
 
 def loads_csv(
@@ -405,6 +416,7 @@ def loads_csv(
     delimiter: Optional[str] = ",",
     **csv_reader_kwds,
 ) -> Union[List[Dict[str, Any]], Dict[str, List[Any]]]:
+    """Load s csv."""
     with io.StringIO(content) as buffer:
         return _parse_csv(
             buffer,
@@ -418,7 +430,9 @@ def loads_csv(
 
 
 @function_alias(load_csv)
-def read_csv(*args, **kwargs): ...
+def read_csv(*args, **kwargs):
+    """Read csv."""
+    ...
 
 
 def _parse_csv(
@@ -433,6 +447,7 @@ def _parse_csv(
     delimiter: Optional[str] = ",",
     **csv_reader_kwds,
 ) -> Union[List[Dict[str, Any]], Dict[str, List[Any]]]:
+    """Parse csv."""
     if delimiter is None:
         msg = f"Invalid argument {delimiter=}. (expected not None when {type(file)=})"
         raise ValueError(msg)

@@ -73,7 +73,9 @@ def disk_cache_decorator(
     cache_load_fn: Callable[[Path], Any],
     cache_enable: bool = True,
     cache_store_mode: StoreMode,
-) -> Callable[[Callable[P, T]], Callable[P, T]]: ...
+) -> Callable[[Callable[P, T]], Callable[P, T]]:
+    """Perform the disk cache decorator operation."""
+    ...
 
 
 @overload
@@ -93,7 +95,9 @@ def disk_cache_decorator(
     cache_load_fn: None = None,
     cache_enable: bool = True,
     cache_store_mode: StoreMode = _DEFAULT_CACHE_STORE_MODE,
-) -> Callable[[Callable[P, T]], Callable[P, T]]: ...
+) -> Callable[[Callable[P, T]], Callable[P, T]]:
+    """Perform the disk cache decorator operation."""
+    ...
 
 
 @overload
@@ -113,7 +117,9 @@ def disk_cache_decorator(
     cache_load_fn: Optional[Callable[[Path], Any]] = None,
     cache_enable: bool = True,
     cache_store_mode: StoreMode = _DEFAULT_CACHE_STORE_MODE,
-) -> Callable[[Callable[P, T]], Callable[P, T]]: ...
+) -> Callable[[Callable[P, T]], Callable[P, T]]:
+    """Perform the disk cache decorator operation."""
+    ...
 
 
 @overload
@@ -133,7 +139,9 @@ def disk_cache_decorator(
     cache_load_fn: Callable[[Path], Any],
     cache_enable: bool = True,
     cache_store_mode: StoreMode = _DEFAULT_CACHE_STORE_MODE,
-) -> Callable[P, T]: ...
+) -> Callable[P, T]:
+    """Perform the disk cache decorator operation."""
+    ...
 
 
 @overload
@@ -153,7 +161,9 @@ def disk_cache_decorator(
     cache_load_fn: Optional[Callable[[Path], Any]] = None,
     cache_enable: bool = True,
     cache_store_mode: StoreMode = _DEFAULT_CACHE_STORE_MODE,
-) -> Callable[P, T]: ...
+) -> Callable[P, T]:
+    """Perform the disk cache decorator operation."""
+    ...
 
 
 def disk_cache_decorator(
@@ -237,7 +247,9 @@ def disk_cache_call(
     cache_enable: bool = True,
     cache_store_mode: StoreMode,
     **kwargs,
-) -> T: ...
+) -> T:
+    """Perform the disk cache call operation."""
+    ...
 
 
 @overload
@@ -258,7 +270,9 @@ def disk_cache_call(
     cache_enable: bool = True,
     cache_store_mode: StoreMode = _DEFAULT_CACHE_STORE_MODE,
     **kwargs,
-) -> T: ...
+) -> T:
+    """Perform the disk cache call operation."""
+    ...
 
 
 @overload
@@ -279,7 +293,9 @@ def disk_cache_call(
     cache_enable: bool = True,
     cache_store_mode: StoreMode = _DEFAULT_CACHE_STORE_MODE,
     **kwargs,
-) -> T: ...
+) -> T:
+    """Perform the disk cache call operation."""
+    ...
 
 
 def disk_cache_call(
@@ -361,6 +377,7 @@ def _disk_cache_impl(
     cache_store_mode: StoreMode = _DEFAULT_CACHE_STORE_MODE,
 ) -> Callable[[Callable[P, T]], Callable[P, T]]:
     # for backward compatibility
+    """Perform the disk cache impl operation."""
     if cache_fname_fmt is None:
         expected = "{fn_name}_{csum}{suffix}"
         msg = f"Deprecated argument value {cache_fname_fmt=}. (use {expected} instead)"
@@ -418,6 +435,7 @@ def _disk_cache_impl(
         cache_fname_fmt = cache_fname_fmt.format
 
     def _disk_cache_impl_fn(fn: Callable[P, T]) -> Callable[P, T]:
+        """Perform the disk cache impl fn operation."""
         fn_fullname, fn_name = _get_fn_fullname_and_name(fn)
         cache_fn_dpath = _get_fn_cache_dpath(fn, cache_dpath=cache_dpath)
 
@@ -436,6 +454,7 @@ def _disk_cache_impl(
 
         @wraps(fn)
         def _disk_cache_wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
+            """Perform the disk cache wrapper operation."""
             checksum_args = fn, args, kwargs
 
             kwds = {}
@@ -582,6 +601,7 @@ def _get_fn_cache_dpath(
     *,
     cache_dpath: Union[str, Path, None] = None,
 ) -> Path:
+    """Perform the get fn cache dpath operation."""
     _, fn_name = _get_fn_fullname_and_name(fn)
     cache_dpath = get_cache_dpath(cache_dpath)
     cache_fn_dpath = cache_dpath.joinpath(fn_name)
@@ -589,6 +609,7 @@ def _get_fn_cache_dpath(
 
 
 def _get_fn_fullname_and_name(fn: Callable) -> Tuple[str, str]:
+    """Perform the get fn fullname and name operation."""
     fn_fullname = get_fullname(fn, inst_suffix="").replace("<locals>", "_locals_")
     fn_name = fn_fullname.split(".")[-1]
     return fn_fullname, fn_name

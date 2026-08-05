@@ -15,6 +15,12 @@ from typing import (
     runtime_checkable,
 )
 
+try:
+    from types import UnionType  # type: ignore
+except ImportError:
+    # support older python versions
+    UnionType = type(Union)
+
 from typing_extensions import TypeAlias, TypeVar
 
 NoneType: TypeAlias = type(None)  # type: ignore
@@ -62,12 +68,15 @@ class NamedTupleInstance(Protocol):
     _field_defaults: Dict[str, Any]
 
     def _asdict(self) -> Dict[str, Any]:
+        """Perform the asdict operation."""
         raise NotImplementedError
 
     def __getitem__(self, idx, /):
+        """Return the item at the requested index or key."""
         raise NotImplementedError
 
     def __len__(self) -> int:
+        """Return the number of items in the instance."""
         raise NotImplementedError
 
 
@@ -76,6 +85,7 @@ class SupportsAdd(Protocol[_T_Other]):
     """Protocol that support `__add__` (+) method."""
 
     def __add__(self, other: _T_Other, /):
+        """Return the result of adding another object."""
         raise NotImplementedError
 
 
@@ -84,6 +94,7 @@ class SupportsAnd(Protocol[_T_Other]):
     """Protocol that support `__and__` (&) method."""
 
     def __and__(self, other: _T_Other, /):
+        """Return the result of applying the and operator."""
         raise NotImplementedError
 
 
@@ -92,6 +103,7 @@ class SupportsBool(Protocol):
     """Protocol that support `__bool__` method."""
 
     def __bool__(self) -> bool:
+        """Return the truth value of the instance."""
         raise NotImplementedError
 
 
@@ -100,6 +112,7 @@ class SupportsDiv(Protocol[_T_Other]):
     """Protocol that support `__div__` (/) method."""
 
     def __div__(self, other: _T_Other, /):
+        """Return the result of dividing by another object."""
         raise NotImplementedError
 
 
@@ -108,6 +121,7 @@ class SupportsGetitem(Protocol[_T_Item, _T_Index]):
     """Protocol that support `__getitem__` method."""
 
     def __getitem__(self, idx: _T_Index, /) -> _T_Item:
+        """Return the item at the requested index or key."""
         raise NotImplementedError
 
 
@@ -119,6 +133,7 @@ class SupportsGetitem2(Protocol[_T_Index2, _T_Item]):
     """
 
     def __getitem__(self, idx: _T_Index2, /) -> _T_Item:
+        """Return the item at the requested index or key."""
         raise NotImplementedError
 
 
@@ -127,9 +142,11 @@ class SupportsGetitemLen(Protocol[_T_Item, _T_Index]):
     """Protocol that support `__getitem__` and `__len__` methods."""
 
     def __getitem__(self, idx: _T_Index, /) -> _T_Item:
+        """Return the item at the requested index or key."""
         raise NotImplementedError
 
     def __len__(self) -> int:
+        """Return the number of items in the instance."""
         raise NotImplementedError
 
 
@@ -140,9 +157,11 @@ class SupportsGetitemLen2(Protocol[_T_Index2, _T_Item]):
     Same than `SupportsGetitemLen` except that generic parameters are in reversed order: [T_Index, T_Item]."""
 
     def __getitem__(self, idx: _T_Index2, /) -> _T_Item:
+        """Return the item at the requested index or key."""
         raise NotImplementedError
 
     def __len__(self) -> int:
+        """Return the number of items in the instance."""
         raise NotImplementedError
 
 
@@ -151,12 +170,15 @@ class SupportsGetitemIterLen(Protocol[_T_Item, _T_Index]):
     """Protocol that support `__getitem__`, `__iter__` and `__len__` methods."""
 
     def __getitem__(self, idx: _T_Index, /) -> _T_Item:
+        """Return the item at the requested index or key."""
         raise NotImplementedError
 
     def __iter__(self) -> Iterator[_T_Item]:
+        """Return an iterator over the instance."""
         raise NotImplementedError
 
     def __len__(self) -> int:
+        """Return the number of items in the instance."""
         raise NotImplementedError
 
 
@@ -168,12 +190,15 @@ class SupportsGetitemIterLen2(Protocol[_T_Index2, _T_Item]):
     """
 
     def __getitem__(self, idx: _T_Index2, /) -> _T_Item:
+        """Return the item at the requested index or key."""
         raise NotImplementedError
 
     def __iter__(self) -> Iterator[_T_Item]:
+        """Return an iterator over the instance."""
         raise NotImplementedError
 
     def __len__(self) -> int:
+        """Return the number of items in the instance."""
         raise NotImplementedError
 
 
@@ -182,9 +207,11 @@ class SupportsIterLen(Protocol[_T_Item]):
     """Protocol that support `__iter__` and `__len__` methods."""
 
     def __iter__(self) -> Iterator[_T_Item]:
+        """Return an iterator over the instance."""
         raise NotImplementedError
 
     def __len__(self) -> int:
+        """Return the number of items in the instance."""
         raise NotImplementedError
 
 
@@ -193,6 +220,7 @@ class SupportsLen(Protocol):
     """Protocol that support `__len__` method."""
 
     def __len__(self) -> int:
+        """Return the number of items in the instance."""
         raise NotImplementedError
 
 
@@ -201,6 +229,7 @@ class SupportsMul(Protocol[_T_Other]):
     """Protocol that support `__mul__` (*) method."""
 
     def __mul__(self, other: _T_Other, /):
+        """Return the result of multiplying by another object."""
         raise NotImplementedError
 
 
@@ -209,6 +238,7 @@ class SupportsOr(Protocol[_T_Other]):
     """Protocol that support `__or__` (|) method."""
 
     def __or__(self, other: _T_Other, /):
+        """Return the result of applying the or operator."""
         raise NotImplementedError
 
 
@@ -217,4 +247,5 @@ class SupportsMatmul(Protocol[_T_Other]):
     """Protocol that support `__matmul__` (@) method."""
 
     def __matmul__(self, other: _T_Other, /):
+        """Return the result of matrix multiplication."""
         raise NotImplementedError

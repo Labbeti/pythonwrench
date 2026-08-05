@@ -64,28 +64,36 @@ class Version:
         self,
         version: Self,
         /,
-    ) -> None: ...
+    ) -> None:
+        """Initialize the instance."""
+        ...
 
     @overload
     def __init__(
         self,
         version_str: str,
         /,
-    ) -> None: ...
+    ) -> None:
+        """Initialize the instance."""
+        ...
 
     @overload
     def __init__(
         self,
         version_dict: VersionDictLike,
         /,
-    ) -> None: ...
+    ) -> None:
+        """Initialize the instance."""
+        ...
 
     @overload
     def __init__(
         self,
         version_tuple: VersionTupleLike,
         /,
-    ) -> None: ...
+    ) -> None:
+        """Initialize the instance."""
+        ...
 
     @overload
     def __init__(
@@ -95,9 +103,12 @@ class Version:
         patch: int,
         prerelease: PreRelease = None,
         buildmetadata: BuildMetadata = None,
-    ) -> None: ...
+    ) -> None:
+        """Initialize the instance."""
+        ...
 
     def __init__(self, *args, **kwargs) -> None:
+        """Initialize the instance."""
         has_1_pos_arg = len(args) == 1 and len(kwargs) == 0
         # Version
         if has_1_pos_arg and isinstance(args[0], Version):
@@ -150,14 +161,17 @@ class Version:
 
     @classmethod
     def from_dict(cls, version_dict: VersionDictLike) -> Self:
+        """Create an instance from dict."""
         return cls(version_dict)
 
     @classmethod
     def from_str(cls, version_str: str) -> Self:
+        """Create an instance from str."""
         return cls(version_str)
 
     @classmethod
     def from_tuple(cls, version_tuple: VersionTupleLike) -> Self:
+        """Create an instance from tuple."""
         return cls(version_tuple)
 
     @classmethod
@@ -189,9 +203,11 @@ class Version:
         self.patch = new_value
 
     def without_prerelease(self) -> "Version":
+        """Perform the without prerelease operation."""
         return Version(self.major, self.minor, self.patch, None, self.buildmetadata)
 
     def without_buildmetadata(self) -> "Version":
+        """Perform the without buildmetadata operation."""
         return Version(self.major, self.minor, self.patch, self.prerelease, None)
 
     def next_major(
@@ -199,6 +215,7 @@ class Version:
         keep_prerelease: bool = False,
         keep_buildmetadata: bool = False,
     ) -> "Version":
+        """Perform the next major operation."""
         prerelease = self.prerelease if keep_prerelease else None
         buildmetadata = self.buildmetadata if keep_buildmetadata else None
         return Version(
@@ -214,6 +231,7 @@ class Version:
         keep_prerelease: bool = False,
         keep_buildmetadata: bool = False,
     ) -> "Version":
+        """Perform the next minor operation."""
         prerelease = self.prerelease if keep_prerelease else None
         buildmetadata = self.buildmetadata if keep_buildmetadata else None
         return Version(
@@ -229,6 +247,7 @@ class Version:
         keep_prerelease: bool = False,
         keep_buildmetadata: bool = False,
     ) -> "Version":
+        """Perform the next patch operation."""
         prerelease = self.prerelease if keep_prerelease else None
         buildmetadata = self.buildmetadata if keep_buildmetadata else None
         return Version(
@@ -240,12 +259,14 @@ class Version:
         )
 
     def to_dict(self, exclude_none: bool = True) -> VersionDict:
+        """Convert the value to dict."""
         version_dict = asdict(self)
         if exclude_none:
             version_dict = {k: v for k, v in version_dict.items() if v is not None}
         return version_dict  # type: ignore
 
     def to_str(self) -> str:
+        """Convert the value to str."""
         kwds = dict(
             major=self.major,
             minor=self.minor,
@@ -263,10 +284,12 @@ class Version:
         self,
         exclude_none: bool = True,
     ) -> VersionTuple:
+        """Convert the value to tuple."""
         version_tuple = tuple(self.to_dict(exclude_none).values())
         return version_tuple  # type: ignore
 
     def equals(self, other: VersionLike, *, ignore_buildmetadata: bool = False) -> bool:
+        """Perform the equals operation."""
         if isinstance(other, (Mapping, tuple, str)):
             other = Version(other)
         # note: use self.__class__ to avoid error cause by 'pytest -v test' collect
@@ -282,27 +305,34 @@ class Version:
         )
 
     def __str__(self) -> str:
+        """Return the string representation of the instance."""
         return self.to_str()
 
     def __eq__(self, other: Any) -> bool:
+        """Return whether this instance equals another object."""
         return self.equals(other)
 
     def __lt__(self, other: VersionLike) -> bool:
+        """Return whether this instance is less than another."""
         return _compare_lt(self, other)
 
     def __le__(self, other: VersionLike) -> bool:
+        """Return whether this instance is less than or equal to another."""
         return (self == other) or (self < other)
 
     def __gt__(self, other: VersionLike) -> bool:
+        """Return whether this instance is greater than another."""
         return _compare_lt(other, self)
 
     def __ge__(self, other: VersionLike) -> bool:
+        """Return whether this instance is greater than or equal to another."""
         return (self == other) or (self > other)
 
 
 def _compare_lt(
     x: Union[Version, Mapping, tuple, str], y: Union[Version, Mapping, tuple, str]
 ) -> bool:
+    """Perform the compare lt operation."""
     if isinstance(x, (Mapping, tuple, str)):
         x = Version(x)
     if isinstance(y, (Mapping, tuple, str)):
@@ -355,6 +385,7 @@ def _compare_lt(
 
 
 def _parse_version_str(version_str: str) -> VersionDict:
+    """Parse version str."""
     version_match = re.match(_VERSION_PATTERN, version_str)
     if version_match is None:
         msg = f"Invalid argument {version_str=}. (not a version)"

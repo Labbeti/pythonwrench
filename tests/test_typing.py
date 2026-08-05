@@ -314,8 +314,16 @@ class TestIsInstanceGuard(TestCase):
         assert isinstance_generic(lambda x: x, Callable)
         assert isinstance_generic(Path, Callable)
 
-        with self.assertRaises(NotImplementedError):
-            assert isinstance_generic(Path, Callable[[str], Path])
+        def parse(value: str, base: int) -> float:
+            return float(value) + base
+
+        assert isinstance_generic(parse, Callable[[str, int], float])
+        assert isinstance_generic(parse, Callable[..., float])
+
+        assert not isinstance_generic(parse, Callable[[str], float])
+        assert not isinstance_generic(parse, Callable[[int, int], float])
+        assert not isinstance_generic(parse, Callable[[str, int], int])
+        assert not isinstance_generic(1, Callable[[str, int], float])
 
     def test_check_only_first(self) -> None:
         assert isinstance_generic([1, 2], List[int], check_only_first=True)

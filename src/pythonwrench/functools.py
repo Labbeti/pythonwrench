@@ -29,21 +29,27 @@ class Compose(Generic[T, U]):
     """Compose callables to chain calls sequentially."""
 
     @overload
-    def __init__(self) -> None: ...
+    def __init__(self) -> None:
+        """Initialize the instance."""
+        ...
 
     @overload
     def __init__(
         self,
         fn0: Iterable[Callable[[T], T]],
         /,
-    ) -> None: ...
+    ) -> None:
+        """Initialize the instance."""
+        ...
 
     @overload
     def __init__(
         self,
         fn0: Callable[[T], U],
         /,
-    ) -> None: ...
+    ) -> None:
+        """Initialize the instance."""
+        ...
 
     @overload
     def __init__(
@@ -51,7 +57,9 @@ class Compose(Generic[T, U]):
         fn0: Callable[[T], Any],
         fn1: Callable[[Any], U],
         /,
-    ) -> None: ...
+    ) -> None:
+        """Initialize the instance."""
+        ...
 
     @overload
     def __init__(
@@ -60,7 +68,9 @@ class Compose(Generic[T, U]):
         fn1: Callable[[Any], Any],
         fn2: Callable[[Any], U],
         /,
-    ) -> None: ...
+    ) -> None:
+        """Initialize the instance."""
+        ...
 
     @overload
     def __init__(
@@ -70,7 +80,9 @@ class Compose(Generic[T, U]):
         fn2: Callable[[Any], Any],
         fn3: Callable[[Any], U],
         /,
-    ) -> None: ...
+    ) -> None:
+        """Initialize the instance."""
+        ...
 
     @overload
     def __init__(
@@ -81,12 +93,17 @@ class Compose(Generic[T, U]):
         fn3: Callable[[Any], Any],
         fn4: Callable[[Any], U],
         /,
-    ) -> None: ...
+    ) -> None:
+        """Initialize the instance."""
+        ...
 
     @overload
-    def __init__(self, *fns: Callable) -> None: ...
+    def __init__(self, *fns: Callable) -> None:
+        """Initialize the instance."""
+        ...
 
     def __init__(self, *fns) -> None:
+        """Initialize the instance."""
         if isinstance_generic(fns, Tuple[Iterable[Callable]]):
             fns = fns[0]
         elif isinstance_generic(fns, Tuple[Callable, ...]):
@@ -99,14 +116,17 @@ class Compose(Generic[T, U]):
         self.fns = fns
 
     def __call__(self, x: T) -> U:
+        """Call the instance."""
         for fn in self.fns:
             x = fn(x)
         return x  # type: ignore
 
     def __getitem__(self, idx: int, /) -> Callable[[Any], Any]:
+        """Return the item at the requested index or key."""
         return self.fns[idx]
 
     def __len__(self) -> int:
+        """Return the number of items in the instance."""
         return len(self.fns)
 
 
@@ -197,6 +217,7 @@ def repeat_fn(f: Callable[[T], T], n: int) -> Callable[[T], T]:
 
 
 def _get_code_and_start(fn: Callable) -> Tuple[CodeType, int]:
+    """Perform the get code and start operation."""
     if inspect.isfunction(fn):
         code = fn.__code__
         start = 0

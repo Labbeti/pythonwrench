@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.3] 2026-08-06
+### Added
+- Handle `Enum`, `Path`, and add `register_parser_fn` decorator for `parse_to_type`.
+- `isinstance_generic` now supports parametrized `Callable`.
+
+### Modified
+- Replace build backend `setuptools` by `hatchling`.
+
+
 ## [0.6.2] 2026-07-30
 ### Added
 - `dataclassdict` decorator and `add_dict_method` function to create dataclass+dict classes.

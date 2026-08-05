@@ -17,7 +17,9 @@ def _setup_output_fpath(
     overwrite: bool = True,
     make_parents: bool = True,
     absolute: bool = True,
-) -> Path: ...
+) -> Path:
+    """Perform the setup output fpath operation."""
+    ...
 
 
 @overload
@@ -27,7 +29,9 @@ def _setup_output_fpath(
     overwrite: bool = True,
     make_parents: bool = True,
     absolute: bool = True,
-) -> TextIOWrapper: ...
+) -> TextIOWrapper:
+    """Perform the setup output fpath operation."""
+    ...
 
 
 @overload
@@ -37,7 +41,9 @@ def _setup_output_fpath(
     overwrite: bool = True,
     make_parents: bool = True,
     absolute: bool = True,
-) -> None: ...
+) -> None:
+    """Perform the setup output fpath operation."""
+    ...
 
 
 def _setup_output_fpath(

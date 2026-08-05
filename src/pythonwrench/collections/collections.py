@@ -53,14 +53,17 @@ class SizedGenerator(Generic[T]):
     """Wraps a generator and size to provide a sized iterable object."""
 
     def __init__(self, generator: Generator[T, None, None], size: int) -> None:
+        """Initialize the instance."""
         super().__init__()
         self._generator = generator
         self._size = size
 
     def __iter__(self) -> Iterator[T]:
+        """Return an iterator over the instance."""
         yield from self._generator
 
     def __len__(self) -> int:
+        """Return the number of items in the instance."""
         return self._size
 
 
@@ -93,7 +96,9 @@ def dict_list_to_list_dict(
     dic: Mapping[T, Iterable[U]],
     key_mode: Literal["same", "intersect"] = "same",
     default_val: Any = None,
-) -> List[Dict[T, U]]: ...
+) -> List[Dict[T, U]]:
+    """Perform the dict list to list dict operation."""
+    ...
 
 
 @overload
@@ -101,7 +106,9 @@ def dict_list_to_list_dict(
     dic: Mapping[T, Iterable[U]],
     key_mode: Literal["union"],
     default_val: W = None,
-) -> List[Dict[T, Union[U, W]]]: ...
+) -> List[Dict[T, Union[U, W]]]:
+    """Perform the dict list to list dict operation."""
+    ...
 
 
 def dict_list_to_list_dict(
@@ -191,6 +198,7 @@ def filter_iterable(
     match_fn: Callable[[T, T], bool] = operator.eq,
     order: Literal["left", "right"] = "right",
 ) -> List[T]:
+    """Perform the filter iterable operation."""
     return [
         item
         for item in it
@@ -213,7 +221,9 @@ def find(
     order: Literal["right"] = "right",
     default: U = -1,
     return_value: Literal[False] = False,
-) -> Union[int, U]: ...
+) -> Union[int, U]:
+    """Perform the find operation."""
+    ...
 
 
 @overload
@@ -225,7 +235,9 @@ def find(
     order: Literal["left"],
     default: U = -1,
     return_value: Literal[False] = False,
-) -> Union[int, U]: ...
+) -> Union[int, U]:
+    """Perform the find operation."""
+    ...
 
 
 @overload
@@ -237,7 +249,9 @@ def find(
     order: Literal["right"] = "right",
     default: U = -1,
     return_value: Literal[True],
-) -> Tuple[Union[int, U], Union[V, U]]: ...
+) -> Tuple[Union[int, U], Union[V, U]]:
+    """Perform the find operation."""
+    ...
 
 
 @overload
@@ -249,7 +263,9 @@ def find(
     order: Literal["left"],
     default: U = -1,
     return_value: Literal[True],
-) -> Tuple[Union[int, U], Union[V, U]]: ...
+) -> Tuple[Union[int, U], Union[V, U]]:
+    """Perform the find operation."""
+    ...
 
 
 def find(
@@ -261,6 +277,7 @@ def find(
     default: U = -1,
     return_value: bool = False,
 ) -> Union[int, U, Tuple[Union[int, U], Union[V, U]]]:
+    """Perform the find operation."""
     if not return_value:
         result = find(
             target,
@@ -277,7 +294,10 @@ def find(
     elif order == "left":
 
         def revert(f):
+            """Perform the revert operation."""
+
             def reverted_f(a, b):
+                """Perform the reverted f operation."""
                 return f(b, a)
 
             return reverted_f
@@ -300,7 +320,9 @@ def flatten(
     x: T_BuiltinScalar,
     start_dim: int = 0,
     end_dim: Optional[int] = None,
-) -> List[T_BuiltinScalar]: ...
+) -> List[T_BuiltinScalar]:
+    """Perform the flatten operation."""
+    ...
 
 
 @overload
@@ -308,7 +330,9 @@ def flatten(  # type: ignore
     x: Iterable[T_BuiltinScalar],
     start_dim: int = 0,
     end_dim: Optional[int] = None,
-) -> List[T_BuiltinScalar]: ...
+) -> List[T_BuiltinScalar]:
+    """Perform the flatten operation."""
+    ...
 
 
 @overload
@@ -319,7 +343,9 @@ def flatten(
     is_scalar_fn: Union[
         Callable[[Any], TypeGuard[T]], Callable[[Any], TypeIs[T]]
     ] = is_builtin_scalar,
-) -> List[Any]: ...
+) -> List[Any]:
+    """Perform the flatten operation."""
+    ...
 
 
 def flatten(
@@ -330,6 +356,7 @@ def flatten(
         Callable[[Any], TypeGuard[T]], Callable[[Any], TypeIs[T]]
     ] = is_builtin_scalar,
 ) -> List[Any]:
+    """Perform the flatten operation."""
     if end_dim is None:
         end_dim = sys.maxsize
     if start_dim < 0:
@@ -341,6 +368,7 @@ def flatten(
         raise ValueError(msg)
 
     def flatten_impl(x: Any, start_dim: int, end_dim: int) -> List[Any]:
+        """Perform the flatten impl operation."""
         if is_scalar_fn(x):
             return [x]
         elif isinstance(x, Iterable):
@@ -395,6 +423,7 @@ def flat_dict_of_dict(
     """
 
     def _impl(nested_dic: Mapping[str, Any]) -> Dict[str, Any]:
+        """Perform the impl operation."""
         output = {}
         for k, v in nested_dic.items():
             if isinstance_generic(v, Mapping[str, Any]):
@@ -423,14 +452,18 @@ def flat_dict_of_dict(
 def flat_list_of_list(
     lst: Iterable[Sequence[T]],
     return_sizes: Literal[True] = True,
-) -> Tuple[List[T], List[int]]: ...
+) -> Tuple[List[T], List[int]]:
+    """Perform the flat list of list operation."""
+    ...
 
 
 @overload
 def flat_list_of_list(
     lst: Iterable[Sequence[T]],
     return_sizes: Literal[False],
-) -> List[T]: ...
+) -> List[T]:
+    """Perform the flat list of list operation."""
+    ...
 
 
 def flat_list_of_list(
@@ -467,7 +500,9 @@ def list_dict_to_dict_list(
     *,
     default_val_fn: Any = None,
     list_fn: None = None,
-) -> Dict[K, List[V]]: ...
+) -> Dict[K, List[V]]:
+    """Perform the list dict to dict list operation."""
+    ...
 
 
 @overload
@@ -478,7 +513,9 @@ def list_dict_to_dict_list(
     *,
     default_val_fn: Callable[[K], X],
     list_fn: None = None,
-) -> Dict[K, List[Union[V, X]]]: ...
+) -> Dict[K, List[Union[V, X]]]:
+    """Perform the list dict to dict list operation."""
+    ...
 
 
 @overload
@@ -489,7 +526,9 @@ def list_dict_to_dict_list(
     *,
     default_val_fn: None = None,
     list_fn: None = None,
-) -> Dict[K, List[Union[V, W]]]: ...
+) -> Dict[K, List[Union[V, W]]]:
+    """Perform the list dict to dict list operation."""
+    ...
 
 
 @overload
@@ -500,7 +539,9 @@ def list_dict_to_dict_list(
     *,
     default_val_fn: Optional[Callable[[K], X]] = None,
     list_fn: Callable[[List[Union[V, W, X]]], Y],
-) -> Dict[K, Y]: ...
+) -> Dict[K, Y]:
+    """Perform the list dict to dict list operation."""
+    ...
 
 
 def list_dict_to_dict_list(
@@ -576,11 +617,14 @@ def list_dict_to_dict_list(
 
 
 def recursive_generator(x: Any) -> Generator[Tuple[Any, int, int], None, None]:
+    """Perform the recursive generator operation."""
+
     def recursive_generator_impl(
         x: Any,
         i: int,
         deep: int,
     ) -> Generator[Tuple[Any, int, int], None, None]:
+        """Perform the recursive generator impl operation."""
         if is_builtin_scalar(x):
             yield x, i, deep
         elif isinstance(x, Iterable):
@@ -605,7 +649,9 @@ def sorted_dict(
     by: Literal["key"] = "key",
     key: Optional[Callable[[K], Any]] = None,
     reverse: bool = False,
-) -> Dict[K, V]: ...
+) -> Dict[K, V]:
+    """Perform the sorted dict operation."""
+    ...
 
 
 @overload
@@ -616,7 +662,9 @@ def sorted_dict(
     by: Literal["value"],
     key: Optional[Callable[[V], Any]] = None,
     reverse: bool = False,
-) -> Dict[K, V]: ...
+) -> Dict[K, V]:
+    """Perform the sorted dict operation."""
+    ...
 
 
 @overload
@@ -627,7 +675,9 @@ def sorted_dict(
     by: Literal["item"],
     key: Optional[Callable[[Tuple[K, V]], Any]] = None,
     reverse: bool = False,
-) -> Dict[K, V]: ...
+) -> Dict[K, V]:
+    """Perform the sorted dict operation."""
+    ...
 
 
 def sorted_dict(
@@ -645,6 +695,7 @@ def sorted_dict(
     elif by == "key":
 
         def by_key_fn(x: Tuple[K, V]) -> Any:
+            """Perform the by key fn operation."""
             return key(x[0])
 
         impl_key = by_key_fn
@@ -652,6 +703,7 @@ def sorted_dict(
     elif by == "value":
 
         def by_value_fn(x: Tuple[K, V]) -> Any:
+            """Perform the by value fn operation."""
             return key(x[1])
 
         impl_key = by_value_fn
@@ -669,6 +721,7 @@ def shuffled(
     seed: Optional[int] = None,
     deep: bool = False,
 ) -> MutableSequence[T]:
+    """Perform the shuffled operation."""
     if deep:
         x = copy.deepcopy(x)
     else:
@@ -761,37 +814,51 @@ def union_lists(lst_of_lst: Iterable[Iterable[K]]) -> List[K]:
 
 
 @overload
-def unzip(lst: Iterable[Tuple[()]]) -> Tuple[()]: ...
+def unzip(lst: Iterable[Tuple[()]]) -> Tuple[()]:
+    """Perform the unzip operation."""
+    ...
 
 
 @overload
-def unzip(lst: Iterable[Tuple[T]]) -> Tuple[List[T]]: ...
+def unzip(lst: Iterable[Tuple[T]]) -> Tuple[List[T]]:
+    """Perform the unzip operation."""
+    ...
 
 
 @overload
-def unzip(lst: Iterable[Tuple[T, U]]) -> Tuple[List[T], List[U]]: ...
+def unzip(lst: Iterable[Tuple[T, U]]) -> Tuple[List[T], List[U]]:
+    """Perform the unzip operation."""
+    ...
 
 
 @overload
-def unzip(lst: Iterable[Tuple[T, U, V]]) -> Tuple[List[T], List[U], List[V]]: ...
+def unzip(lst: Iterable[Tuple[T, U, V]]) -> Tuple[List[T], List[U], List[V]]:
+    """Perform the unzip operation."""
+    ...
 
 
 @overload
 def unzip(
     lst: Iterable[Tuple[T, U, V, W]],
-) -> Tuple[List[T], List[U], List[V], List[W]]: ...
+) -> Tuple[List[T], List[U], List[V], List[W]]:
+    """Perform the unzip operation."""
+    ...
 
 
 @overload
 def unzip(
     lst: Iterable[Tuple[T, U, V, W, X]],
-) -> Tuple[List[T], List[U], List[V], List[W], List[X]]: ...
+) -> Tuple[List[T], List[U], List[V], List[W], List[X]]:
+    """Perform the unzip operation."""
+    ...
 
 
 @overload
 def unzip(
     lst: Iterable[Tuple[T, ...]],
-) -> Tuple[List[T], ...]: ...
+) -> Tuple[List[T], ...]:
+    """Perform the unzip operation."""
+    ...
 
 
 def unzip(lst):

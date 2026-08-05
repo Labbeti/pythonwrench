@@ -38,14 +38,18 @@ def reduce_add(
     /,
     *,
     start: T_SupportsAdd,
-) -> T_SupportsAdd: ...
+) -> T_SupportsAdd:
+    """Perform the reduce add operation."""
+    ...
 
 
 @overload
 def reduce_add(
     *args: T_SupportsAdd,
     start: T_SupportsAdd,
-) -> T_SupportsAdd: ...
+) -> T_SupportsAdd:
+    """Perform the reduce add operation."""
+    ...
 
 
 @overload
@@ -54,7 +58,9 @@ def reduce_add(
     /,
     *args: T_SupportsAdd,
     start: Optional[T_SupportsAdd] = None,
-) -> T_SupportsAdd: ...
+) -> T_SupportsAdd:
+    """Perform the reduce add operation."""
+    ...
 
 
 def reduce_add(*args, start=None):
@@ -68,14 +74,18 @@ def reduce_and(
     /,
     *,
     start: T_SupportsAnd,
-) -> T_SupportsAnd: ...
+) -> T_SupportsAnd:
+    """Perform the reduce and operation."""
+    ...
 
 
 @overload
 def reduce_and(
     *args: T_SupportsAnd,
     start: T_SupportsAnd,
-) -> T_SupportsAnd: ...
+) -> T_SupportsAnd:
+    """Perform the reduce and operation."""
+    ...
 
 
 @overload
@@ -84,7 +94,9 @@ def reduce_and(
     /,
     *args: T_SupportsAnd,
     start: Optional[T_SupportsAnd] = None,
-) -> T_SupportsAnd: ...
+) -> T_SupportsAnd:
+    """Perform the reduce and operation."""
+    ...
 
 
 def reduce_and(*args, start=None):
@@ -98,14 +110,18 @@ def reduce_matmul(
     /,
     *,
     start: T_SupportsMatmul,
-) -> T_SupportsMatmul: ...
+) -> T_SupportsMatmul:
+    """Perform the reduce matmul operation."""
+    ...
 
 
 @overload
 def reduce_matmul(
     *args: T_SupportsMatmul,
     start: T_SupportsMatmul,
-) -> T_SupportsMatmul: ...
+) -> T_SupportsMatmul:
+    """Perform the reduce matmul operation."""
+    ...
 
 
 @overload
@@ -114,7 +130,9 @@ def reduce_matmul(
     /,
     *args: T_SupportsMatmul,
     start: Optional[T_SupportsMatmul] = None,
-) -> T_SupportsMatmul: ...
+) -> T_SupportsMatmul:
+    """Perform the reduce matmul operation."""
+    ...
 
 
 def reduce_matmul(*args, start=None):
@@ -128,14 +146,18 @@ def reduce_mul(
     /,
     *,
     start: T_SupportsMul,
-) -> T_SupportsMul: ...
+) -> T_SupportsMul:
+    """Perform the reduce mul operation."""
+    ...
 
 
 @overload
 def reduce_mul(
     *args: T_SupportsMul,
     start: T_SupportsMul,
-) -> T_SupportsMul: ...
+) -> T_SupportsMul:
+    """Perform the reduce mul operation."""
+    ...
 
 
 @overload
@@ -144,7 +166,9 @@ def reduce_mul(
     /,
     *args: T_SupportsMul,
     start: Optional[T_SupportsMul] = None,
-) -> T_SupportsMul: ...
+) -> T_SupportsMul:
+    """Perform the reduce mul operation."""
+    ...
 
 
 def reduce_mul(*args, start=None):
@@ -158,14 +182,18 @@ def reduce_or(
     /,
     *,
     start: T_SupportsOr,
-) -> T_SupportsOr: ...
+) -> T_SupportsOr:
+    """Perform the reduce or operation."""
+    ...
 
 
 @overload
 def reduce_or(
     *args: T_SupportsOr,
     start: T_SupportsOr,
-) -> T_SupportsOr: ...
+) -> T_SupportsOr:
+    """Perform the reduce or operation."""
+    ...
 
 
 @overload
@@ -174,7 +202,9 @@ def reduce_or(
     /,
     *args: T_SupportsOr,
     start: Optional[T_SupportsOr] = None,
-) -> T_SupportsOr: ...
+) -> T_SupportsOr:
+    """Perform the reduce or operation."""
+    ...
 
 
 def reduce_or(*args, start=None):
@@ -188,6 +218,7 @@ def _reduce(
     op_fn: Callable[[T, T], T],
     type_: Type[T],
 ) -> T:
+    """Perform the reduce operation."""
     if isinstance_generic(args, Tuple[Iterable[type_]]):
         it_or_args = args[0]
     elif isinstance_generic(args, Tuple[type_, ...]):
@@ -221,14 +252,18 @@ def sum(
     /,
     *,
     start: T_SupportsAdd = 0,
-) -> T_SupportsAdd: ...
+) -> T_SupportsAdd:
+    """Perform the sum operation."""
+    ...
 
 
 @overload
 def sum(
     *args: T_SupportsAdd,
     start: T_SupportsAdd = 0,
-) -> T_SupportsAdd: ...
+) -> T_SupportsAdd:
+    """Perform the sum operation."""
+    ...
 
 
 @overload
@@ -237,7 +272,9 @@ def sum(
     /,
     *args: T_SupportsAdd,
     start: Optional[T_SupportsAdd] = 0,
-) -> T_SupportsAdd: ...
+) -> T_SupportsAdd:
+    """Perform the sum operation."""
+    ...
 
 
 def sum(*args, start: Any = 0):
@@ -251,14 +288,18 @@ def prod(
     /,
     *,
     start: T_SupportsMul = 1,
-) -> T_SupportsMul: ...
+) -> T_SupportsMul:
+    """Perform the prod operation."""
+    ...
 
 
 @overload
 def prod(
     *args: T_SupportsMul,
     start: T_SupportsMul = 1,
-) -> T_SupportsMul: ...
+) -> T_SupportsMul:
+    """Perform the prod operation."""
+    ...
 
 
 @overload
@@ -267,7 +308,9 @@ def prod(
     /,
     *args: T_SupportsMul,
     start: Optional[T_SupportsMul] = 1,
-) -> T_SupportsMul: ...
+) -> T_SupportsMul:
+    """Perform the prod operation."""
+    ...
 
 
 def prod(*args, start: Any = 1):
@@ -276,8 +319,12 @@ def prod(*args, start: Any = 1):
 
 
 @function_alias(reduce_and)
-def intersect(*args, **kwargs): ...
+def intersect(*args, **kwargs):
+    """Perform the intersect operation."""
+    ...
 
 
 @function_alias(reduce_or)
-def union(*args, **kwargs): ...
+def union(*args, **kwargs):
+    """Perform the union operation."""
+    ...

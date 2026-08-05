@@ -135,20 +135,24 @@ def setup_logging_level(
 
 
 def running_on_interpreter() -> bool:
+    """Return whether running on interpreter."""
     return get_ipython_name() is None
 
 
 def running_on_terminal() -> bool:
+    """Return whether running on terminal."""
     return get_ipython_name() == "TerminalInteractiveShell"
 
 
 def running_on_notebook() -> bool:
+    """Return whether running on notebook."""
     return get_ipython_name() == "ZMQInteractiveShell"
 
 
 def get_ipython_name() -> Optional[
     Literal["TerminalInteractiveShell", "ZMQInteractiveShell"]
 ]:
+    """Return ipython name."""
     try:
         return get_ipython().__class__.__name__  # type: ignore
     except NameError:
@@ -173,6 +177,7 @@ def get_current_file_logger(
 
 @lru_cache(maxsize=None)
 def get_null_logger() -> Logger:
+    """Return null logger."""
     logger = logging.getLogger("null_logger")
     logger.addHandler(logging.NullHandler())
     logger.setLevel(logging.CRITICAL + 1)
@@ -180,6 +185,7 @@ def get_null_logger() -> Logger:
 
 
 def _get_loggers(pkg_name_log_arg: PackageOrLoggerList) -> List[Logger]:
+    """Perform the get loggers operation."""
     if pkg_name_log_arg is None or isinstance(
         pkg_name_log_arg, (str, Logger, ModuleType)
     ):
@@ -223,6 +229,7 @@ class MkdirFileHandler(FileHandler):
         mkdir_parents: bool = True,
         mkdir_exist_ok: bool = True,
     ) -> None:
+        """Initialize the instance."""
         filename = Path(filename)
         filename.parent.mkdir(parents=mkdir_parents, exist_ok=mkdir_exist_ok)
 
@@ -233,6 +240,7 @@ class MkdirFileHandler(FileHandler):
 
 
 def _verbose_to_logging_level(verbose: int) -> int:
+    """Perform the verbose to logging level operation."""
     if verbose <= VERBOSE_ERROR:
         level = logging.ERROR
     elif verbose == VERBOSE_WARNING:

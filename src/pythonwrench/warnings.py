@@ -19,7 +19,9 @@ def warn_once(
     category: Optional[Type[Warning]] = None,
     stacklevel: int = 1,
     source: Any = None,
-) -> None: ...
+) -> None:
+    """Perform the warn once operation."""
+    ...
 
 
 @overload
@@ -28,7 +30,9 @@ def warn_once(
     category: Any = None,
     stacklevel: int = 1,
     source: Any = None,
-) -> None: ...
+) -> None:
+    """Perform the warn once operation."""
+    ...
 
 
 @lru_cache(maxsize=None)
@@ -56,6 +60,7 @@ def deprecated_alias(
         pre_fn = return_none
 
     def inner_pre_fn(fn, *args, **kwargs) -> None:
+        """Perform the inner pre fn operation."""
         msg = msg_fmt.format(fn_name=fn.__name__, alternative_name=alternative_name)
         warn_fn(msg)
         pre_fn(fn, *args, **kwargs)
@@ -70,7 +75,9 @@ def deprecated_function(
     *,
     msg_fmt: str = "Deprecated call to '{fn_name}'.",
     warn_fn: Callable[[str], Any] = partial(warn_once, category=DeprecationWarning),
-) -> Callable[[T_Function], T_Function]: ...
+) -> Callable[[T_Function], T_Function]:
+    """Perform the deprecated function operation."""
+    ...
 
 
 @overload
@@ -80,7 +87,9 @@ def deprecated_function(
     *,
     msg_fmt: str = "Deprecated call to '{fn_name}'.",
     warn_fn: Callable[[str], Any] = partial(warn_once, category=DeprecationWarning),
-) -> T_Function: ...
+) -> T_Function:
+    """Perform the deprecated function operation."""
+    ...
 
 
 def deprecated_function(
@@ -97,6 +106,7 @@ def deprecated_function(
         pre_fn = return_none
 
     def inner_pre_fn(fn, *args, **kwargs):
+        """Perform the inner pre fn operation."""
         msg = msg_fmt.format(fn_name=fn.__qualname__)
         warn_fn(msg)
         pre_fn(fn, *args, **kwargs)

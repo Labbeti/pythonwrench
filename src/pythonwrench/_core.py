@@ -13,6 +13,7 @@ from typing import (
     Tuple,
     Union,
     get_args,
+    runtime_checkable,
 )
 
 from typing_extensions import ParamSpec, TypeVar
@@ -20,16 +21,19 @@ from typing_extensions import ParamSpec, TypeVar
 P = ParamSpec("P")
 T = TypeVar("T", covariant=True)
 U = TypeVar("U", covariant=True)
-T_Output = TypeVar("T_Output")
-T_Any = TypeVar("T_Any", contravariant=True, default=Any)
+T_Output = TypeVar("T_Output", default=Any)
+T_PredicateArg = TypeVar("T_PredicateArg", contravariant=True, default=Any)
 T_Function = TypeVar("T_Function", bound=Callable[..., Any])
 
 UnkMode = Literal["identity", "error"]
 ClassOrTuple = Union[type, Tuple[type, ...]]
 
 
-class Predicate(Protocol[T_Any]):
-    def __call__(self, /, x: T_Any) -> bool: ...
+@runtime_checkable
+class Predicate(Protocol[T_PredicateArg]):
+    def __call__(self, /, x: T_PredicateArg) -> bool:
+        """Call the instance."""
+        ...
 
 
 def return_none(*args, **kwargs) -> None:
@@ -50,6 +54,7 @@ def _decorator_factory(
         post_fn = return_none
 
     def wrapper_factory(fn: T_Function) -> T_Function:
+        """Perform the wrapper factory operation."""
         if inner_fn is None:
             _inner_fn = fn
         else:
@@ -57,6 +62,7 @@ def _decorator_factory(
 
         @wraps(_inner_fn)
         def wrapped(*args, **kwargs):
+            """Perform the wrapped operation."""
             pre_fn(fn, *args, **kwargs)
             result = _inner_fn(*args, **kwargs)
             post_fn(fn, *args, **kwargs)
@@ -69,6 +75,7 @@ def _decorator_factory(
 
 class _FunctionRegistry(Generic[T_Output]):
     def __init__(self) -> None:
+        """Initialize the instance."""
         fns: Dict[
             Callable[..., T_Output],
             Tuple[Optional[ClassOrTuple], Optional[Predicate], int],
@@ -85,6 +92,7 @@ class _FunctionRegistry(Generic[T_Output]):
         custom_predicate: Optional[Predicate] = None,
         priority: int = 0,
     ) -> Callable[[T], T_Output]:
+        """Perform the register operation."""
         return self.register_decorator(
             class_or_tuple,
             custom_predicate=custom_predicate,
@@ -98,36 +106,21 @@ class _FunctionRegistry(Generic[T_Output]):
         custom_predicate: Optional[Predicate] = None,
         priority: int = 0,
     ) -> Callable:
+        """Perform the register decorator operation."""
         if (class_or_tuple is None) == (custom_predicate is None):
             msg = f"Invalid combinaison of arguments: {class_or_tuple=} and {custom_predicate=}. (only one of them must be None)"
             raise ValueError(msg)
 
         def _impl(new_fn: Callable[[T], T_Output]) -> Callable[[T], T_Output]:
-            new_fns = {}
-            inserted = False
-
-            for fn_i, (
-                class_or_tuple_i,
-                custom_predicate_i,
-                priority_i,
-            ) in self.fns.items():
-                if new_fn == fn_i:
-                    continue
-
-                if not inserted and priority >= priority_i:
-                    new_fns[new_fn] = (class_or_tuple, custom_predicate, priority)
-                    inserted = True
-
-                new_fns[fn_i] = (class_or_tuple_i, custom_predicate_i, priority_i)
-
-            if not inserted:
-                assert all(
-                    priority < priority_i for _, _, priority_i in self.fns.values()
-                )
-                new_fns[new_fn] = (class_or_tuple, custom_predicate, priority)
-
-            assert new_fn in new_fns
-            self.fns = new_fns
+            """Perform the impl operation."""
+            new_value = (class_or_tuple, custom_predicate, priority)
+            self.fns = _insert_in_dict(
+                self.fns,
+                new_fn,
+                new_value,
+                priority,
+                priority_key=2,
+            )
             return new_fn
 
         return _impl
@@ -140,6 +133,7 @@ class _FunctionRegistry(Generic[T_Output]):
         unk_mode: UnkMode = "error",
         **kwargs,
     ) -> T_Output:
+        """Perform the apply operation."""
         for fn, (class_or_tuple, custom_predicate, _) in self.fns.items():
             if custom_predicate is not None:
                 predicate = custom_predicate
@@ -147,6 +141,7 @@ class _FunctionRegistry(Generic[T_Output]):
             elif class_or_tuple is not None:
 
                 def target_isinstance_fn_wrap(x: Any) -> bool:
+                    """Perform the target isinstance fn wrap operation."""
                     return isinstance_fn(x, class_or_tuple)  # type: ignore
 
                 predicate = target_isinstance_fn_wrap
@@ -170,3 +165,28 @@ class _FunctionRegistry(Generic[T_Output]):
         else:
             msg = f"Invalid argument {unk_mode=}. (expected one of {get_args(UnkMode)})"
             raise ValueError(msg)
+
+
+def _insert_in_dict(
+    dic: Dict,
+    key: Any,
+    value: Any,
+    priority: int,
+    priority_key: int,
+) -> Dict:
+    """Perform the insert in dict operation."""
+    if key in dic:
+        return dic
+    insert_index = _get_insertion_index(list(dic.values()), priority, priority_key)
+    items = list(dic.items())
+    items.insert(insert_index, (key, value))
+    return dict(items)
+
+
+def _get_insertion_index(lst: list, priority: int, priority_key: int) -> int:
+    """Perform the get insertion index operation."""
+    for i, item in enumerate(lst):
+        other_priority = item[priority_key]
+        if priority >= other_priority:
+            return i
+    return len(lst)

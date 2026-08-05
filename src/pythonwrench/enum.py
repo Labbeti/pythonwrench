@@ -20,6 +20,7 @@ class StrEnum(str, Enum):
         value: str,
         case_sensitive: bool = False,
     ) -> Self:
+        """Create an instance from str."""
         members = cls.__members__.keys()
         for member in members:
             if member == value or (
@@ -32,18 +33,23 @@ class StrEnum(str, Enum):
 
     @staticmethod
     def _generate_next_value_(name, start, count, last_values) -> str:
+        """Perform the generate next value operation."""
         return name
 
     @property
     def value(self) -> str:
+        """Perform the value operation."""
         return self._value_
 
     def __eq__(self, other: object) -> bool:
+        """Return whether this instance equals another object."""
         other = other.value if isinstance(other, Enum) else str(other)
         return self.value == other  # type: ignore
 
     def __hash__(self) -> int:
+        """Return the hash of the instance."""
         return hash(self.value)
 
     def __str__(self) -> str:
+        """Return the string representation of the instance."""
         return self.name

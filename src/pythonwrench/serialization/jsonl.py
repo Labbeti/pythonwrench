@@ -87,6 +87,7 @@ def dumps_jsonl(
     ensure_ascii: bool = False,
     **json_dumps_kwds,
 ) -> str:
+    """Perform the dumps jsonl operation."""
     with StringIO() as buffer:
         _serialize_jsonl(
             data,
@@ -111,6 +112,7 @@ def save_jsonl(
     ensure_ascii: bool = False,
     **json_dumps_kwds,
 ) -> None:
+    """Save jsonl."""
     if isinstance(file, (str, Path, PathLike)):
         file = _setup_output_fpath(file, overwrite=overwrite, make_parents=make_parents)
         file = open(file, "w")
@@ -141,6 +143,7 @@ def _serialize_jsonl(
     to_builtins: bool = False,
     **json_dumps_kwds,
 ) -> None:
+    """Perform the serialize jsonl operation."""
     if to_builtins:
         data = as_builtin(data)
 
@@ -162,6 +165,7 @@ def load_jsonl(
     /,
     **json_loads_kwds,
 ) -> list:
+    """Load jsonl."""
     if isinstance(file, (str, Path, PathLike)):
         file = open(file, "r")
         close = True
@@ -175,15 +179,19 @@ def load_jsonl(
 
 
 def loads_jsonl(content: str, /, **json_loads_kwds) -> list:
+    """Load s jsonl."""
     with StringIO(content) as buffer:
         return _parse_jsonl(buffer, **json_loads_kwds)
 
 
 @function_alias(load_json)
-def read_jsonl(*args, **kwargs): ...
+def read_jsonl(*args, **kwargs):
+    """Read jsonl."""
+    ...
 
 
 def _parse_jsonl(buffer: TextIOBase, **json_loads_kwds) -> list:
+    """Parse jsonl."""
     data_lst = []
     while True:
         content = buffer.readline()

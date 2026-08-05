@@ -10,6 +10,7 @@ on:
 
 env:
   CACHE_NUMBER: 0  # increase to reset cache manually
+  UV_NO_SYNC: 1
 
 # Cancel workflow if a new push occurs
 concurrency:
@@ -48,7 +49,7 @@ jobs:
 
     - name: Install the project
       run: |
-        uv sync --all-extras --dev
+        uv sync --extra tests
 
     # --- TESTS ---
     - name: Print install info

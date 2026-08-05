@@ -5,7 +5,7 @@ import logging
 import re
 from functools import partial
 from re import Pattern
-from typing import Any, Callable, Iterable, List, Optional, TypeVar, Union
+from typing import Any, Callable, Iterable, List, Literal, Optional, TypeVar, Union
 
 from typing_extensions import TypeAlias
 
@@ -16,28 +16,31 @@ T = TypeVar("T")
 PatternLike: TypeAlias = Union[str, Pattern]
 PatternListLike: TypeAlias = Union[PatternLike, Iterable[PatternLike]]
 
+MatchFn = Callable[[PatternLike, str], Any]
+MatchName = Literal["search", "mactch"]
+MatchLike = Union[MatchFn, MatchName]
+
 logger = logging.getLogger(__name__)
 
 
-def compile_patterns(patterns: PatternListLike) -> List[Pattern]:
-    """Compile patterns-like to a list."""
-    if isinstance(patterns, (str, Pattern)):
-        patterns = [patterns]
-    patterns = [re.compile(pattern) for pattern in patterns]
-    return patterns
-
-
-def find_patterns(
-    x: str,
-    patterns: PatternListLike,
+def filter_with_patterns(
+    x: Iterable[str],
+    include: Optional[PatternListLike] = ".*",
     *,
-    match_fn: Callable[[PatternLike, str], Any] = re.search,
-    default: T = -1,
-) -> Union[int, T]:
-    """Find index of a pattern that match the first argument. If no pattern matches, returns the default value (-1)."""
-    patterns = compile_patterns(patterns)
-    index = find(x, patterns, match_fn=match_fn, order="right", default=default)
-    return index
+    exclude: Optional[PatternListLike] = (),
+    match_fn: MatchLike = re.search,
+) -> List[str]:
+    """Perform the filter with patterns operation."""
+    if include is None:
+        include = ".*"
+    if exclude is None:
+        exclude = ()
+
+    return [
+        xi
+        for xi in x
+        if match_patterns(xi, include, exclude=exclude, match_fn=match_fn)
+    ]
 
 
 def match_patterns(
@@ -45,7 +48,7 @@ def match_patterns(
     include: Optional[PatternListLike] = ".*",
     *,
     exclude: Optional[PatternListLike] = (),
-    match_fn: Callable[[PatternLike, str], Any] = re.search,
+    match_fn: MatchLike = re.search,
 ) -> bool:
     """Returns True if the first argument match at least 1 included pattern and does not match any excluded pattern.
 
@@ -59,15 +62,29 @@ def match_patterns(
         include = ".*"
     if exclude is None:
         exclude = ()
+
     include_index = find_patterns(x, include, match_fn=match_fn, default=-1)
     exclude_index = find_patterns(x, exclude, match_fn=match_fn, default=-1)
     return include_index != -1 and exclude_index == -1
 
 
+def sort_with_patterns(
+    x: Iterable[str],
+    patterns: PatternListLike,
+    *,
+    match_fn: MatchLike = re.search,
+    reverse: bool = False,
+) -> List[str]:
+    """Perform the sort with patterns operation."""
+    key_fn = get_key_fn(patterns, match_fn=match_fn)
+    x = sorted(x, key=key_fn, reverse=reverse)
+    return x
+
+
 def get_key_fn(
     patterns: PatternListLike,
     *,
-    match_fn: Callable[[PatternLike, str], Any] = re.search,
+    match_fn: MatchLike = re.search,
 ) -> Callable[[str], int]:
     """Generate key_fn to sorted list of string using multiple patterns.
 
@@ -88,31 +105,35 @@ def get_key_fn(
     return key_fn  # type: ignore
 
 
-def sort_with_patterns(
-    x: Iterable[str],
+def find_patterns(
+    x: str,
     patterns: PatternListLike,
     *,
-    match_fn: Callable[[PatternLike, str], Any] = re.search,
-    reverse: bool = False,
-) -> List[str]:
-    key_fn = get_key_fn(patterns, match_fn=match_fn)
-    x = sorted(x, key=key_fn, reverse=reverse)
-    return x
+    match_fn: MatchLike = re.search,
+    default: T = -1,
+) -> Union[int, T]:
+    """Find index of a pattern that match the first argument. If no pattern matches, returns the default value (-1)."""
+    patterns = compile_patterns(patterns)
+    match_fn = _get_match_fn(match_fn)
+    index = find(x, patterns, match_fn=match_fn, order="right", default=default)
+    return index
 
 
-def filter_with_patterns(
-    x: Iterable[str],
-    include: Optional[PatternListLike] = ".*",
-    *,
-    exclude: Optional[PatternListLike] = (),
-    match_fn: Callable[[PatternLike, str], Any] = re.search,
-) -> List[str]:
-    if include is None:
-        include = ".*"
-    if exclude is None:
-        exclude = ()
-    return [
-        xi
-        for xi in x
-        if match_patterns(xi, include, exclude=exclude, match_fn=match_fn)
-    ]
+def compile_patterns(patterns: PatternListLike) -> List[Pattern]:
+    """Compile patterns-like to a list."""
+    if isinstance(patterns, (str, Pattern)):
+        patterns = [patterns]
+    patterns = [re.compile(pattern) for pattern in patterns]
+    return patterns
+
+
+def _get_match_fn(match_fn: MatchLike) -> MatchFn:
+    if callable(match_fn):
+        return match_fn
+    elif match_fn == "search":
+        return re.search
+    elif match_fn == "match":
+        return re.match
+    else:
+        msg = f"Invalid argument {match_fn=}. (expected callable, 'search' or 'match')"
+        raise ValueError(msg)
