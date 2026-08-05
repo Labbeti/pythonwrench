@@ -9,7 +9,8 @@ from typing import Literal, Optional, Protocol, Union, get_args, runtime_checkab
 
 from typing_extensions import Buffer
 
-HashName = Literal["sha256", "md5"]
+HasherName = Literal["sha256", "md5"]
+HashName = HasherName  # alias
 
 DEFAULT_CHUNK_SIZE = 256 * 1024**2  # 256 MiB
 
@@ -20,12 +21,15 @@ logger = logging.getLogger(__name__)
 class Hasher(Protocol):
     """Hasher protocol class."""
 
-    digest_size: int
-    block_size: int
-    name: str
+    @property
+    def digest_size(self) -> int: ...
+    @property
+    def block_size(self) -> int: ...
+    @property
+    def name(self) -> str: ...
 
-    def hexdigest(self) -> str:
-        """Perform the hexdigest operation."""
+    def digest(self) -> bytes:
+        """Perform the digest operation."""
         ...
 
     def update(self, data: Buffer, /) -> None:
@@ -35,8 +39,10 @@ class Hasher(Protocol):
 
 def hash_file(
     fpath: Union[str, Path, BufferedReader],
-    hash_type: Union[HashName, Hasher] = "md5",
+    hash_type: Union[HasherName, Hasher] = "md5",
     chunk_size: Optional[int] = DEFAULT_CHUNK_SIZE,
+    *,
+    init_bytes: bytes = b"",
 ) -> str:
     """Return the hash value for a file.
 
@@ -57,14 +63,12 @@ def hash_file(
         file = fpath
     del fpath
 
-    if hash_type == "sha256":
-        hasher = hashlib.sha256()
-    elif hash_type == "md5":
-        hasher = hashlib.md5()
+    if isinstance(hash_type, str):
+        hasher = _get_hasher(hash_type, init_bytes)
     elif isinstance(hash_type, Hasher):
         hasher = hash_type
     else:
-        msg = f"Invalid argument hash_type={hash_type}. (expected one of {get_args(HashName)} or a custom hasher)"
+        msg = f"Invalid argument {hash_type=}. (expected one of {get_args(HasherName)} or custom Hasher type)"
         raise ValueError(msg)
     del hash_type
 
@@ -74,5 +78,18 @@ def hash_file(
             break
         hasher.update(chunk)
 
-    hash_value = hasher.hexdigest()
-    return hash_value
+    hash_bytes = hasher.digest()
+    return hash_bytes.hex()
+
+
+def _get_hasher(hasher_name: HasherName, init_bytes: bytes = b"") -> Hasher:
+    if hasher_name == "sha256":
+        hasher = hashlib.sha256(init_bytes)
+    elif hasher_name == "md5":
+        hasher = hashlib.md5(init_bytes)
+    else:
+        msg = (
+            f"Invalid argument {hasher_name=}. (expected one of {get_args(HasherName)})"
+        )
+        raise ValueError(msg)
+    return hasher
