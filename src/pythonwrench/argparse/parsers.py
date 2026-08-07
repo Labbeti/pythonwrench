@@ -38,7 +38,6 @@ TargetType = Union[
     UnionType,
     "Type[Literal]",
     "Type[Optional]",
-    Tuple[type, ...],
 ]
 
 ListParsing = Literal["argparse", "brackets"]
@@ -51,12 +50,9 @@ DEFAULT_NONE_VALUES = ("None", "null")
 _PARSER_REGISTRY: List[Tuple[Union[TargetType, Predicate], Callable]] = []
 
 
-class ParseError(ValueError): ...
-
-
 @overload
 def register_parser_fn(
-    type_: Union[TargetType, Predicate, None],
+    type_: Union[TargetType[T], Predicate, None],
     fn: None = None,
 ) -> Callable[[T_Callable], T_Callable]:
     """Perform the register parser fn operation."""
@@ -65,7 +61,7 @@ def register_parser_fn(
 
 @overload
 def register_parser_fn(
-    type_: Union[TargetType, Predicate, None],
+    type_: Union[TargetType[T], Predicate, None],
     fn: T_Callable,
 ) -> T_Callable:
     """Perform the register parser fn operation."""
@@ -73,7 +69,7 @@ def register_parser_fn(
 
 
 def register_parser_fn(
-    type_: Union[TargetType, Predicate, None],
+    type_: Union[TargetType[T], Predicate, None],
     fn: Optional[Callable] = None,
 ) -> Callable:
     """Perform the register parser fn operation."""
@@ -107,7 +103,7 @@ def parse_to_type(
     - True values: 'True', 'T', 'yes', 'y', '1'.
     - False values: 'False', 'F', 'no', 'n', '0'.
     - None values: 'None', 'null'
-    - Other raises ParseError.
+    - Other raises ValueError.
     """
     parse_fn = get_parse_fn(
         target_type,
@@ -144,6 +140,17 @@ def get_parse_fn(
         list_parsing=list_parsing,
         handle_exception=handle_exception,
     )
+    parse_fn = _search_parse_fn(type_, **kwds)
+
+    if parse_fn is None:
+        msg = f"Invalid argument {type_=}. (no valid type or typing found in registry)"
+        raise ValueError(msg)
+
+    parse_fn = partial(parse_fn, **kwds)
+    return parse_fn
+
+
+def _search_parse_fn(type_: TargetType[T], **kwds) -> Optional[Callable[[str], T]]:
     if type_ is None:
         type_ = NoneType
 
@@ -160,12 +167,6 @@ def get_parse_fn(
         else:
             msg = f"Invalid argument {type_or_pred_i=}. (excepted type or predicate function)"
             raise ValueError(msg)
-
-    if parse_fn is None:
-        msg = f"Invalid argument {type_=}. (no valid type or typing found in registry)"
-        raise ValueError(msg)
-
-    parse_fn = partial(parse_fn, **kwds)
     return parse_fn
 
 
@@ -189,7 +190,7 @@ def parse_to_bool(
         return False
 
     values = tuple(true_values + false_values)
-    output = ParseError(f"Invalid argument '{x}'. (expected one of {values})")
+    output = ValueError(f"Invalid argument '{x}'. (expected one of {values})")
     return _handle_output(x, handle_exception, output)
 
 

@@ -59,7 +59,8 @@ def parse_args_using_dataclass(
     )
     parsed, argv = parser.parse_known_args(args)
     if len(argv) > 0:
-        raise ValueError(f"Found {len(argv)} unknown arguments: {argv}.")
+        msg = f"Found {len(argv)} unknown arguments: {argv}."
+        raise ValueError(msg)
 
     if init_parser is None:
         instance = dataclass_type(**parsed.__dict__)
