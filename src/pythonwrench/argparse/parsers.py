@@ -146,7 +146,6 @@ def get_parse_fn(
         msg = f"Invalid argument {type_=}. (no valid type or typing found in registry)"
         raise ValueError(msg)
 
-    parse_fn = partial(parse_fn, **kwds)
     return parse_fn
 
 
@@ -167,6 +166,10 @@ def _search_parse_fn(type_: TargetType[T], **kwds) -> Optional[Callable[[str], T
         else:
             msg = f"Invalid argument {type_or_pred_i=}. (excepted type or predicate function)"
             raise ValueError(msg)
+
+    if parse_fn is not None:
+        parse_fn = partial(parse_fn, **kwds)
+
     return parse_fn
 
 

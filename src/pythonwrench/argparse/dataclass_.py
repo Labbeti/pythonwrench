@@ -8,14 +8,18 @@ from typing import (
     Dict,
     Iterable,
     Optional,
+    Tuple,
     Type,
     TypeVar,
+    Union,
     get_args,
     get_origin,
+    overload,
 )
 
 from pythonwrench.argparse.parsers import (
     ListParsing,
+    _search_parse_fn,
     get_parse_fn,
 )
 from pythonwrench.functools import filter_and_call
@@ -34,10 +38,15 @@ from pythonwrench.warnings import deprecated_alias
 
 T_Dataclass = TypeVar("T_Dataclass", bound=Dataclass)
 T_DataclassInstance = TypeVar("T_DataclassInstance", bound=DataclassInstance)
+T_DataclassInstance_2 = TypeVar("T_DataclassInstance_2", bound=DataclassInstance)
+T_DataclassInstance_3 = TypeVar("T_DataclassInstance_3", bound=DataclassInstance)
+T_DataclassInstance_4 = TypeVar("T_DataclassInstance_4", bound=DataclassInstance)
+T_DataclassInstance_5 = TypeVar("T_DataclassInstance_5", bound=DataclassInstance)
 
 _SCALARS_TARGET_TYPES = (str, int, float, None, NoneType, bool)
 
 
+@overload
 def parse_args_using_dataclass(
     dataclass_type: Type[T_DataclassInstance],
     *,
@@ -45,32 +54,134 @@ def parse_args_using_dataclass(
     parser: Optional[ArgumentParser] = None,
     list_parsing: ListParsing = "argparse",
     add_dashed_arg: bool = True,
-) -> T_DataclassInstance:
+) -> T_DataclassInstance: ...
+
+
+@overload
+def parse_args_using_dataclass(
+    dataclass_type: Type[T_DataclassInstance],
+    dataclass_type_2: Type[T_DataclassInstance_2],
+    /,
+    *,
+    args: Optional[Iterable[str]] = None,
+    parser: Optional[ArgumentParser] = None,
+    list_parsing: ListParsing = "argparse",
+    add_dashed_arg: bool = True,
+) -> Tuple[
+    T_DataclassInstance,
+    T_DataclassInstance_2,
+]: ...
+
+
+@overload
+def parse_args_using_dataclass(
+    dataclass_type: Type[T_DataclassInstance],
+    dataclass_type_2: Type[T_DataclassInstance_2],
+    dataclass_type_3: Type[T_DataclassInstance_3],
+    /,
+    *,
+    args: Optional[Iterable[str]] = None,
+    parser: Optional[ArgumentParser] = None,
+    list_parsing: ListParsing = "argparse",
+    add_dashed_arg: bool = True,
+) -> Tuple[
+    T_DataclassInstance,
+    T_DataclassInstance_2,
+    T_DataclassInstance_3,
+]: ...
+
+
+@overload
+def parse_args_using_dataclass(
+    dataclass_type: Type[T_DataclassInstance],
+    dataclass_type_2: Type[T_DataclassInstance_2],
+    dataclass_type_3: Type[T_DataclassInstance_3],
+    dataclass_type_4: Type[T_DataclassInstance_4],
+    /,
+    *,
+    args: Optional[Iterable[str]] = None,
+    parser: Optional[ArgumentParser] = None,
+    list_parsing: ListParsing = "argparse",
+    add_dashed_arg: bool = True,
+) -> Tuple[
+    T_DataclassInstance,
+    T_DataclassInstance_2,
+    T_DataclassInstance_3,
+    T_DataclassInstance_4,
+]: ...
+
+
+@overload
+def parse_args_using_dataclass(
+    dataclass_type: Type[T_DataclassInstance],
+    dataclass_type_2: Type[T_DataclassInstance_2],
+    dataclass_type_3: Type[T_DataclassInstance_3],
+    dataclass_type_4: Type[T_DataclassInstance_4],
+    dataclass_type_5: Type[T_DataclassInstance_5],
+    /,
+    *,
+    args: Optional[Iterable[str]] = None,
+    parser: Optional[ArgumentParser] = None,
+    list_parsing: ListParsing = "argparse",
+    add_dashed_arg: bool = True,
+) -> Tuple[
+    T_DataclassInstance,
+    T_DataclassInstance_2,
+    T_DataclassInstance_3,
+    T_DataclassInstance_4,
+    T_DataclassInstance_5,
+]: ...
+
+
+def parse_args_using_dataclass(
+    dataclass_type: Type[DataclassInstance],
+    *dataclass_types: Type[DataclassInstance],
+    args: Optional[Iterable[str]] = None,
+    parser: Optional[ArgumentParser] = None,
+    list_parsing: ListParsing = "argparse",
+    add_dashed_arg: bool = True,
+) -> Union[
+    DataclassInstance,
+    Tuple[DataclassInstance, ...],
+]:
     """Converts prog args to a typed dataclass using argparse.
 
     Currently only supports dataclasses that contains only builtin scalars: str, int, float, None, bool OR list of builtin scalars.
     """
     init_parser = parser
-    parser = add_dataclass_fields_to_parser(
-        dataclass_type,
-        parser=parser,
-        list_parsing=list_parsing,
-        add_dashed_arg=add_dashed_arg,
-    )
+    dataclass_types = (dataclass_type,) + dataclass_types
+    del dataclass_type
+
+    for dataclass_type_i in dataclass_types:
+        parser = add_dataclass_fields_to_parser(
+            dataclass_type_i,
+            parser=parser,
+            list_parsing=list_parsing,
+            add_dashed_arg=add_dashed_arg,
+        )
+    assert parser is not None
+
     parsed, argv = parser.parse_known_args(args)
     if len(argv) > 0:
         msg = f"Found {len(argv)} unknown arguments: {argv}."
         raise ValueError(msg)
 
-    if init_parser is None:
-        instance = dataclass_type(**parsed.__dict__)
+    dataclass_insts = []
+    for dataclass_type_i in dataclass_types:
+        if init_parser is None and len(dataclass_types) == 1:
+            instance = dataclass_type_i(**parsed.__dict__)
+        else:
+            instance = filter_and_call(
+                dataclass_type_i,
+                _fill_all_arguments=True,
+                **parsed.__dict__,
+            )
+        dataclass_insts.append(instance)
+
+    if len(dataclass_insts) == 1:
+        return dataclass_insts[0]
     else:
-        instance = filter_and_call(
-            dataclass_type,
-            _fill_all_arguments=True,
-            **parsed.__dict__,
-        )
-    return instance
+        return tuple(dataclass_insts)
 
 
 def add_dataclass_fields_to_parser(
@@ -115,40 +226,26 @@ def add_dataclass_fields_to_parser(
 
 def _get_kwds_for_type(
     field_type: Any,
-    list_parsing: ListParsing = "argparse",
+    list_parsing: Optional[ListParsing] = "argparse",
 ) -> Dict[str, Any]:
     """Perform the get kwds for type operation."""
     kwds = {}
-
-    type_origin = get_origin(field_type)
     type_args = get_args(field_type)
 
-    # sanity checks
-    if _is_literal_type(field_type):
-        if not all(type(arg) in _SCALARS_TARGET_TYPES for arg in type_args):
-            msg = f"Invalid argument {field_type=}. (expected homogeneous types in {type_origin})"
-            raise TypeError(msg)
+    parse_fn = _search_parse_fn(field_type, list_parsing=list_parsing)
+    if parse_fn is not None:
+        kwds["type"] = parse_fn
+        if _is_literal_type(field_type):
+            kwds["choices"] = type_args
 
-    if (
-        (field_type in _SCALARS_TARGET_TYPES)
-        or (
-            _is_literal_type(field_type)
-            or _is_optional_type(field_type)
-            or _is_union_type(field_type)
-        )
-        or (_is_iterable_type_like(type_origin) and list_parsing == "brackets")
-    ):
-        inner_kwds = _get_kwds_for_scalar_type(field_type, field_type, list_parsing)
-        kwds.update(inner_kwds)
-
-    elif _is_iterable_type_like(type_origin):
-        item_type = type_args[0]
-        inner_kwds = _get_kwds_for_scalar_type(item_type, field_type, list_parsing)
-        inner_kwds["nargs"] = "*"
-        kwds.update(inner_kwds)
+    elif _is_iterable_type_like(field_type) and list_parsing == "argparse":
+        if isinstance(type_args, tuple) and len(type_args) == 1:
+            item_type = type_args[0]
+            kwds = _get_kwds_for_type(item_type, list_parsing=None)
+        kwds["nargs"] = "*"
 
     else:
-        msg = f"Unsupported type {field_type}. (with {type_origin=})"
+        msg = f"Unsupported type {field_type}. (with {list_parsing=})"
         raise TypeError(msg)
 
     return kwds
