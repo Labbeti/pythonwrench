@@ -313,11 +313,10 @@ def checksum_pattern(x: re.Pattern, **kwargs) -> int:
 
 
 @register_checksum_fn(Path)
-def checksum_path(x: Path, **kwargs) -> int:
+def checksum_path(x: Path, *, resolve_path: bool = False, **kwargs) -> int:
     """Return a checksum for path."""
+    kwargs["resolve_path"] = resolve_path
     kwargs = _add_type_checksum_to_accumulator(x, kwargs)
-
-    resolve_path = kwargs.get("resolve_path", False)
     if isinstance(resolve_path, bool) and resolve_path:
         x = x.expanduser().resolve()
     return checksum_str(str(x), **kwargs)
