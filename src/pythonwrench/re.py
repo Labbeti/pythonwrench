@@ -17,7 +17,7 @@ PatternLike: TypeAlias = Union[str, Pattern]
 PatternListLike: TypeAlias = Union[PatternLike, Iterable[PatternLike]]
 
 MatchFn = Callable[[PatternLike, str], Any]
-MatchName = Literal["search", "mactch"]
+MatchName = Literal["search", "match"]
 MatchLike = Union[MatchFn, MatchName]
 
 logger = logging.getLogger(__name__)
