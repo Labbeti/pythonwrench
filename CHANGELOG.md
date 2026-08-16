@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.4] UNRELEASED
+### Added
+- `parse_args_using_dataclass` can now handle multiple dataclass at once.
+
 ## [0.6.3] 2026-08-06
 ### Added
 - Handle `Enum`, `Path`, and add `register_parser_fn` decorator for `parse_to_type`.

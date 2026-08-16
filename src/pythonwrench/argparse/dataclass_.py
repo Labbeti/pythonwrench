@@ -1,38 +1,34 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from argparse import ArgumentParser
+from argparse import ArgumentParser, BooleanOptionalAction
 from dataclasses import MISSING, fields
 from typing import (
     Any,
     Dict,
     Iterable,
+    Literal,
     Optional,
     Tuple,
     Type,
     TypeVar,
     Union,
     get_args,
-    get_origin,
     overload,
 )
 
 from pythonwrench.argparse.parsers import (
     ListParsing,
     _search_parse_fn,
-    get_parse_fn,
 )
 from pythonwrench.functools import filter_and_call
 from pythonwrench.typing.checks import (
     _is_iterable_type_like,
     _is_literal_type,
-    _is_optional_type,
-    _is_union_type,
 )
 from pythonwrench.typing.classes import (
     Dataclass,
     DataclassInstance,
-    NoneType,
 )
 from pythonwrench.warnings import deprecated_alias
 
@@ -43,7 +39,10 @@ T_DataclassInstance_3 = TypeVar("T_DataclassInstance_3", bound=DataclassInstance
 T_DataclassInstance_4 = TypeVar("T_DataclassInstance_4", bound=DataclassInstance)
 T_DataclassInstance_5 = TypeVar("T_DataclassInstance_5", bound=DataclassInstance)
 
-_SCALARS_TARGET_TYPES = (str, int, float, None, NoneType, bool)
+BoolAction = Union[
+    Literal["store", "store_true", "store_false", "bool_optional"],
+    BooleanOptionalAction,
+]
 
 
 @overload
@@ -227,58 +226,33 @@ def add_dataclass_fields_to_parser(
 def _get_kwds_for_type(
     field_type: Any,
     list_parsing: Optional[ListParsing] = "argparse",
+    bool_action: BoolAction = "store",
 ) -> Dict[str, Any]:
     """Perform the get kwds for type operation."""
+    if bool_action != "store":
+        raise NotImplementedError("TODO")
+
     kwds = {}
     type_args = get_args(field_type)
 
-    parse_fn = _search_parse_fn(field_type, list_parsing=list_parsing)
-    if parse_fn is not None:
-        kwds["type"] = parse_fn
-        if _is_literal_type(field_type):
-            kwds["choices"] = type_args
-
-    elif _is_iterable_type_like(field_type) and list_parsing == "argparse":
+    if list_parsing == "argparse" and _is_iterable_type_like(field_type):
         if isinstance(type_args, tuple) and len(type_args) == 1:
             item_type = type_args[0]
             kwds = _get_kwds_for_type(item_type, list_parsing=None)
         kwds["nargs"] = "*"
+        return kwds
+
+    parse_fn = _search_parse_fn(field_type, list_parsing=list_parsing)
+
+    if parse_fn is not None:
+        kwds["type"] = parse_fn
+        if _is_literal_type(field_type):
+            kwds["choices"] = type_args
+        return kwds
 
     else:
         msg = f"Unsupported type {field_type}. (with {list_parsing=})"
         raise TypeError(msg)
-
-    return kwds
-
-
-def _get_kwds_for_scalar_type(
-    type_: Any,
-    from_field_type: Any,
-    list_parsing: ListParsing,
-) -> Dict[str, Any]:
-    """Perform the get kwds for scalar type operation."""
-    kwds = {}
-
-    if (
-        type_ in _SCALARS_TARGET_TYPES
-        or _is_optional_type(type_)
-        or _is_union_type(type_)
-        or (
-            _is_iterable_type_like(get_origin(from_field_type))
-            and list_parsing == "brackets"
-        )
-    ):
-        pass
-
-    elif _is_literal_type(type_):
-        type_args = get_args(type_)
-        kwds["choices"] = type_args
-    else:
-        msg = f"Unsupported dataclass member type {type_} from {from_field_type}."
-        raise TypeError(msg)
-
-    kwds["type"] = get_parse_fn(type_, list_parsing=list_parsing)  # type: ignore
-    return kwds
 
 
 # ALIASES
