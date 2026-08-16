@@ -128,7 +128,7 @@ class TestDataclassParser(TestCase):
 
         assert output == target
 
-    def test_parse_args_using_dataclass_example_3(self) -> None:
+    def test_parse_args_using_dataclass_example_3a(self) -> None:
         @dataclass
         class A:
             arg_a: List[List[int]] = field(default_factory=list)
@@ -136,6 +136,7 @@ class TestDataclassParser(TestCase):
         with self.assertRaises(TypeError):
             _ = parse_args_using_dataclass(A, args=[])
 
+    def test_parse_args_using_dataclass_example_3b(self) -> None:
         @dataclass
         class B:
             arg_b: Union[str, List[str]] = ""
@@ -143,6 +144,7 @@ class TestDataclassParser(TestCase):
         with self.assertRaises(SystemExit):
             _ = parse_args_using_dataclass(B, args=[])
 
+    def test_parse_args_using_dataclass_example_3c(self) -> None:
         @dataclass
         class C:
             arg_c: Tuple[str, ...] = ()
@@ -150,6 +152,7 @@ class TestDataclassParser(TestCase):
         with self.assertRaises(TypeError):
             _ = parse_args_using_dataclass(C, args=[])
 
+    def test_parse_args_using_dataclass_example_3d(self) -> None:
         @dataclass
         class D:
             arg_d: int = 0
@@ -291,6 +294,19 @@ class TestDataclassParser(TestCase):
         )
         assert cfg1 == expected_cfg1
         assert cfg2 == expected_cfg2
+
+    def test_parse_store_bool(self) -> None:
+        @dataclass
+        class Cfg:
+            test: bool = False
+            num: int = 0
+            create: bool = False
+
+        target = Cfg(False, 10, True)
+        cfg = parse_args_using_dataclass(
+            Cfg, args=["--create", "--num", str(target.num)], bool_action="store_true"
+        )
+        assert cfg == target
 
 
 if __name__ == "__main__":

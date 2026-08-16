@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import re
+from collections.abc import Iterable as _RuntimeIterable
 from enum import Enum
 from functools import partial
 from pathlib import Path
@@ -17,16 +18,11 @@ from typing import (
     TypeVar,
     Union,
     get_args,
+    get_origin,
     overload,
 )
 
 from pythonwrench._core import Predicate
-from pythonwrench.typing.checks import (
-    _is_iterable_type_like,
-    _is_literal_type,
-    _is_optional_type,
-    _is_union_type,
-)
 from pythonwrench.typing.classes import NoneType, UnionType
 from pythonwrench.warnings import deprecated_alias
 
@@ -255,9 +251,39 @@ def _parse_to_str(x: str, **kwds) -> str:
     return x
 
 
+def _is_enum_type(x: Any, **kwds) -> bool:
+    """Perform the is enum type operation."""
+    return isinstance(x, type) and issubclass(x, Enum)
+
+
+def _is_iterable_type_like(x: Any) -> bool:
+    """Perform the is iterable type like operation."""
+    return any(xi in (list, Iterable, _RuntimeIterable) for xi in (x, get_origin(x)))
+
+
+def _is_literal_type(x: Any) -> bool:
+    """Perform the is literal type operation."""
+    origin = get_origin(x)
+    return origin is Literal
+
+
+def _is_optional_type(x: Any) -> bool:
+    """Perform the is optional type operation."""
+    return getattr(x, "__name__", None) == "Optional"
+
+
+def _is_union_type(x: Any) -> bool:
+    """Perform the is union type operation."""
+    origin = get_origin(x)
+    return origin == Union or getattr(origin, "__name__", None) in (
+        "Union",
+        "UnionType",
+    )
+
+
 def _is_enum_for_parsing(x: Any, **kwds) -> bool:
     """Perform the is enum for parsing operation."""
-    return isinstance(x, type) and issubclass(x, Enum)
+    return _is_enum_type(x)
 
 
 def _is_iterable_type_like_for_parsing(

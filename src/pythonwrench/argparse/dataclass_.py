@@ -19,13 +19,11 @@ from typing import (
 
 from pythonwrench.argparse.parsers import (
     ListParsing,
+    _is_iterable_type_like,
+    _is_literal_type,
     _search_parse_fn,
 )
 from pythonwrench.functools import filter_and_call
-from pythonwrench.typing.checks import (
-    _is_iterable_type_like,
-    _is_literal_type,
-)
 from pythonwrench.typing.classes import (
     Dataclass,
     DataclassInstance,
@@ -41,7 +39,7 @@ T_DataclassInstance_5 = TypeVar("T_DataclassInstance_5", bound=DataclassInstance
 
 BoolAction = Union[
     Literal["store", "store_true", "store_false", "bool_optional"],
-    BooleanOptionalAction,
+    Type[BooleanOptionalAction],
 ]
 
 
@@ -52,6 +50,7 @@ def parse_args_using_dataclass(
     args: Optional[Iterable[str]] = None,
     parser: Optional[ArgumentParser] = None,
     list_parsing: ListParsing = "argparse",
+    bool_action: BoolAction = "store",
     add_dashed_arg: bool = True,
 ) -> T_DataclassInstance: ...
 
@@ -65,6 +64,7 @@ def parse_args_using_dataclass(
     args: Optional[Iterable[str]] = None,
     parser: Optional[ArgumentParser] = None,
     list_parsing: ListParsing = "argparse",
+    bool_action: BoolAction = "store",
     add_dashed_arg: bool = True,
 ) -> Tuple[
     T_DataclassInstance,
@@ -82,6 +82,7 @@ def parse_args_using_dataclass(
     args: Optional[Iterable[str]] = None,
     parser: Optional[ArgumentParser] = None,
     list_parsing: ListParsing = "argparse",
+    bool_action: BoolAction = "store",
     add_dashed_arg: bool = True,
 ) -> Tuple[
     T_DataclassInstance,
@@ -101,6 +102,7 @@ def parse_args_using_dataclass(
     args: Optional[Iterable[str]] = None,
     parser: Optional[ArgumentParser] = None,
     list_parsing: ListParsing = "argparse",
+    bool_action: BoolAction = "store",
     add_dashed_arg: bool = True,
 ) -> Tuple[
     T_DataclassInstance,
@@ -122,6 +124,7 @@ def parse_args_using_dataclass(
     args: Optional[Iterable[str]] = None,
     parser: Optional[ArgumentParser] = None,
     list_parsing: ListParsing = "argparse",
+    bool_action: BoolAction = "store",
     add_dashed_arg: bool = True,
 ) -> Tuple[
     T_DataclassInstance,
@@ -138,6 +141,7 @@ def parse_args_using_dataclass(
     args: Optional[Iterable[str]] = None,
     parser: Optional[ArgumentParser] = None,
     list_parsing: ListParsing = "argparse",
+    bool_action: BoolAction = "store",
     add_dashed_arg: bool = True,
 ) -> Union[
     DataclassInstance,
@@ -156,6 +160,7 @@ def parse_args_using_dataclass(
             dataclass_type_i,
             parser=parser,
             list_parsing=list_parsing,
+            bool_action=bool_action,
             add_dashed_arg=add_dashed_arg,
         )
     assert parser is not None
@@ -188,6 +193,7 @@ def add_dataclass_fields_to_parser(
     *,
     parser: Optional[ArgumentParser],
     list_parsing: ListParsing = "argparse",
+    bool_action: BoolAction = "store",
     add_dashed_arg: bool = True,
 ) -> ArgumentParser:
     """Perform the add dataclass fields to parser operation."""
@@ -202,7 +208,11 @@ def add_dataclass_fields_to_parser(
             posargs.append(f"--{dashed_arg_name}")
 
         if field.default is MISSING and field.default_factory is MISSING:
+            if bool_action != "store" and field.type is bool:
+                msg = f"Invalid arguments: boolean '{field.name}' without default value is incompatible with {bool_action=}."
+                raise RuntimeError(msg)
             kwds["required"] = True
+
         elif field.default is not MISSING:
             kwds["default"] = field.default
         elif field.default_factory is not MISSING:
@@ -212,7 +222,7 @@ def add_dataclass_fields_to_parser(
             raise ValueError(msg)
 
         try:
-            inner_kwds = _get_kwds_for_type(field.type, list_parsing)
+            inner_kwds = _get_kwds_for_type(field.type, list_parsing, bool_action)
         except (ValueError, TypeError, RuntimeError) as err:
             msg = f"Invalid field {field.name}: field type '{field.type}' is not supported."
             raise type(err)(msg) from err
@@ -225,20 +235,25 @@ def add_dataclass_fields_to_parser(
 
 def _get_kwds_for_type(
     field_type: Any,
-    list_parsing: Optional[ListParsing] = "argparse",
-    bool_action: BoolAction = "store",
+    list_parsing: Optional[ListParsing],
+    bool_action: BoolAction,
 ) -> Dict[str, Any]:
     """Perform the get kwds for type operation."""
-    if bool_action != "store":
-        raise NotImplementedError("TODO")
-
+    if bool_action == "bool_optional":
+        bool_action = BooleanOptionalAction
     kwds = {}
-    type_args = get_args(field_type)
 
-    if list_parsing == "argparse" and _is_iterable_type_like(field_type):
+    if bool_action != "store" and field_type is bool:
+        kwds["action"] = bool_action
+        return kwds
+
+    elif list_parsing == "argparse" and _is_iterable_type_like(field_type):
+        type_args = get_args(field_type)
         if isinstance(type_args, tuple) and len(type_args) == 1:
             item_type = type_args[0]
-            kwds = _get_kwds_for_type(item_type, list_parsing=None)
+            kwds = _get_kwds_for_type(
+                item_type, list_parsing=None, bool_action=bool_action
+            )
         kwds["nargs"] = "*"
         return kwds
 
@@ -247,11 +262,13 @@ def _get_kwds_for_type(
     if parse_fn is not None:
         kwds["type"] = parse_fn
         if _is_literal_type(field_type):
-            kwds["choices"] = type_args
+            kwds["choices"] = get_args(field_type)
         return kwds
 
     else:
-        msg = f"Unsupported type {field_type}. (with {list_parsing=})"
+        msg = (
+            f"Unsupported type {field_type}. (with {list_parsing=} and {bool_action=})"
+        )
         raise TypeError(msg)
 
 
