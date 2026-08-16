@@ -304,7 +304,9 @@ class TestDataclassParser(TestCase):
 
         target = Cfg(False, 10, True)
         cfg = parse_args_using_dataclass(
-            Cfg, args=["--create", "--num", str(target.num)], bool_action="store_true"
+            Cfg,
+            args=["--create", "--num", str(target.num)],
+            bool_action="store_true",
         )
         assert cfg == target
 

@@ -4,7 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [0.6.4] UNRELEASED
 ### Added
-- `parse_args_using_dataclass` can now handle multiple dataclass at once.
+- Function `parse_args_using_dataclass` can now handle multiple dataclass at once.
+- Function `parse_args_using_dataclass` now has option `bool_action`.
+
 
 ## [0.6.3] 2026-08-06
 ### Added
