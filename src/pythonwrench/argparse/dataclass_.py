@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from argparse import ArgumentParser, BooleanOptionalAction
+from argparse import ArgumentParser
 from dataclasses import MISSING, fields
 from typing import (
     Any,
@@ -30,6 +30,13 @@ from pythonwrench.typing.classes import (
 )
 from pythonwrench.warnings import deprecated_alias
 
+try:
+    from argparse import BooleanOptionalAction  # type: ignore
+except ImportError:
+
+    class BooleanOptionalAction: ...
+
+
 T_Dataclass = TypeVar("T_Dataclass", bound=Dataclass)
 T_DataclassInstance = TypeVar("T_DataclassInstance", bound=DataclassInstance)
 T_DataclassInstance_2 = TypeVar("T_DataclassInstance_2", bound=DataclassInstance)
@@ -37,10 +44,8 @@ T_DataclassInstance_3 = TypeVar("T_DataclassInstance_3", bound=DataclassInstance
 T_DataclassInstance_4 = TypeVar("T_DataclassInstance_4", bound=DataclassInstance)
 T_DataclassInstance_5 = TypeVar("T_DataclassInstance_5", bound=DataclassInstance)
 
-BoolAction = Union[
-    Literal["store", "store_true", "store_false", "bool_optional"],
-    Type[BooleanOptionalAction],
-]
+_BoolActionName = Literal["store", "store_true", "store_false", "bool_optional"]
+BoolAction = Union[_BoolActionName, Type[BooleanOptionalAction]]
 
 
 @overload
