@@ -88,6 +88,13 @@ class TestArgparse(TestCase):
 
     def test_enum(self) -> None:
         assert parse_to_type("SLEEPING", State) == State.SLEEPING
+        assert parse_to_type("pending", State) == State.PENDING
+
+        with self.assertRaises(ValueError):
+            assert parse_to_type("pending", State, case_sensitive=True) == State.PENDING
+
+        with self.assertRaises(ValueError):
+            assert parse_to_type("PENDING2", State) == State.PENDING
 
 
 class TestDataclassParser(TestCase):
