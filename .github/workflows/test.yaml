@@ -15,7 +15,8 @@ env:
 # Cancel workflow if a new push occurs
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  # Never interrupt a main-branch publication between PyPI and GitHub.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   build-and-test:
@@ -67,3 +68,127 @@ jobs:
     - name: Show coverage results
       run: |
         uv run coverage report -m
+
+  release-check:
+    name: Check whether a release is needed
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build-and-test
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.release.outputs.version }}
+      should-publish: ${{ steps.release.outputs.should-publish }}
+
+    steps:
+    - name: Checkout repository and tags
+      uses: actions/checkout@v5
+      with:
+        fetch-depth: 0
+
+    - name: Validate release metadata
+      id: release
+      shell: python
+      run: |
+        import os
+        import pathlib
+        import re
+
+        init_text = pathlib.Path("src/pythonwrench/__init__.py").read_text(encoding="utf-8")
+        version_match = re.search(
+            r'^__version__\s*=\s*["\'](\d+\.\d+\.\d+)["\']\s*$',
+            init_text,
+            flags=re.MULTILINE,
+        )
+        if version_match is None:
+            raise SystemExit(
+                "__version__ must be a stable X.Y.Z release in "
+                "src/pythonwrench/__init__.py"
+            )
+
+        version = version_match.group(1)
+        changelog = pathlib.Path("CHANGELOG.md").read_text(encoding="utf-8")
+        heading = rf"^## \[{re.escape(version)}\](?:[ \t]+[^\r\n]*)?$"
+        if re.search(heading, changelog, flags=re.MULTILINE) is None:
+            raise SystemExit(f"CHANGELOG.md has no release section for {version}")
+
+        tag_ref = pathlib.Path(".git/refs/tags") / f"v{version}"
+        tag_exists = tag_ref.exists()
+        if not tag_exists:
+            import subprocess
+
+            tag_exists = subprocess.run(
+                ["git", "rev-parse", "--verify", "--quiet", f"refs/tags/v{version}"],
+                check=False,
+            ).returncode == 0
+
+        with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+            print(f"version={version}", file=output)
+            print(f"should-publish={'false' if tag_exists else 'true'}", file=output)
+
+        if tag_exists:
+            print(f"v{version} already exists; publication will be skipped.")
+        else:
+            print(f"v{version} is ready to publish.")
+
+  publish:
+    name: Publish to PyPI and GitHub Releases
+    if: needs.release-check.outputs.should-publish == 'true'
+    needs: release-check
+    runs-on: ubuntu-24.04
+    environment:
+      name: pypi
+      url: https://pypi.org/project/pythonwrench/${{ needs.release-check.outputs.version }}/
+    permissions:
+      contents: write
+      id-token: write
+    env:
+      RELEASE_VERSION: ${{ needs.release-check.outputs.version }}
+
+    steps:
+    - name: Checkout tested commit
+      uses: actions/checkout@v5
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v9.0.0
+
+    - name: Build distributions
+      run: uv build
+
+    - name: Validate distributions
+      run: uvx twine check dist/*
+
+    - name: Extract release notes from changelog
+      shell: python
+      run: |
+        import os
+        import pathlib
+        import re
+
+        version = os.environ["RELEASE_VERSION"]
+        changelog = pathlib.Path("CHANGELOG.md").read_text(encoding="utf-8")
+        section = re.search(
+            rf"^## \[{re.escape(version)}\](?:[ \t]+[^\r\n]*)?\n(.*?)(?=^## \[|\Z)",
+            changelog,
+            flags=re.MULTILINE | re.DOTALL,
+        )
+        if section is None:
+            raise SystemExit(f"Could not extract changelog notes for {version}")
+        pathlib.Path("release-notes.md").write_text(
+            section.group(1).strip() + "\n",
+            encoding="utf-8",
+        )
+
+    - name: Publish distributions to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        skip-existing: true
+
+    - name: Create GitHub Release and tag
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh release create "v${RELEASE_VERSION}" dist/* \
+          --target "${GITHUB_SHA}" \
+          --title "v${RELEASE_VERSION}" \
+          --notes-file release-notes.md
