@@ -143,8 +143,7 @@ def filter_and_call(
     Arguments:
         fn: Callable to call.
         _fill_all_arguments: If True, all arguments of fn must be provided in kwargs. defaults to False.
-        **kwargs: Superset of arguments to pass to fn.
-            Name that does not match any argument of fn are ignored.
+        **kwargs: Superset of arguments to pass to fn. Name that does not match any argument of fn are ignored.
 
     Examples:
     ---------

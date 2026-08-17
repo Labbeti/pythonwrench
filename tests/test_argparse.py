@@ -2,23 +2,23 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from enum import Enum, auto
 from argparse import ArgumentParser
 from dataclasses import dataclass, field
+from enum import Enum, auto
 from pathlib import Path
 from typing import Iterable, List, Literal, Optional, Tuple, Union
 from unittest import TestCase
 
 from pythonwrench.argparse import (
-    parse_args_using_dataclass,
     get_parse_fn,
-    parse_to_type,
+    parse_args_using_dataclass,
     parse_to_bool,
     parse_to_none,
     parse_to_optional_bool,
     parse_to_optional_float,
     parse_to_optional_int,
     parse_to_optional_str,
+    parse_to_type,
 )
 from pythonwrench.typing import NoneType
 
@@ -88,6 +88,13 @@ class TestArgparse(TestCase):
 
     def test_enum(self) -> None:
         assert parse_to_type("SLEEPING", State) == State.SLEEPING
+        assert parse_to_type("pending", State) == State.PENDING
+
+        with self.assertRaises(ValueError):
+            assert parse_to_type("pending", State, case_sensitive=True) == State.PENDING
+
+        with self.assertRaises(ValueError):
+            assert parse_to_type("PENDING2", State) == State.PENDING
 
 
 class TestDataclassParser(TestCase):
@@ -128,7 +135,7 @@ class TestDataclassParser(TestCase):
 
         assert output == target
 
-    def test_parse_args_using_dataclass_example_3(self) -> None:
+    def test_parse_args_using_dataclass_example_3a(self) -> None:
         @dataclass
         class A:
             arg_a: List[List[int]] = field(default_factory=list)
@@ -136,6 +143,7 @@ class TestDataclassParser(TestCase):
         with self.assertRaises(TypeError):
             _ = parse_args_using_dataclass(A, args=[])
 
+    def test_parse_args_using_dataclass_example_3b(self) -> None:
         @dataclass
         class B:
             arg_b: Union[str, List[str]] = ""
@@ -143,6 +151,7 @@ class TestDataclassParser(TestCase):
         with self.assertRaises(SystemExit):
             _ = parse_args_using_dataclass(B, args=[])
 
+    def test_parse_args_using_dataclass_example_3c(self) -> None:
         @dataclass
         class C:
             arg_c: Tuple[str, ...] = ()
@@ -150,6 +159,7 @@ class TestDataclassParser(TestCase):
         with self.assertRaises(TypeError):
             _ = parse_args_using_dataclass(C, args=[])
 
+    def test_parse_args_using_dataclass_example_3d(self) -> None:
         @dataclass
         class D:
             arg_d: int = 0
@@ -262,6 +272,50 @@ class TestDataclassParser(TestCase):
                 list_parsing="brackets",
             )
             assert result == A([1])  # type: ignore
+
+    def test_parse_args_using_dataclass_example_7(self) -> None:
+        @dataclass
+        class Cfg1:
+            path: Union[str, Path]
+
+        @dataclass
+        class Cfg2:
+            a: int = 0
+            b: str = ""
+
+        expected_cfg1 = Cfg1(Path("test/a.txt"))
+        expected_cfg2 = Cfg2(b="b")
+
+        cfg = parse_args_using_dataclass(Cfg1, args=["--path", str(expected_cfg1.path)])
+        assert cfg == expected_cfg1
+
+        cfg2, cfg1 = parse_args_using_dataclass(
+            Cfg2,
+            Cfg1,
+            args=[
+                "--path",
+                str(expected_cfg1.path),
+                "--b",
+                expected_cfg2.b,
+            ],
+        )
+        assert cfg1 == expected_cfg1
+        assert cfg2 == expected_cfg2
+
+    def test_parse_store_bool(self) -> None:
+        @dataclass
+        class Cfg:
+            test: bool = False
+            num: int = 0
+            create: bool = False
+
+        target = Cfg(False, 10, True)
+        cfg = parse_args_using_dataclass(
+            Cfg,
+            args=["--create", "--num", str(target.num)],
+            bool_action="store_true",
+        )
+        assert cfg == target
 
 
 if __name__ == "__main__":

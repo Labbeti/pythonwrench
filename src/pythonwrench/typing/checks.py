@@ -6,7 +6,6 @@ import logging
 import sys
 import typing
 from collections.abc import Callable as _RuntimeCallable
-from collections.abc import Iterable as _RuntimeIterable
 from dataclasses import is_dataclass
 from numbers import Integral
 from types import FunctionType, MethodType
@@ -550,28 +549,3 @@ def _safe_isin(x: Any, targets: Iterable) -> bool:
 def _is_callable_type(x: Any) -> bool:
     """Perform the is callable type operation."""
     return x in (Callable, _RuntimeCallable)
-
-
-def _is_iterable_type_like(x: Any) -> bool:
-    """Perform the is iterable type like operation."""
-    return any(xi in (list, Iterable, _RuntimeIterable) for xi in (x, get_origin(x)))
-
-
-def _is_literal_type(x: Any) -> bool:
-    """Perform the is literal type operation."""
-    origin = get_origin(x)
-    return origin is Literal
-
-
-def _is_optional_type(x: Any) -> bool:
-    """Perform the is optional type operation."""
-    return getattr(x, "__name__", None) == "Optional"
-
-
-def _is_union_type(x: Any) -> bool:
-    """Perform the is union type operation."""
-    origin = get_origin(x)
-    return origin == Union or getattr(origin, "__name__", None) in (
-        "Union",
-        "UnionType",
-    )

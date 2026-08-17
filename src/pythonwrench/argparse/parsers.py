@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import re
+from collections.abc import Iterable as _RuntimeIterable
 from enum import Enum
 from functools import partial
 from pathlib import Path
@@ -17,16 +18,11 @@ from typing import (
     TypeVar,
     Union,
     get_args,
+    get_origin,
     overload,
 )
 
 from pythonwrench._core import Predicate
-from pythonwrench.typing.checks import (
-    _is_iterable_type_like,
-    _is_literal_type,
-    _is_optional_type,
-    _is_union_type,
-)
 from pythonwrench.typing.classes import NoneType, UnionType
 from pythonwrench.warnings import deprecated_alias
 
@@ -38,7 +34,6 @@ TargetType = Union[
     UnionType,
     "Type[Literal]",
     "Type[Optional]",
-    Tuple[type, ...],
 ]
 
 ListParsing = Literal["argparse", "brackets"]
@@ -51,12 +46,9 @@ DEFAULT_NONE_VALUES = ("None", "null")
 _PARSER_REGISTRY: List[Tuple[Union[TargetType, Predicate], Callable]] = []
 
 
-class ParseError(ValueError): ...
-
-
 @overload
 def register_parser_fn(
-    type_: Union[TargetType, Predicate, None],
+    type_: Union[TargetType[T], Predicate, None],
     fn: None = None,
 ) -> Callable[[T_Callable], T_Callable]:
     """Perform the register parser fn operation."""
@@ -65,7 +57,7 @@ def register_parser_fn(
 
 @overload
 def register_parser_fn(
-    type_: Union[TargetType, Predicate, None],
+    type_: Union[TargetType[T], Predicate, None],
     fn: T_Callable,
 ) -> T_Callable:
     """Perform the register parser fn operation."""
@@ -73,7 +65,7 @@ def register_parser_fn(
 
 
 def register_parser_fn(
-    type_: Union[TargetType, Predicate, None],
+    type_: Union[TargetType[T], Predicate, None],
     fn: Optional[Callable] = None,
 ) -> Callable:
     """Perform the register parser fn operation."""
@@ -107,7 +99,7 @@ def parse_to_type(
     - True values: 'True', 'T', 'yes', 'y', '1'.
     - False values: 'False', 'F', 'no', 'n', '0'.
     - None values: 'None', 'null'
-    - Other raises ParseError.
+    - Other raises ValueError.
     """
     parse_fn = get_parse_fn(
         target_type,
@@ -144,6 +136,16 @@ def get_parse_fn(
         list_parsing=list_parsing,
         handle_exception=handle_exception,
     )
+    parse_fn = _search_parse_fn(type_, **kwds)
+
+    if parse_fn is None:
+        msg = f"Invalid argument {type_=}. (no valid type or typing found in registry)"
+        raise ValueError(msg)
+
+    return parse_fn
+
+
+def _search_parse_fn(type_: TargetType[T], **kwds) -> Optional[Callable[[str], T]]:
     if type_ is None:
         type_ = NoneType
 
@@ -161,11 +163,9 @@ def get_parse_fn(
             msg = f"Invalid argument {type_or_pred_i=}. (excepted type or predicate function)"
             raise ValueError(msg)
 
-    if parse_fn is None:
-        msg = f"Invalid argument {type_=}. (no valid type or typing found in registry)"
-        raise ValueError(msg)
+    if parse_fn is not None:
+        parse_fn = partial(parse_fn, **kwds)
 
-    parse_fn = partial(parse_fn, **kwds)
     return parse_fn
 
 
@@ -189,7 +189,7 @@ def parse_to_bool(
         return False
 
     values = tuple(true_values + false_values)
-    output = ParseError(f"Invalid argument '{x}'. (expected one of {values})")
+    output = ValueError(f"Invalid argument '{x}'. (expected one of {values})")
     return _handle_output(x, handle_exception, output)
 
 
@@ -251,9 +251,39 @@ def _parse_to_str(x: str, **kwds) -> str:
     return x
 
 
+def _is_enum_type(x: Any, **kwds) -> bool:
+    """Perform the is enum type operation."""
+    return isinstance(x, type) and issubclass(x, Enum)
+
+
+def _is_iterable_type_like(x: Any) -> bool:
+    """Perform the is iterable type like operation."""
+    return any(xi in (list, Iterable, _RuntimeIterable) for xi in (x, get_origin(x)))
+
+
+def _is_literal_type(x: Any) -> bool:
+    """Perform the is literal type operation."""
+    origin = get_origin(x)
+    return origin is Literal
+
+
+def _is_optional_type(x: Any) -> bool:
+    """Perform the is optional type operation."""
+    return getattr(x, "__name__", None) == "Optional"
+
+
+def _is_union_type(x: Any) -> bool:
+    """Perform the is union type operation."""
+    origin = get_origin(x)
+    return origin == Union or getattr(origin, "__name__", None) in (
+        "Union",
+        "UnionType",
+    )
+
+
 def _is_enum_for_parsing(x: Any, **kwds) -> bool:
     """Perform the is enum for parsing operation."""
-    return isinstance(x, type) and issubclass(x, Enum)
+    return _is_enum_type(x)
 
 
 def _is_iterable_type_like_for_parsing(

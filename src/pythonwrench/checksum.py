@@ -213,9 +213,9 @@ def checksum_dataclass(x: DataclassInstance, **kwargs) -> int:
 @register_checksum_fn(datetime)
 def checksum_datetime(x: datetime, **kwargs) -> int:
     """Return a checksum for datetime."""
+    kwargs = _add_type_checksum_to_accumulator(x, kwargs)
     return _checksum_iterable(
         [
-            x.__class__,
             x.year,
             x.month,
             x.day,
@@ -233,7 +233,8 @@ def checksum_datetime(x: datetime, **kwargs) -> int:
 @register_checksum_fn(date)
 def checksum_date(x: date, **kwargs) -> int:
     """Return a checksum for date."""
-    return _checksum_iterable([x.__class__, x.year, x.month, x.day], **kwargs)
+    kwargs = _add_type_checksum_to_accumulator(x, kwargs)
+    return _checksum_iterable([x.year, x.month, x.day], **kwargs)
 
 
 @register_checksum_fn(dict)
@@ -245,21 +246,21 @@ def checksum_dict(x: dict, **kwargs) -> int:
 @register_checksum_fn(Enum)
 def checksum_enum(x: Enum, **kwargs) -> int:
     """Return a checksum for enum."""
-    return _checksum_iterable((x.__class__, x.name, x.value), **kwargs)
+    kwargs = _add_type_checksum_to_accumulator(x, kwargs)
+    return _checksum_iterable((x.name, x.value), **kwargs)
 
 
 @register_checksum_fn((list, tuple))
 def checksum_list_tuple(x: Union[list, tuple], **kwargs) -> int:
     """Return a checksum for list tuple."""
+    kwargs = _add_type_checksum_to_accumulator(x, kwargs)
     return _checksum_iterable(x, **kwargs)
 
 
 @register_checksum_fn((set, frozenset))
 def checksum_set(x: Union[set, frozenset], **kwargs) -> int:
     """Return a checksum for set."""
-    kwargs["accumulator"] = kwargs.get("accumulator", 0) + _cached_checksum_str(
-        get_fullname(x)
-    )
+    kwargs = _add_type_checksum_to_accumulator(x, kwargs)
     # Simply use sum here, order does not matter
     csum = sum(checksum_any(xi, **kwargs) for xi in x)
     return csum
@@ -312,11 +313,10 @@ def checksum_pattern(x: re.Pattern, **kwargs) -> int:
 
 
 @register_checksum_fn(Path)
-def checksum_path(x: Path, **kwargs) -> int:
+def checksum_path(x: Path, *, resolve_path: bool = False, **kwargs) -> int:
     """Return a checksum for path."""
+    kwargs["resolve_path"] = resolve_path
     kwargs = _add_type_checksum_to_accumulator(x, kwargs)
-
-    resolve_path = kwargs.get("resolve_path", False)
     if isinstance(resolve_path, bool) and resolve_path:
         x = x.expanduser().resolve()
     return checksum_str(str(x), **kwargs)
