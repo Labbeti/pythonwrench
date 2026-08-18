@@ -217,7 +217,6 @@ def add_dataclass_fields_to_parser(
                 msg = f"Invalid arguments: boolean '{field.name}' without default value is incompatible with {bool_action=}."
                 raise RuntimeError(msg)
             kwds["required"] = True
-
         elif field.default is not MISSING:
             kwds["default"] = field.default
         elif field.default_factory is not MISSING:
