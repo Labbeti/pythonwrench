@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [0.6.5] UNRELEASED
 ### Added
 - `return_single_namespace` option for `parse_args_using_dataclass` function.
+- Context manager for `Ticker` class.
 
 
 ## [0.6.4] 2026-08-17

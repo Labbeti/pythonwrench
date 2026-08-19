@@ -4,6 +4,8 @@
 import time
 from typing import Callable, Optional
 
+from typing_extensions import Self
+
 
 class Ticker:
     def __init__(
@@ -32,3 +34,18 @@ class Ticker:
         if prev_tick is None:
             prev_tick = self._get_time_fn()
         self._prev_tick = prev_tick
+
+    def get_elapsed_duration(self) -> float:
+        """Returns elapsed time since last tick. If no tick has been set, returns 0."""
+        if self._prev_tick is None:
+            return 0.0
+        now = self._get_time_fn()
+        duration = now - self._prev_tick
+        return duration
+
+    def __enter__(self) -> Self:
+        self.tick()
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        pass
