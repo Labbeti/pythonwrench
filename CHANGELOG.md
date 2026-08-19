@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file.
 - Context manager for `Ticker` class.
 
 ### Modified
-- Allow argument `stream` to be None to just set formatter without adding handlers in setup_logging functions.
+- Allow argument `stream` to be None or root_logging_stream customize handlers set in setup_logging functions.
 
 
 ## [0.6.4] 2026-08-17
