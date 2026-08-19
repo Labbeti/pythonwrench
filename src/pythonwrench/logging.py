@@ -14,7 +14,7 @@ from typing_extensions import TypeAlias
 
 from pythonwrench.importlib import reload_submodules
 from pythonwrench.semver import Version
-from pythonwrench.typing import SupportsIterLen
+from pythonwrench.typing import SupportsIterLen, isinstance_generic
 
 T = TypeVar("T", covariant=True)
 
@@ -121,7 +121,7 @@ def setup_logging_level(
         streams = [stream]
     elif stream is None:
         streams = stream
-    elif isinstance(stream, Iterable):
+    elif isinstance_generic(stream, Iterable[IO]):
         streams = list(stream)
     else:
         raise TypeError(f"Invalid argument type {type(stream)=}.")
