@@ -88,7 +88,7 @@ def setup_logging_level(
     level: Optional[int] = logging.INFO,
     *,
     fmt: Union[str, None, Formatter] = DEFAULT_FMT,
-    stream: Union[IO[str], Literal["auto"]] = "auto",
+    stream: Union[IO[str], Literal["auto"], None] = "auto",
     set_fmt: bool = True,
     capture_warnings: bool = True,
     autoreload: bool = True,
@@ -110,22 +110,29 @@ def setup_logging_level(
             stream = sys.stderr
 
     for logger in logger_lst:
-        if set_fmt:
-            found = False
-
-            for handler in logger.handlers:
-                if isinstance(handler, StreamHandler) and handler.stream is stream:
-                    handler.setFormatter(fmt)
-                    found = True
-                    break
-
-            if not found:
-                handler = StreamHandler(stream)  # type: ignore
-                handler.setFormatter(fmt)
-                logger.addHandler(handler)
-
         if level is not None:
             logger.setLevel(level)
+
+        if not set_fmt:
+            continue
+
+        if stream is None:
+            for handler in logger.handlers:
+                handler.setFormatter(fmt)
+            continue
+
+        found = False
+
+        for handler in logger.handlers:
+            if isinstance(handler, StreamHandler) and handler.stream is stream:
+                handler.setFormatter(fmt)
+                found = True
+                break
+
+        if not found:
+            handler = StreamHandler(stream)  # type: ignore
+            handler.setFormatter(fmt)
+            logger.addHandler(handler)
 
     if autoreload:
         for logger in logger_lst:

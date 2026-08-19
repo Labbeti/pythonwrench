@@ -7,6 +7,9 @@ All notable changes to this project will be documented in this file.
 - `return_single_namespace` option for `parse_args_using_dataclass` function.
 - Context manager for `Ticker` class.
 
+### Modified
+- Allow argument `stream` to be None to just set formatter without adding handlers in setup_logging functions.
+
 
 ## [0.6.4] 2026-08-17
 ### Added
