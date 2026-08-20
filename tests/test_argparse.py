@@ -331,6 +331,16 @@ class TestDataclassParser(TestCase):
         )
         assert cfg == target
 
+    def test_parse_list(self) -> None:
+        @dataclass
+        class Cfg:
+            constraints: Iterable[Optional[str]]
+
+        cfg = parse_args_using_dataclass(
+            Cfg, args=["--constraints", "[none]"], list_parsing="brackets"
+        )
+        assert cfg == Cfg([None])
+
 
 if __name__ == "__main__":
     unittest.main()
