@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
 from dataclasses import MISSING, fields
 from typing import (
     Any,
@@ -50,6 +50,19 @@ BoolAction = Union[_BoolActionName, Type[BooleanOptionalAction]]
 
 @overload
 def parse_args_using_dataclass(
+    dataclass_type: Type[DataclassInstance],
+    *dataclass_types: Type[DataclassInstance],
+    args: Optional[Iterable[str]] = None,
+    parser: Optional[ArgumentParser] = None,
+    list_parsing: ListParsing = "argparse",
+    bool_action: BoolAction = "store",
+    add_dashed_arg: bool = True,
+    return_single_namespace: Literal[True],
+) -> Namespace: ...
+
+
+@overload
+def parse_args_using_dataclass(
     dataclass_type: Type[T_DataclassInstance],
     *,
     args: Optional[Iterable[str]] = None,
@@ -57,6 +70,7 @@ def parse_args_using_dataclass(
     list_parsing: ListParsing = "argparse",
     bool_action: BoolAction = "store",
     add_dashed_arg: bool = True,
+    return_single_namespace: Literal[False] = False,
 ) -> T_DataclassInstance: ...
 
 
@@ -71,6 +85,7 @@ def parse_args_using_dataclass(
     list_parsing: ListParsing = "argparse",
     bool_action: BoolAction = "store",
     add_dashed_arg: bool = True,
+    return_single_namespace: Literal[False] = False,
 ) -> Tuple[
     T_DataclassInstance,
     T_DataclassInstance_2,
@@ -89,6 +104,7 @@ def parse_args_using_dataclass(
     list_parsing: ListParsing = "argparse",
     bool_action: BoolAction = "store",
     add_dashed_arg: bool = True,
+    return_single_namespace: Literal[False] = False,
 ) -> Tuple[
     T_DataclassInstance,
     T_DataclassInstance_2,
@@ -109,6 +125,7 @@ def parse_args_using_dataclass(
     list_parsing: ListParsing = "argparse",
     bool_action: BoolAction = "store",
     add_dashed_arg: bool = True,
+    return_single_namespace: Literal[False] = False,
 ) -> Tuple[
     T_DataclassInstance,
     T_DataclassInstance_2,
@@ -131,6 +148,7 @@ def parse_args_using_dataclass(
     list_parsing: ListParsing = "argparse",
     bool_action: BoolAction = "store",
     add_dashed_arg: bool = True,
+    return_single_namespace: Literal[False] = False,
 ) -> Tuple[
     T_DataclassInstance,
     T_DataclassInstance_2,
@@ -148,9 +166,11 @@ def parse_args_using_dataclass(
     list_parsing: ListParsing = "argparse",
     bool_action: BoolAction = "store",
     add_dashed_arg: bool = True,
+    return_single_namespace: bool = False,
 ) -> Union[
     DataclassInstance,
     Tuple[DataclassInstance, ...],
+    Namespace,
 ]:
     """Converts prog args to a typed dataclass using argparse.
 
@@ -174,6 +194,9 @@ def parse_args_using_dataclass(
     if len(argv) > 0:
         msg = f"Found {len(argv)} unknown arguments: {argv}."
         raise ValueError(msg)
+
+    if return_single_namespace:
+        return parsed
 
     dataclass_insts = []
     for dataclass_type_i in dataclass_types:

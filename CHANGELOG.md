@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.5] 2026-08-20
+### Added
+- `return_single_namespace` option for `parse_args_using_dataclass` function.
+- Context manager for `Ticker` class.
+
+### Modified
+- Allow argument `stream` to be None or root_logging_stream customize handlers set in setup_logging functions.
+
+
 ## [0.6.4] 2026-08-17
 ### Added
 - Function `parse_args_using_dataclass` can now handle multiple dataclass at once.

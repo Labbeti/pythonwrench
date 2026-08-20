@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from argparse import ArgumentParser
-from dataclasses import dataclass, field
+from argparse import ArgumentParser, Namespace
+from dataclasses import asdict, dataclass, field
 from enum import Enum, auto
 from pathlib import Path
 from typing import Iterable, List, Literal, Optional, Tuple, Union
@@ -301,6 +301,20 @@ class TestDataclassParser(TestCase):
         )
         assert cfg1 == expected_cfg1
         assert cfg2 == expected_cfg2
+
+        args = parse_args_using_dataclass(
+            Cfg2,
+            Cfg1,
+            args=[
+                "--path",
+                str(expected_cfg1.path),
+                "--b",
+                expected_cfg2.b,
+            ],
+            return_single_namespace=True,
+        )
+        expected_args = Namespace(**asdict(expected_cfg1), **asdict(expected_cfg2))
+        assert args == expected_args
 
     def test_parse_store_bool(self) -> None:
         @dataclass

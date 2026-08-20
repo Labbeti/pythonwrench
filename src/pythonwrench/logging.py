@@ -8,13 +8,13 @@ from functools import lru_cache
 from logging import FileHandler, Formatter, Logger, StreamHandler
 from pathlib import Path
 from types import ModuleType
-from typing import IO, List, Literal, Optional, TypeVar, Union
+from typing import IO, Iterable, List, Literal, Optional, TypeVar, Union
 
 from typing_extensions import TypeAlias
 
 from pythonwrench.importlib import reload_submodules
 from pythonwrench.semver import Version
-from pythonwrench.typing import SupportsIterLen
+from pythonwrench.typing import SupportsIterLen, isinstance_generic
 
 T = TypeVar("T", covariant=True)
 
@@ -28,6 +28,9 @@ PackageOrLogger: TypeAlias = Union[
 PackageOrLoggerList: TypeAlias = Union[
     PackageOrLogger,
     SupportsIterLen[PackageOrLogger],
+]
+TargetStream = Union[
+    IO[str], Iterable[IO[str]], Literal["auto", "root_logger_streams"], None
 ]
 
 _PARENT_FILE_KEY = "__parent_file__"
@@ -58,7 +61,7 @@ def setup_logging_verbose(
     verbose: Optional[int] = VERBOSE_INFO,
     *,
     fmt: Union[str, None, Formatter] = DEFAULT_FMT,
-    stream: Union[IO[str], Literal["auto"]] = "auto",
+    stream: TargetStream = "auto",
     set_fmt: bool = True,
     capture_warnings: bool = True,
     autoreload: bool = True,
@@ -88,7 +91,7 @@ def setup_logging_level(
     level: Optional[int] = logging.INFO,
     *,
     fmt: Union[str, None, Formatter] = DEFAULT_FMT,
-    stream: Union[IO[str], Literal["auto"]] = "auto",
+    stream: TargetStream = "auto",
     set_fmt: bool = True,
     capture_warnings: bool = True,
     autoreload: bool = True,
@@ -105,27 +108,58 @@ def setup_logging_level(
 
     if stream == "auto":
         if running_on_interpreter():
-            stream = sys.stdout
+            streams = [sys.stdout]
         else:
-            stream = sys.stderr
+            streams = [sys.stderr]
+    elif stream == "root_logger_streams":
+        streams = [
+            handler.stream
+            for handler in logging.getLogger().handlers
+            if isinstance(handler, StreamHandler)
+        ]
+    elif isinstance(stream, IO):
+        streams = [stream]
+    elif stream is None:
+        streams = stream
+    elif isinstance_generic(stream, Iterable[IO]):
+        streams = list(stream)
+    else:
+        raise TypeError(f"Invalid argument type {type(stream)=}.")
+    del stream
 
     for logger in logger_lst:
-        if set_fmt:
-            found = False
-
-            for handler in logger.handlers:
-                if isinstance(handler, StreamHandler) and handler.stream is stream:
-                    handler.setFormatter(fmt)
-                    found = True
-                    break
-
-            if not found:
-                handler = StreamHandler(stream)  # type: ignore
-                handler.setFormatter(fmt)
-                logger.addHandler(handler)
-
         if level is not None:
             logger.setLevel(level)
+
+        if not set_fmt:
+            continue
+
+        if streams is None:
+            for handler in logger.handlers:
+                handler.setFormatter(fmt)
+            continue
+
+        found = [False] * len(streams)
+
+        for handler in logger.handlers:
+            if not isinstance(handler, StreamHandler):
+                continue
+
+            try:
+                index = streams.index(handler.stream)
+            except IndexError:
+                continue
+
+            handler.setFormatter(fmt)
+            found[index] = True
+
+        if not all(found):
+            for stream_i, found_i in zip(streams, found):
+                if found_i:
+                    continue
+                handler = StreamHandler(stream_i)
+                handler.setFormatter(fmt)
+                logger.addHandler(handler)
 
     if autoreload:
         for logger in logger_lst:
