@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import logging
 import unittest
 from dataclasses import dataclass
+from io import TextIOBase
+from logging import StreamHandler
 from numbers import Number
 from pathlib import Path
 from typing import (
@@ -330,6 +333,18 @@ class TestIsInstanceGuard(TestCase):
         assert isinstance_generic([1, "2", 1], List[int], check_only_first=True)
         assert isinstance_generic([], List[int], check_only_first=True)
         assert isinstance_generic([1, 2], List, check_only_first=True)
+
+    def test_io_check(self) -> None:
+        assert isinstance_generic([], Iterable[TextIOBase])
+        assert not isinstance_generic([1], Iterable[TextIOBase])
+
+        logger = logging.getLogger()
+        streams = [
+            handler.stream
+            for handler in logger.handlers
+            if isinstance(handler, StreamHandler)
+        ]
+        assert isinstance_generic(streams, Iterable[TextIOBase])
 
 
 class TestCheckArgsType(TestCase):
