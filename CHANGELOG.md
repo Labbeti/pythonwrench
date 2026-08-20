@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.6] 2026-08-20
+### Fixed
+- `setup_logging_level` isinstance check.
+
 ## [0.6.5] 2026-08-20
 ### Added
 - `return_single_namespace` option for `parse_args_using_dataclass` function.
