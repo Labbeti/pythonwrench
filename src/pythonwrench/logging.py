@@ -5,10 +5,11 @@ import inspect
 import logging
 import sys
 from functools import lru_cache
+from io import TextIOBase
 from logging import FileHandler, Formatter, Logger, StreamHandler
 from pathlib import Path
 from types import ModuleType
-from typing import IO, Iterable, List, Literal, Optional, TypeVar, Union
+from typing import IO, Iterable, List, Literal, Optional, TextIO, TypeVar, Union
 
 from typing_extensions import TypeAlias
 
@@ -117,11 +118,11 @@ def setup_logging_level(
             for handler in logging.getLogger().handlers
             if isinstance(handler, StreamHandler)
         ]
-    elif isinstance(stream, IO):
+    elif isinstance(stream, (TextIOBase, TextIO)):
         streams = [stream]
     elif stream is None:
         streams = stream
-    elif isinstance_generic(stream, Iterable[IO]):
+    elif isinstance_generic(stream, Iterable[Union[TextIOBase, TextIO]]):
         streams = list(stream)
     else:
         raise TypeError(f"Invalid argument type {type(stream)=}.")
