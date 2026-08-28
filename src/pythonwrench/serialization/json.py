@@ -3,13 +3,14 @@
 
 import json
 from io import StringIO, TextIOBase
+from json import JSONDecodeError
 from os import PathLike
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Optional, Union, get_args
 
 from pythonwrench.cast import as_builtin
 from pythonwrench.functools import function_alias
-from pythonwrench.serialization._core import _setup_output_fpath
+from pythonwrench.serialization._core import OnError, _setup_output_fpath
 
 # -- Dump / Save / Serialize content to JSON --
 
@@ -146,6 +147,9 @@ def _serialize_json(
 def load_json(
     file: Union[str, Path, PathLike, TextIOBase],
     /,
+    *,
+    on_error: OnError = "raise",
+    default: Any = None,
     **json_loads_kwds,
 ) -> Any:
     """Load json."""
@@ -155,16 +159,33 @@ def load_json(
     else:
         close = False
 
-    data = _parse_json(file, **json_loads_kwds)
+    data = _parse_json(
+        file,
+        on_error=on_error,
+        default=default,
+        **json_loads_kwds,
+    )
     if close:
         file.close()
     return data
 
 
-def loads_json(content: str, /, **json_loads_kwds) -> Any:
-    """Load s json."""
+def loads_json(
+    content: str,
+    /,
+    *,
+    on_error: OnError = "raise",
+    default: Any = None,
+    **json_loads_kwds,
+) -> Any:
+    """Parse JSON string to object."""
     with StringIO(content) as buffer:
-        return _parse_json(buffer, **json_loads_kwds)
+        return _parse_json(
+            buffer,
+            on_error=on_error,
+            default=default,
+            **json_loads_kwds,
+        )
 
 
 @function_alias(load_json)
@@ -173,6 +194,21 @@ def read_json(*args, **kwargs):
     ...
 
 
-def _parse_json(buffer: TextIOBase, **json_loads_kwds) -> Any:
+def _parse_json(
+    buffer: TextIOBase,
+    *,
+    on_error: OnError,
+    default: Any = None,
+    **json_loads_kwds,
+) -> Any:
     """Parse json."""
-    return json.load(buffer, **json_loads_kwds)
+    try:
+        return json.load(buffer, **json_loads_kwds)
+    except JSONDecodeError as err:
+        if on_error == "raise":
+            raise err
+        elif on_error == "default":
+            return default
+        else:
+            msg = f"Invalid argument {on_error=}. (expected one of {get_args(OnError)})"
+            raise ValueError(msg)

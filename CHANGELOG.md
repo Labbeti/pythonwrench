@@ -2,9 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.7] UNRELEASED
+### Added
+- `on_error` and `default` arguments to `load_json`, `load_pickle`, `load_jsonl` functions.
+
+
 ## [0.6.6] 2026-08-20
 ### Fixed
 - `setup_logging_level` isinstance check.
+
 
 ## [0.6.5] 2026-08-20
 ### Added

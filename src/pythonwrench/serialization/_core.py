@@ -5,9 +5,12 @@ import os
 from io import TextIOWrapper
 from pathlib import Path
 from typing import (
+    Literal,
     Union,
     overload,
 )
+
+OnError = Literal["raise", "default"]
 
 
 @overload
