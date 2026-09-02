@@ -63,7 +63,9 @@ def dump_jsonl(
         **json_dumps_kwds,
     )
 
-    if isinstance(file, (str, Path, PathLike)):
+    if not overwrite and isinstance(file, (str, Path, PathLike)):
+        return content
+    elif isinstance(file, (str, Path, PathLike)):
         file = _setup_output_fpath(file, overwrite=overwrite, make_parents=make_parents)
         with open(file, "w") as opened_file:
             opened_file.write(content)
@@ -113,7 +115,9 @@ def save_jsonl(
     **json_dumps_kwds,
 ) -> None:
     """Save jsonl."""
-    if isinstance(file, (str, Path, PathLike)):
+    if not overwrite and isinstance(file, (str, Path, PathLike)):
+        return None
+    elif isinstance(file, (str, Path, PathLike)):
         file = _setup_output_fpath(file, overwrite=overwrite, make_parents=make_parents)
         file = open(file, "w")
         close = True

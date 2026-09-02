@@ -45,7 +45,9 @@ def dump_pickle(
         **pkl_dumps_kwds,
     )
 
-    if isinstance(file, (str, Path, PathLike)):
+    if not overwrite and isinstance(file, (str, Path, PathLike)):
+        return content
+    elif isinstance(file, (str, Path, PathLike)):
         file = _setup_output_fpath(file, overwrite=overwrite, make_parents=make_parents)
         with open(file, "wb") as opened_file:
             opened_file.write(content)
@@ -108,7 +110,9 @@ def save_pickle(
         to_builtins: If True, converts data to builtin equivalent before saving. defaults to False.
         \*\*pkl_dumps_kwds: Other args passed to `pickle.dumps`.
     """
-    if isinstance(file, (str, Path, PathLike)):
+    if not overwrite and isinstance(file, (str, Path, PathLike)):
+        return None
+    elif isinstance(file, (str, Path, PathLike)):
         file = _setup_output_fpath(file, overwrite=overwrite, make_parents=make_parents)
         file = open(file, "wb")
         close = True
