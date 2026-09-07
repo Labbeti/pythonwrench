@@ -58,6 +58,7 @@ def parse_args_using_dataclass(
     bool_action: BoolAction = "store",
     add_dashed_arg: bool = True,
     return_single_namespace: Literal[True],
+    posonly_for_required: bool = False,
 ) -> Namespace: ...
 
 
@@ -71,6 +72,7 @@ def parse_args_using_dataclass(
     bool_action: BoolAction = "store",
     add_dashed_arg: bool = True,
     return_single_namespace: Literal[False] = False,
+    posonly_for_required: bool = False,
 ) -> T_DataclassInstance: ...
 
 
@@ -86,6 +88,7 @@ def parse_args_using_dataclass(
     bool_action: BoolAction = "store",
     add_dashed_arg: bool = True,
     return_single_namespace: Literal[False] = False,
+    posonly_for_required: bool = False,
 ) -> Tuple[
     T_DataclassInstance,
     T_DataclassInstance_2,
@@ -105,6 +108,7 @@ def parse_args_using_dataclass(
     bool_action: BoolAction = "store",
     add_dashed_arg: bool = True,
     return_single_namespace: Literal[False] = False,
+    posonly_for_required: bool = False,
 ) -> Tuple[
     T_DataclassInstance,
     T_DataclassInstance_2,
@@ -126,6 +130,7 @@ def parse_args_using_dataclass(
     bool_action: BoolAction = "store",
     add_dashed_arg: bool = True,
     return_single_namespace: Literal[False] = False,
+    posonly_for_required: bool = False,
 ) -> Tuple[
     T_DataclassInstance,
     T_DataclassInstance_2,
@@ -149,6 +154,7 @@ def parse_args_using_dataclass(
     bool_action: BoolAction = "store",
     add_dashed_arg: bool = True,
     return_single_namespace: Literal[False] = False,
+    posonly_for_required: bool = False,
 ) -> Tuple[
     T_DataclassInstance,
     T_DataclassInstance_2,
@@ -167,6 +173,7 @@ def parse_args_using_dataclass(
     bool_action: BoolAction = "store",
     add_dashed_arg: bool = True,
     return_single_namespace: bool = False,
+    posonly_for_required: bool = False,
 ) -> Union[
     DataclassInstance,
     Tuple[DataclassInstance, ...],
@@ -187,6 +194,7 @@ def parse_args_using_dataclass(
             list_parsing=list_parsing,
             bool_action=bool_action,
             add_dashed_arg=add_dashed_arg,
+            posonly_for_required=posonly_for_required,
         )
     assert parser is not None
 
@@ -223,17 +231,23 @@ def add_dataclass_fields_to_parser(
     list_parsing: ListParsing = "argparse",
     bool_action: BoolAction = "store",
     add_dashed_arg: bool = True,
+    posonly_for_required: bool = False,
 ) -> ArgumentParser:
     """Perform the add dataclass fields to parser operation."""
+    if posonly_for_required:
+        prefix = ""
+    else:
+        prefix = "--"
+
     if parser is None:
         parser = ArgumentParser()
 
     for field in fields(dataclass_type):
         kwds = {}
-        posargs = [f"--{field.name}"]
+        posargs = [f"{prefix}{field.name}"]
         if add_dashed_arg and "_" in field.name:
             dashed_arg_name = field.name.replace("_", "-")
-            posargs.append(f"--{dashed_arg_name}")
+            posargs.append(f"{prefix}{dashed_arg_name}")
 
         if field.default is MISSING and field.default_factory is MISSING:
             if bool_action != "store" and field.type is bool:

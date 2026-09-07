@@ -6,11 +6,12 @@ import pickle
 from io import BytesIO
 from os import PathLike
 from pathlib import Path
-from typing import Any, BinaryIO, Union
+from pickle import UnpicklingError
+from typing import Any, BinaryIO, Union, get_args
 
 from pythonwrench.cast import as_builtin
 from pythonwrench.functools import function_alias
-from pythonwrench.serialization._core import _setup_output_fpath
+from pythonwrench.serialization._core import OnError, _setup_output_fpath
 
 # -- Dump / Save / Serialize content to PICKLE --
 
@@ -44,7 +45,9 @@ def dump_pickle(
         **pkl_dumps_kwds,
     )
 
-    if isinstance(file, (str, Path, PathLike)):
+    if not overwrite and isinstance(file, (str, Path, PathLike)):
+        return content
+    elif isinstance(file, (str, Path, PathLike)):
         file = _setup_output_fpath(file, overwrite=overwrite, make_parents=make_parents)
         with open(file, "wb") as opened_file:
             opened_file.write(content)
@@ -107,7 +110,9 @@ def save_pickle(
         to_builtins: If True, converts data to builtin equivalent before saving. defaults to False.
         \*\*pkl_dumps_kwds: Other args passed to `pickle.dumps`.
     """
-    if isinstance(file, (str, Path, PathLike)):
+    if not overwrite and isinstance(file, (str, Path, PathLike)):
+        return None
+    elif isinstance(file, (str, Path, PathLike)):
         file = _setup_output_fpath(file, overwrite=overwrite, make_parents=make_parents)
         file = open(file, "wb")
         close = True
@@ -145,7 +150,14 @@ def _serialize_pickle(
 # -- Load / Read / Parse PICKLE content --
 
 
-def load_pickle(file: Union[str, Path, BinaryIO], /, **pkl_loads_kwds) -> Any:
+def load_pickle(
+    file: Union[str, Path, BinaryIO],
+    /,
+    *,
+    on_error: OnError = "raise",
+    default: Any = None,
+    **pkl_loads_kwds,
+) -> Any:
     r"""Load content from PICKLE file.
 
     Args:
@@ -158,13 +170,20 @@ def load_pickle(file: Union[str, Path, BinaryIO], /, **pkl_loads_kwds) -> Any:
     else:
         close = False
 
-    data = _parse_pickle(file, **pkl_loads_kwds)
+    data = _parse_pickle(file, on_error=on_error, default=default, **pkl_loads_kwds)
     if close:
         file.close()
     return data
 
 
-def loads_pickle(content: bytes, /, **pkl_loads_kwds) -> Any:
+def loads_pickle(
+    content: bytes,
+    /,
+    *,
+    on_error: OnError = "raise",
+    default: Any = None,
+    **pkl_loads_kwds,
+) -> Any:
     r"""Load content from raw bytes.
 
     Args:
@@ -172,7 +191,12 @@ def loads_pickle(content: bytes, /, **pkl_loads_kwds) -> Any:
         \*\*pkl_loads_kwds: Other args passed to `pickle.loads`.
     """
     with BytesIO(content) as buffer:
-        return _parse_pickle(buffer, **pkl_loads_kwds)
+        return _parse_pickle(
+            buffer,
+            on_error=on_error,
+            default=default,
+            **pkl_loads_kwds,
+        )
 
 
 @function_alias(load_pickle)
@@ -181,6 +205,22 @@ def read_pickle(*args, **kwargs):
     ...
 
 
-def _parse_pickle(buffer: BinaryIO, **pkl_loads_kwds) -> Any:
+def _parse_pickle(
+    buffer: BinaryIO,
+    /,
+    *,
+    on_error: OnError = "raise",
+    default: Any = None,
+    **pkl_loads_kwds,
+) -> Any:
     """Parse pickle."""
-    return pickle.load(buffer, **pkl_loads_kwds)
+    try:
+        return pickle.load(buffer, **pkl_loads_kwds)
+    except UnpicklingError as err:
+        if on_error == "raise":
+            raise err
+        elif on_error == "default":
+            return default
+        else:
+            msg = f"Invalid argument {on_error=}. (expected one of {get_args(OnError)})"
+            raise ValueError(msg)

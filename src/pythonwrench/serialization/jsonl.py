@@ -4,12 +4,12 @@
 from io import StringIO, TextIOBase
 from os import PathLike
 from pathlib import Path
-from typing import Union
+from typing import Any, Union
 
 from pythonwrench.cast import as_builtin
 from pythonwrench.functools import function_alias
 from pythonwrench.semver import Version
-from pythonwrench.serialization._core import _setup_output_fpath
+from pythonwrench.serialization._core import OnError, _setup_output_fpath
 from pythonwrench.serialization.json import (
     _serialize_json,
     dumps_json,
@@ -63,7 +63,9 @@ def dump_jsonl(
         **json_dumps_kwds,
     )
 
-    if isinstance(file, (str, Path, PathLike)):
+    if not overwrite and isinstance(file, (str, Path, PathLike)):
+        return content
+    elif isinstance(file, (str, Path, PathLike)):
         file = _setup_output_fpath(file, overwrite=overwrite, make_parents=make_parents)
         with open(file, "w") as opened_file:
             opened_file.write(content)
@@ -113,7 +115,9 @@ def save_jsonl(
     **json_dumps_kwds,
 ) -> None:
     """Save jsonl."""
-    if isinstance(file, (str, Path, PathLike)):
+    if not overwrite and isinstance(file, (str, Path, PathLike)):
+        return None
+    elif isinstance(file, (str, Path, PathLike)):
         file = _setup_output_fpath(file, overwrite=overwrite, make_parents=make_parents)
         file = open(file, "w")
         close = True
@@ -163,6 +167,9 @@ def _serialize_jsonl(
 def load_jsonl(
     file: Union[str, Path, PathLike, TextIOBase],
     /,
+    *,
+    on_error: OnError = "raise",
+    default: Any = None,
     **json_loads_kwds,
 ) -> list:
     """Load jsonl."""
@@ -172,16 +179,25 @@ def load_jsonl(
     else:
         close = False
 
-    data = _parse_jsonl(file, **json_loads_kwds)
+    data = _parse_jsonl(file, on_error=on_error, default=default, **json_loads_kwds)
     if close:
         file.close()
     return data
 
 
-def loads_jsonl(content: str, /, **json_loads_kwds) -> list:
+def loads_jsonl(
+    content: str,
+    /,
+    *,
+    on_error: OnError = "raise",
+    default: Any = None,
+    **json_loads_kwds,
+) -> list:
     """Load s jsonl."""
     with StringIO(content) as buffer:
-        return _parse_jsonl(buffer, **json_loads_kwds)
+        return _parse_jsonl(
+            buffer, on_error=on_error, default=default, **json_loads_kwds
+        )
 
 
 @function_alias(load_json)
@@ -190,7 +206,14 @@ def read_jsonl(*args, **kwargs):
     ...
 
 
-def _parse_jsonl(buffer: TextIOBase, **json_loads_kwds) -> list:
+def _parse_jsonl(
+    buffer: TextIOBase,
+    /,
+    *,
+    on_error: OnError = "raise",
+    default: Any = None,
+    **json_loads_kwds,
+) -> list:
     """Parse jsonl."""
     data_lst = []
     while True:
@@ -198,7 +221,9 @@ def _parse_jsonl(buffer: TextIOBase, **json_loads_kwds) -> list:
         if content == "":
             break
         content = _removesuffix(content, "\n")
-        data = loads_json(content, **json_loads_kwds)
+        data = loads_json(
+            content, on_error=on_error, default=default, **json_loads_kwds
+        )
         data_lst.append(data)
     return data_lst
 

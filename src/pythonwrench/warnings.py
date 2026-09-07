@@ -20,7 +20,7 @@ def warn_once(
     stacklevel: int = 1,
     source: Any = None,
 ) -> None:
-    """Perform the warn once operation."""
+    """Warn message once using warnings module."""
     ...
 
 
@@ -31,7 +31,7 @@ def warn_once(
     stacklevel: int = 1,
     source: Any = None,
 ) -> None:
-    """Perform the warn once operation."""
+    """Warn message once using warnings module."""
     ...
 
 
