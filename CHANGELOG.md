@@ -7,6 +7,9 @@ All notable changes to this project will be documented in this file.
 - `on_error` and `default` arguments to `load_json`, `load_pickle`, `load_jsonl` functions.
 - `posonly_for_required` argument for `parse_args_using_dataclass`.
 
+### Fixed
+- `setup_logging_level` when stderr is not set in root logger.
+
 
 ## [0.6.6] 2026-08-20
 ### Fixed
