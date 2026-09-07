@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.6.7] UNRELEASED
+## [0.6.7] 2026-09-07
 ### Added
 - `on_error` and `default` arguments to `load_json`, `load_pickle`, `load_jsonl` functions.
 - `posonly_for_required` argument for `parse_args_using_dataclass`.
