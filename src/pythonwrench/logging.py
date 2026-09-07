@@ -148,7 +148,7 @@ def setup_logging_level(
 
             try:
                 index = streams.index(handler.stream)
-            except IndexError:
+            except ValueError:
                 continue
 
             handler.setFormatter(fmt)
