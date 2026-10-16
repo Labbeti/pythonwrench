@@ -157,7 +157,7 @@ if TYPE_CHECKING or lazy is None:
         setup_logging_verbose,
     )
     from .math import argmax, argmin, argsort, clamp, clip
-    from .os import get_num_cpus_available, safe_rmdir, tree_iter
+    from .os import get_num_cpus_available, remove_children, safe_rmdir, tree_iter
     from .random import randstr
     from .re import (
         PatternLike,
@@ -414,7 +414,12 @@ else:
                 "setup_logging_verbose",
             ],
             "math": ["argmax", "argmin", "argsort", "clamp", "clip"],
-            "os": ["get_num_cpus_available", "safe_rmdir", "tree_iter"],
+            "os": [
+                "get_num_cpus_available",
+                "remove_children",
+                "safe_rmdir",
+                "tree_iter",
+            ],
             "random": ["randstr"],
             "re": [
                 "PatternLike",

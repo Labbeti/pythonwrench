@@ -4,6 +4,7 @@
 import logging
 import os
 import os.path as osp
+import shutil
 import sys
 from pathlib import Path
 from re import Pattern
@@ -224,3 +225,29 @@ def _walker_impl(
                 skipfiles=skipfiles,
                 sort=sort,
             )
+
+
+def remove_children(dpath: Union[str, Path], *dpaths: Union[str, Path]) -> List[Path]:
+    """Remove all children in folder(s), without removing the folder itself.
+
+    Returns the list of paths to children removed.
+    """
+    dpaths = (dpath,) + dpaths
+    dpaths_list = list(map(Path, dpaths))
+    del dpaths
+
+    all_children = []
+    for dpath in dpaths_list:
+        if not dpath.is_dir():
+            msg = f"Invalid argument {dpath=}. (not a directory)"
+            raise RuntimeError(msg)
+
+        children = list(dpath.iterdir())
+        for path in children:
+            if path.is_dir():
+                shutil.rmtree(path)
+            else:
+                path.unlink()
+        all_children += children
+
+    return all_children

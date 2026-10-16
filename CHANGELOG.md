@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.8] UNRELEASED
+### Added
+- `remove_children` function to remove all content of a directory.
+
 ## [0.6.7] 2026-09-07
 ### Added
 - `on_error` and `default` arguments to `load_json`, `load_pickle`, `load_jsonl` functions.
