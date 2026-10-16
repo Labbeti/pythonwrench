@@ -304,9 +304,8 @@ def find(
 
         match_fn = revert(match_fn)
     else:
-        raise ValueError(
-            f"Invalid argument {order=}. (expected one of {get_args(Order)})"
-        )
+        msg = f"Invalid argument {order=}. (expected one of {get_args(Order)})"
+        raise ValueError(msg)
 
     for i, xi in enumerate(it):
         if match_fn(xi, target):
