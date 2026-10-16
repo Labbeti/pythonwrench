@@ -227,8 +227,13 @@ def _walker_impl(
             )
 
 
-def remove_children(dpath: Union[str, Path], *dpaths: Union[str, Path]) -> List[Path]:
+def remove_children(
+    dpath: Union[str, Path], *dpaths: Union[str, Path], use_tqdm: bool = False
+) -> List[Path]:
     """Remove all children in folder(s), without removing the folder itself.
+
+    Why using this function instead of just remove directory recursively then mkdir it ?
+    Because it can mess up with applications that expectes a directory at all times (like standard explorers), and can also avoid replacing the root folder by a directory if it is a symlink.
 
     Returns the list of paths to children removed.
     """
@@ -236,18 +241,28 @@ def remove_children(dpath: Union[str, Path], *dpaths: Union[str, Path]) -> List[
     dpaths_list = list(map(Path, dpaths))
     del dpaths
 
-    all_children = []
+    all_children: List[Path] = []
     for dpath in dpaths_list:
         if not dpath.is_dir():
             msg = f"Invalid argument {dpath=}. (not a directory)"
             raise RuntimeError(msg)
-
         children = list(dpath.iterdir())
-        for path in children:
-            if path.is_dir():
-                shutil.rmtree(path)
-            else:
-                path.unlink()
         all_children += children
+
+    if use_tqdm:
+        try:
+            import tqdm  # type: ignore
+
+            all_children_it = tqdm.tqdm(all_children)
+        except ImportError:
+            raise ValueError(f"You requested {use_tqdm=} but tqdm is not available.")
+    else:
+        all_children_it = all_children
+
+    for path in all_children_it:
+        if path.is_dir():
+            shutil.rmtree(path)
+        else:
+            path.unlink()
 
     return all_children
