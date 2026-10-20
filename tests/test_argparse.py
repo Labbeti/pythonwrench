@@ -341,6 +341,23 @@ class TestDataclassParser(TestCase):
         )
         assert cfg == Cfg([None])
 
+    def test_subparsers(self) -> None:
+        @dataclass
+        class A:
+            a: int = 0
+
+        @dataclass
+        class B:
+            b: str = "b"
+
+        @dataclass
+        class Cfg:
+            subcfg: Union[A, B]
+
+        cfg = parse_args_using_dataclass(Cfg, args=["A"])
+        assert isinstance(cfg.subcfg, A)
+        assert cfg.subcfg.a == 1
+
 
 if __name__ == "__main__":
     unittest.main()

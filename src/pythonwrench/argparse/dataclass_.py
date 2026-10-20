@@ -7,6 +7,7 @@ from typing import (
     Any,
     Dict,
     Iterable,
+    List,
     Literal,
     Optional,
     Tuple,
@@ -14,6 +15,7 @@ from typing import (
     TypeVar,
     Union,
     get_args,
+    get_origin,
     overload,
 )
 
@@ -24,6 +26,7 @@ from pythonwrench.argparse.parsers import (
     _search_parse_fn,
 )
 from pythonwrench.functools import filter_and_call
+from pythonwrench.typing.checks import is_dataclass_type
 from pythonwrench.typing.classes import (
     Dataclass,
     DataclassInstance,
@@ -206,10 +209,26 @@ def parse_args_using_dataclass(
     if return_single_namespace:
         return parsed
 
+    dataclass_insts = _instantiate_dataclasses(dataclass_types, init_parser, parsed)
+
+    if len(dataclass_insts) == 1:
+        return dataclass_insts[0]
+    else:
+        return tuple(dataclass_insts)
+
+
+def _instantiate_dataclasses(
+    dataclass_types: Tuple[Type[DataclassInstance], ...],
+    init_parser: Optional[ArgumentParser],
+    parsed: Namespace,
+) -> List[DataclassInstance]:
     dataclass_insts = []
     for dataclass_type_i in dataclass_types:
         if init_parser is None and len(dataclass_types) == 1:
-            instance = dataclass_type_i(**parsed.__dict__)
+            try:
+                instance = dataclass_type_i(**parsed.__dict__)
+            except TypeError:
+                raise
         else:
             instance = filter_and_call(
                 dataclass_type_i,
@@ -217,11 +236,7 @@ def parse_args_using_dataclass(
                 **parsed.__dict__,
             )
         dataclass_insts.append(instance)
-
-    if len(dataclass_insts) == 1:
-        return dataclass_insts[0]
-    else:
-        return tuple(dataclass_insts)
+    return dataclass_insts
 
 
 def add_dataclass_fields_to_parser(
@@ -232,12 +247,13 @@ def add_dataclass_fields_to_parser(
     bool_action: BoolAction = "store",
     add_dashed_arg: bool = True,
     posonly_for_required: bool = False,
+    argprefix: str = "",
 ) -> ArgumentParser:
     """Perform the add dataclass fields to parser operation."""
     if posonly_for_required:
-        prefix = ""
+        prefix = argprefix
     else:
-        prefix = "--"
+        prefix = f"--{argprefix}"
 
     if parser is None:
         parser = ArgumentParser()
@@ -263,14 +279,35 @@ def add_dataclass_fields_to_parser(
             msg = f"Invalid field {field.name}: found values for default and default_factory."
             raise ValueError(msg)
 
-        try:
-            inner_kwds = _get_kwds_for_type(field.type, list_parsing, bool_action)
-        except (ValueError, TypeError, RuntimeError) as err:
-            msg = f"Invalid field {field.name}: field type '{field.type}' is not supported."
-            raise type(err)(msg) from err
+        if get_origin(field.type) is Union and all(
+            is_dataclass_type(subcls) for subcls in get_args(field.type)
+        ):
+            subclasses = get_args(field.type)
+            subparsers = parser.add_subparsers(
+                dest=field.name,
+                required=kwds.get("required", False),
+            )
+            for subcls in subclasses:
+                subparser = subparsers.add_parser(subcls.__name__)
+                _ = add_dataclass_fields_to_parser(
+                    subcls,
+                    parser=subparser,
+                    list_parsing=list_parsing,
+                    bool_action=bool_action,
+                    add_dashed_arg=add_dashed_arg,
+                    posonly_for_required=posonly_for_required,
+                    argprefix=f"{argprefix}{field.name}.",
+                )
 
-        kwds.update(inner_kwds)
-        parser.add_argument(*posargs, **kwds)
+        else:
+            try:
+                inner_kwds = _get_kwds_for_type(field.type, list_parsing, bool_action)
+            except (ValueError, TypeError, RuntimeError) as err:
+                msg = f"Invalid field {field.name}: field type '{field.type}' is not supported."
+                raise type(err)(msg) from err
+
+            kwds.update(inner_kwds)
+            parser.add_argument(*posargs, **kwds)
 
     return parser
 
