@@ -277,6 +277,7 @@ def sum(
     ...
 
 
+# note: we do not use function_alias because start arg has default value of 0
 def sum(*args, start: Any = 0):
     """Compute sum of elements."""
     return reduce_add(*args, start=start)
@@ -313,6 +314,7 @@ def prod(
     ...
 
 
+# note: we do not use function_alias because start arg has default value of 1
 def prod(*args, start: Any = 1):
     """Compute product of elements."""
     return reduce_mul(*args, start=start)
