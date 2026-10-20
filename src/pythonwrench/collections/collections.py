@@ -47,6 +47,8 @@ Y = TypeVar("Y", covariant=True)
 
 KeyMode = Literal["intersect", "same", "union"]
 Order = Literal["left", "right"]
+DictByKV = Literal["key", "value"]
+DictByKVI = Literal["key", "value", "item"]
 
 
 class SizedGenerator(Generic[T]):
@@ -683,7 +685,7 @@ def sorted_dict(
     x: Mapping[K, V],
     /,
     *,
-    by: Literal["key", "value", "item"] = "key",
+    by: DictByKVI = "key",
     key: Optional[Callable[[Any], Any]] = None,
     reverse: bool = False,
 ) -> Dict[K, V]:
@@ -708,7 +710,7 @@ def sorted_dict(
         impl_key = by_value_fn
 
     else:
-        msg = f"Invalid argument {by=}. (expected one of {('key', 'value', 'item')})"
+        msg = f"Invalid argument {by=}. (expected one of {get_args(DictByKVI)})"
         raise ValueError(msg)
 
     return {k: v for k, v in sorted(x.items(), key=impl_key, reverse=reverse)}  # type: ignore
