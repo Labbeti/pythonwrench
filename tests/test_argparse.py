@@ -101,12 +101,12 @@ class TestDataclassParser(TestCase):
     def test_parse_args_using_dataclass_example_1(self) -> None:
         @dataclass
         class A:
-            a: int
-            b: str = "b"
+            a: str
+            b: int = 0
             c: float = 1.2
 
-        target = A(a=0, c=0.5)
-        args = ["--a", str(target.a), "--c", str(target.c)]
+        target = A(a="a", c=0.5)
+        args = ["--a", target.a, "--c", str(target.c)]
         output = parse_args_using_dataclass(A, args=args)
         assert output == target
 
@@ -337,7 +337,9 @@ class TestDataclassParser(TestCase):
             constraints: Iterable[Optional[str]]
 
         cfg = parse_args_using_dataclass(
-            Cfg, args=["--constraints", "[none]"], list_parsing="brackets"
+            Cfg,
+            args=["--constraints", "[none]"],
+            list_parsing="brackets",
         )
         assert cfg == Cfg([None])
 
