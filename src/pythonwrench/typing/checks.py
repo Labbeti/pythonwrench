@@ -549,3 +549,9 @@ def _safe_isin(x: Any, targets: Iterable) -> bool:
 def _is_callable_type(x: Any) -> bool:
     """Perform the is callable type operation."""
     return x in (Callable, _RuntimeCallable)
+
+
+def _future_annotations_is_imported() -> bool:
+    def f(x: int): ...
+
+    return f.__annotations__["x"] == "int"
