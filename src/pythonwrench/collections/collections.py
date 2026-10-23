@@ -737,7 +737,9 @@ def shuffled(
         return x
 
 
-def unflat_dict_of_dict(dic: Mapping[str, Any], *, sep: str = ".") -> Dict[str, Any]:
+def unflat_dict_of_dict(
+    dic: Mapping[str, Any], *, sep: str = ".", overwrite: bool = True
+) -> Dict[str, Any]:
     """Unflat a dictionary.
 
     Example 1
@@ -753,18 +755,22 @@ def unflat_dict_of_dict(dic: Mapping[str, Any], *, sep: str = ".") -> Dict[str, 
     """
     output = {}
     for k, v in dic.items():
-        if sep not in k:
+        if not overwrite and k in output:
+            msg = f"Ambiguous flatten dict with key {k=}. (with value {v})"
+            raise ValueError(msg)
+        elif sep not in k:
             output[k] = v
-        else:
-            idx = k.index(sep)
-            k, kk = k[:idx], k[idx + 1 :]
-            if k not in output:
-                output[k] = {}
-            elif not isinstance(output[k], Mapping):
-                msg = f"Invalid dict argument. (found keys {k} and {k}{sep}{kk})"
-                raise ValueError(msg)
+            continue
 
-            output[k][kk] = v
+        idx = k.index(sep)
+        k, kk = k[:idx], k[idx + 1 :]
+        if k not in output:
+            output[k] = {}
+        elif not isinstance(output[k], Mapping):
+            msg = f"Invalid dict argument. (found keys {k} and {k}{sep}{kk})"
+            raise ValueError(msg)
+
+        output[k][kk] = v
 
     output = {
         k: (unflat_dict_of_dict(v) if isinstance(v, Mapping) else v)

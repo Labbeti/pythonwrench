@@ -119,6 +119,15 @@ class TestFlatDict(TestCase):
         y_hat = unflat_dict_of_dict(x)
         assert y_hat == y
 
+    def test_unflat_dict_example_2(self) -> None:
+        x = {
+            "a.a": 1,
+            "a.b": 2,
+            "a": 3,
+        }
+        y_hat = unflat_dict_of_dict(x)
+        assert y_hat == {}
+
 
 class TestListDictToDictList(TestCase):
     def test_example_1(self) -> None:
