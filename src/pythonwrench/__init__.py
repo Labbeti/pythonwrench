@@ -163,6 +163,8 @@ if TYPE_CHECKING or lazy is None:
         PatternLike,
         PatternListLike,
         compile_patterns,
+        filter_dict_with_patterns,
+        filter_iter_with_patterns,
         filter_with_patterns,
         find_patterns,
         get_key_fn,
@@ -245,6 +247,7 @@ if TYPE_CHECKING or lazy is None:
         is_special_form,
         is_typed_dict,
         isinstance_generic,
+        isinstance_parametrized,
     )
     from .warnings import deprecated_alias, deprecated_function, warn_once
 
@@ -426,6 +429,8 @@ else:
                 "PatternListLike",
                 "compile_patterns",
                 "filter_with_patterns",
+                "filter_iter_with_patterns",
+                "filter_dict_with_patterns",
                 "find_patterns",
                 "get_key_fn",
                 "match_patterns",
@@ -481,6 +486,7 @@ else:
                 "is_special_form",
                 "is_typed_dict",
                 "isinstance_generic",
+                "isinstance_parametrized",
             ],
             "warnings": ["deprecated_alias", "deprecated_function", "warn_once"],
         },

@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 ## [0.6.8] UNRELEASED
 ### Added
 - `remove_children` function to remove all content of a directory.
+- `filter_dict_with_patterns` function.
+
+### Modified
+- `Version` is now converted to str by default in `as_builtin`.
+- `isinstance_generic` now raises explicit exception when forwarded ref is given.
+
 
 ## [0.6.7] 2026-09-07
 ### Added

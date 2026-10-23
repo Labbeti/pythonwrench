@@ -277,7 +277,6 @@ class Version:
             version_str = f"{version_str}-{self.prerelease}"
         if self.buildmetadata is not None:
             version_str = f"{version_str}+{self.buildmetadata}"
-
         return version_str
 
     def to_tuple(
@@ -285,7 +284,8 @@ class Version:
         exclude_none: bool = True,
     ) -> VersionTuple:
         """Convert the value to tuple."""
-        version_tuple = tuple(self.to_dict(exclude_none).values())
+        version_dict = self.to_dict(exclude_none)
+        version_tuple = tuple(version_dict.values())
         return version_tuple  # type: ignore
 
     def equals(self, other: VersionLike, *, ignore_buildmetadata: bool = False) -> bool:

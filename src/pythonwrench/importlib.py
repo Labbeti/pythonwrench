@@ -230,7 +230,7 @@ class Placeholder:
 
 class ModulePlaceholder(ModuleType, Placeholder):
     def __init__(self, *args, **kwargs) -> None:
-        """Initialize the instance."""
+        """Initialize a module object placeholder."""
         Placeholder.__init__(self, *args, **kwargs)
         ModuleType.__init__(self, *args, **kwargs)
 

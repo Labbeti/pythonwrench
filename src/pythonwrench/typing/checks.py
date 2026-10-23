@@ -13,6 +13,7 @@ from typing import (
     Any,
     Callable,
     Dict,
+    ForwardRef,
     Generator,
     Iterable,
     Literal,
@@ -36,6 +37,7 @@ from typing_extensions import (
     get_origin,
 )
 
+from pythonwrench._core import function_alias
 from pythonwrench.typing.classes import (
     BuiltinCollection,
     BuiltinNumber,
@@ -106,6 +108,7 @@ def isinstance_generic(
     class_or_tuple: Union[Type[T], None, Tuple[Type[T], ...], Any],
     *,
     check_only_first: bool = False,
+    accept_generator: bool = False,
 ) -> TypeIs[T]:
     """Improved isinstance(...) function that supports parametrized Union, TypedDict, Literal, Mapping or Iterable.
 
@@ -127,7 +130,18 @@ def isinstance_generic(
     ... True
 
     """
-    if class_or_tuple is Any or class_or_tuple is typing_extensions.Any:
+    if isinstance(class_or_tuple, (str, ForwardRef)) or (
+        isinstance(class_or_tuple, tuple)
+        and any(isinstance(cls_i, (str, ForwardRef)) for cls_i in class_or_tuple)
+    ):
+        msg = (
+            f"Function `isinstance_generic` does not support forwarded references annotations. "
+            f"Remove `from __future__ import annotations` from the script that call the function. "
+            f"(with {class_or_tuple=})"
+        )
+        raise NotImplementedError(msg)
+
+    if _isany(class_or_tuple):
         return True
     if class_or_tuple is None:
         return obj is None
@@ -151,35 +165,7 @@ def isinstance_generic(
     args = get_args(class_or_tuple)
 
     if _is_callable_type(origin):
-        if not callable(obj):
-            return False
-        if len(args) == 0:
-            return True
-        elif len(args) != 2:
-            msg = f"Invalid number of parameters in Callable. (found {len(args)} but expected 0 or 2)"
-            raise RuntimeError(msg)
-
-        sign = inspect.signature(obj)
-        type_params_annots, type_return_annot = args
-        obj_return_annot = sign.return_annotation
-
-        if obj_return_annot != type_return_annot:
-            return False
-
-        obj_params_annots = [param.annotation for param in sign.parameters.values()]
-        if type_params_annots is ...:
-            return True
-
-        if len(obj_params_annots) != len(type_params_annots):
-            return False
-
-        for obj_param_annot, type_param_annot in zip(
-            obj_params_annots, type_params_annots
-        ):
-            if obj_param_annot != type_param_annot:
-                return False
-
-        return True
+        return _isinstance_generic_callable(obj, class_or_tuple)
 
     if len(args) == 0:
         return isinstance_generic(obj, origin)
@@ -190,21 +176,38 @@ def isinstance_generic(
     if origin is Literal:
         return obj in args
 
-    if isinstance(obj, Generator):
-        msg = f"Invalid argument type {type(obj)}. (cannot check elements in generator)"
-        raise TypeError(msg)
+    if not accept_generator:
+        if isinstance(obj, Generator):
+            msg = f"Invalid argument type {type(obj)}. (cannot check elements in generator)"
+            raise TypeError(msg)
+        if issubclass(origin, Generator):
+            msg = f"Invalid argument type {origin}. (cannot check generator type)"
+            raise TypeError(msg)
 
-    if issubclass(origin, Generator):
-        msg = f"Invalid argument type {origin}. (cannot check generator type)"
-        raise TypeError(msg)
+    elif issubclass(origin, Generator):
+        if not isinstance(obj, Generator):
+            msg = f"Invalid argument type {type(obj)}. (expected Generator)"
+            raise TypeError(msg)
+
+        assert len(args) == 3, f"{args=}"
+        item_type, yield_type, return_type = args
+        if yield_type is not None:
+            msg = f"Unsupported parametrized Generator {yield_type=}. (expected None)"
+            raise NotImplementedError(msg)
+        if return_type is not None:
+            msg = f"Unsupported parametrized Generator {return_type=}. (expected None)"
+            raise NotImplementedError(msg)
+
+        return all(isinstance_generic(xi, item_type) for xi in obj)
 
     if issubclass(origin, Mapping):
         assert len(args) == 2, f"{args=}"
         if not isinstance_generic(obj, origin):
             return False
 
-        return all(isinstance_generic(k, args[0]) for k in obj.keys()) and all(
-            isinstance_generic(v, args[1]) for v in obj.values()
+        return all(
+            isinstance_generic(k, args[0]) and isinstance_generic(v, args[1])
+            for k, v in obj.items()
         )
 
     if issubclass(origin, Tuple):
@@ -233,13 +236,17 @@ def isinstance_generic(
         else:
             return all(isinstance_generic(xi, args[0]) for xi in obj)
 
-    msg = f"Unsupported type {class_or_tuple}. (expected unparametrized type or parametrized Union, TypedDict, Literal, Mapping or Iterable)"
+    msg = f"Unsupported type {class_or_tuple}. (expected unparametrized type or parametrized Union, TypedDict, Generator, Literal, Mapping or Iterable)"
     raise NotImplementedError(msg)
 
 
-def _isinstance_generic_typed_dict(x: Any, target_type: type) -> bool:
+@function_alias(isinstance_generic)
+def isinstance_parametrized(*args, **kwargs): ...
+
+
+def _isinstance_generic_typed_dict(obj: Any, target_type: type) -> bool:
     """Perform the isinstance generic typed dict operation."""
-    if not isinstance_generic(x, Dict[str, Any]):
+    if not isinstance_generic(obj, Dict[str, Any]):
         return False
 
     total: bool = target_type.__total__
@@ -258,13 +265,13 @@ def _isinstance_generic_typed_dict(x: Any, target_type: type) -> bool:
         else:
             optional_annotations[k] = v
 
-    if not set(required_annotations.keys()).issubset(x.keys()):
+    if not set(required_annotations.keys()).issubset(obj.keys()):
         return False
 
     annotations_set = set(required_annotations.keys()) | set(
         optional_annotations.keys()
     )
-    if not annotations_set.issuperset(x.keys()):
+    if not annotations_set.issuperset(obj.keys()):
         return False
 
     for k, v in required_annotations.items():
@@ -272,19 +279,78 @@ def _isinstance_generic_typed_dict(x: Any, target_type: type) -> bool:
         if origin is Required:
             v = get_args(v)[0]
 
-        if not isinstance_generic(x[k], v):
+        if not isinstance_generic(obj[k], v):
             return False
 
     for k, v in optional_annotations.items():
-        if k not in x:
+        if k not in obj:
             continue
         origin = get_origin(v)
         if origin is NotRequired:
             v = get_args(v)[0]
-        if not isinstance_generic(x[k], v):
+        if not isinstance_generic(obj[k], v):
             return False
 
     return True
+
+
+def _isinstance_generic_callable(obj: Any, target_type: type) -> bool:
+    if not callable(obj):
+        return False
+
+    args = get_args(target_type)
+
+    if len(args) == 0:
+        return True
+    elif len(args) != 2:
+        msg = f"Invalid number of parameters in Callable. (found {len(args)} but expected 0 or 2)"
+        raise RuntimeError(msg)
+
+    sign = inspect.signature(obj)
+    obj_return_annot = sign.return_annotation
+    type_params_annots, type_return_annot = args
+
+    if not _annotations_are_equivalent(obj_return_annot, type_return_annot):
+        return False
+    if type_params_annots is ...:
+        return True
+
+    obj_params_annots = [param.annotation for param in sign.parameters.values()]
+
+    if len(obj_params_annots) != len(type_params_annots):
+        return False
+
+    return all(
+        _annotations_are_equivalent(obj_param_annot, type_param_annot)
+        for obj_param_annot, type_param_annot in zip(
+            obj_params_annots, type_params_annots
+        )
+    )
+
+
+def _annotations_are_equivalent(x: Any, y: Any) -> bool:
+    """Check if annotation are equivalent for future annotations mode.
+
+    E.g.: int == "int" == ForwardRef("int")
+    """
+    if x == y:
+        return True
+
+    if isinstance(x, str):
+        pass
+    elif hasattr(x, "__forward_arg__"):
+        x = x.__forward_arg__
+    else:
+        x = x.__name__
+
+    if isinstance(y, str):
+        pass
+    elif hasattr(y, "__forward_arg__"):
+        y = y.__forward_arg__
+    else:
+        y = y.__name__
+
+    return x == y
 
 
 def is_builtin_collection(x: Any, *, strict: bool = False) -> TypeIs[BuiltinCollection]:
@@ -350,9 +416,7 @@ def is_iterable_bool(
     accept_generator: bool = True,
 ) -> TypeIs[Iterable[bool]]:
     """Return whether iterable bool."""
-    if not accept_generator and isinstance(x, Generator):
-        return False
-    return isinstance_generic(x, Iterable[bool])
+    return isinstance_generic(x, Iterable[bool], accept_generator=accept_generator)
 
 
 def is_iterable_bytes_or_list(
@@ -361,9 +425,9 @@ def is_iterable_bytes_or_list(
     accept_generator: bool = True,
 ) -> TypeIs[Iterable[Union[bytes, list]]]:
     """Return whether iterable bytes or list."""
-    if not accept_generator and isinstance(x, Generator):
-        return False
-    return isinstance_generic(x, Iterable[Union[bytes, list]])
+    return isinstance_generic(
+        x, Iterable[Union[bytes, list]], accept_generator=accept_generator
+    )
 
 
 def is_iterable_float(
@@ -372,9 +436,7 @@ def is_iterable_float(
     accept_generator: bool = True,
 ) -> TypeIs[Iterable[float]]:
     """Return whether iterable float."""
-    if not accept_generator and isinstance(x, Generator):
-        return False
-    return isinstance_generic(x, Iterable[float])
+    return isinstance_generic(x, Iterable[float], accept_generator=accept_generator)
 
 
 def is_iterable_int(
@@ -386,8 +448,9 @@ def is_iterable_int(
     """Return whether iterable int."""
     if not accept_generator and isinstance(x, Generator):
         return False
-    return isinstance_generic(x, Iterable[int]) and (
-        accept_bool or not isinstance_generic(x, Iterable[bool])
+    # note: not using isinstance_generic to support by iterating only once on generator
+    return isinstance(x, Iterable) and all(
+        isinstance(xi, int) and (accept_bool or not isinstance(xi, bool)) for xi in x
     )
 
 
@@ -397,9 +460,7 @@ def is_iterable_integral(
     accept_generator: bool = True,
 ) -> TypeIs[Iterable[Integral]]:
     """Return whether iterable integral."""
-    if not accept_generator and isinstance(x, Generator):
-        return False
-    return isinstance_generic(x, Iterable[Integral])
+    return isinstance_generic(x, Iterable[Integral], accept_generator=accept_generator)
 
 
 def is_iterable_str(
@@ -411,9 +472,7 @@ def is_iterable_str(
     """Return whether iterable str."""
     if isinstance(x, str):
         return accept_str
-    if isinstance(x, Generator):
-        return accept_generator and all(isinstance(xi, str) for xi in x)
-    return isinstance_generic(x, Iterable[str])
+    return isinstance_generic(x, Iterable[str], accept_generator=accept_generator)
 
 
 def is_namedtuple_instance(x: Any) -> TypeIs[NamedTupleInstance]:
@@ -427,11 +486,9 @@ def is_sequence_str(
     accept_str: bool = True,
 ) -> TypeGuard[Sequence[str]]:
     """Return whether sequence str."""
-    return (accept_str and isinstance(x, str)) or (
-        not isinstance(x, str)
-        and isinstance(x, Sequence)
-        and all(isinstance(xi, str) for xi in x)
-    )
+    if isinstance(x, str):
+        return accept_str
+    return isinstance_generic(x, Sequence[str])
 
 
 def is_typed_dict(x: Any) -> TypeGuard[type]:
@@ -549,3 +606,13 @@ def _safe_isin(x: Any, targets: Iterable) -> bool:
 def _is_callable_type(x: Any) -> bool:
     """Perform the is callable type operation."""
     return x in (Callable, _RuntimeCallable)
+
+
+def _isany(x: Any) -> bool:
+    return x is object or x is Any or x is typing_extensions.Any
+
+
+def _future_annotations_is_imported() -> bool:
+    def f(x: int): ...
+
+    return inspect.signature(f).parameters["x"].annotation == "int"
