@@ -8,7 +8,6 @@ from typing import (
     Callable,
     Generic,
     Iterable,
-    Optional,
     Tuple,
     TypeVar,
     overload,
@@ -16,9 +15,14 @@ from typing import (
 
 from typing_extensions import ParamSpec
 
-from pythonwrench._core import T_Function, _decorator_factory, return_none  # noqa: F401
+from pythonwrench._core import (  # noqa: F401
+    T_Function,
+    _decorator_factory,
+    function_alias,
+    return_none,
+)
 from pythonwrench.inspect import get_argnames, get_fullname
-from pythonwrench.typing import isinstance_generic
+from pythonwrench.typing.checks import isinstance_generic
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -178,31 +182,6 @@ def filter_and_call(
     }
     result = fn(*posonly_args.values(), **other_kwds)
     return result
-
-
-def function_alias(
-    alternative: T_Function,
-    *,
-    pre_fn: Optional[Callable[..., Any]] = None,
-    post_fn: Optional[Callable[..., Any]] = None,
-) -> Callable[..., T_Function]:
-    """Decorator to wrap function aliases.
-
-    Unlike setting directly an alias, this preserve the nature of the alias for language server.
-
-    Example
-    -------
-    >>> def f(a: int, b: str) -> str:
-    >>>    return a * b
-    >>> @function_alias(f)
-    >>> def g(*args, **kwargs): ...
-    >>> f(2, "a")
-    ... "aa"
-    >>> g(3, "b")  # calls function f() internally.
-    ... "bbb"
-
-    """
-    return _decorator_factory(alternative, pre_fn=pre_fn, post_fn=post_fn)
 
 
 def identity(x: T, **kwargs) -> T:

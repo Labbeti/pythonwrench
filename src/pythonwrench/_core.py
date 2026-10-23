@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from functools import wraps
+import warnings
+from functools import lru_cache, partial, wraps
 from typing import (
     Any,
     Callable,
@@ -11,8 +12,10 @@ from typing import (
     Optional,
     Protocol,
     Tuple,
+    Type,
     Union,
     get_args,
+    overload,
     runtime_checkable,
 )
 
@@ -21,6 +24,7 @@ from typing_extensions import ParamSpec, TypeVar
 P = ParamSpec("P")
 T = TypeVar("T", covariant=True)
 U = TypeVar("U", covariant=True)
+
 T_Output = TypeVar("T_Output", default=Any)
 T_PredicateArg = TypeVar("T_PredicateArg", contravariant=True, default=Any)
 T_Function = TypeVar("T_Function", bound=Callable[..., Any])
@@ -39,6 +43,31 @@ class Predicate(Protocol[T_PredicateArg]):
 def return_none(*args, **kwargs) -> None:
     """Return None function placeholder."""
     return None
+
+
+def function_alias(
+    alternative: T_Function,
+    *,
+    pre_fn: Optional[Callable[..., Any]] = None,
+    post_fn: Optional[Callable[..., Any]] = None,
+) -> Callable[..., T_Function]:
+    """Decorator to wrap function aliases.
+
+    Unlike setting directly an alias, this preserve the nature of the alias for language server.
+
+    Example
+    -------
+    >>> def f(a: int, b: str) -> str:
+    >>>    return a * b
+    >>> @function_alias(f)
+    >>> def g(*args, **kwargs): ...
+    >>> f(2, "a")
+    ... "aa"
+    >>> g(3, "b")  # calls function f() internally.
+    ... "bbb"
+
+    """
+    return _decorator_factory(alternative, pre_fn=pre_fn, post_fn=post_fn)
 
 
 def _decorator_factory(
@@ -190,3 +219,108 @@ def _get_insertion_index(lst: list, priority: int, priority_key: int) -> int:
         if priority >= other_priority:
             return i
     return len(lst)
+
+
+@overload
+def warn_once(
+    message: str,
+    category: Optional[Type[Warning]] = None,
+    stacklevel: int = 1,
+    source: Any = None,
+) -> None:
+    """Warn message once using warnings module."""
+    ...
+
+
+@overload
+def warn_once(
+    message: Warning,
+    category: Any = None,
+    stacklevel: int = 1,
+    source: Any = None,
+) -> None:
+    """Warn message once using warnings module."""
+    ...
+
+
+@lru_cache(maxsize=None)
+def warn_once(
+    message: Union[str, Warning],
+    category: Optional[Type[Warning]] = None,
+    stacklevel: int = 1,
+    source: Any = None,
+) -> None:
+    """Warn message once using warnings module."""
+    warnings.warn(message, category, stacklevel, source)
+
+
+def deprecated_alias(
+    alternative: T_Function,
+    msg_fmt: str = "Deprecated call to '{fn_name}', use '{alternative_name}' instead.",
+    warn_fn: Callable[[str], Any] = partial(warn_once, category=DeprecationWarning),
+    *,
+    pre_fn: Optional[Callable[..., Any]] = None,
+    post_fn: Optional[Callable[..., Any]] = None,
+) -> Callable[..., T_Function]:
+    """Decorator to wrap deprecated function aliases."""
+    alternative_name = alternative.__name__ if alternative is not None else "None"
+    if pre_fn is None:
+        pre_fn = return_none
+
+    def inner_pre_fn(fn, *args, **kwargs) -> None:
+        """Perform the inner pre fn operation."""
+        msg = msg_fmt.format(fn_name=fn.__name__, alternative_name=alternative_name)
+        warn_fn(msg)
+        pre_fn(fn, *args, **kwargs)
+
+    return _decorator_factory(alternative, pre_fn=inner_pre_fn, post_fn=post_fn)
+
+
+@overload
+def deprecated_function(
+    fn: None = None,
+    /,
+    *,
+    msg_fmt: str = "Deprecated call to '{fn_name}'.",
+    warn_fn: Callable[[str], Any] = partial(warn_once, category=DeprecationWarning),
+) -> Callable[[T_Function], T_Function]:
+    """Perform the deprecated function operation."""
+    ...
+
+
+@overload
+def deprecated_function(
+    fn: T_Function,
+    /,
+    *,
+    msg_fmt: str = "Deprecated call to '{fn_name}'.",
+    warn_fn: Callable[[str], Any] = partial(warn_once, category=DeprecationWarning),
+) -> T_Function:
+    """Perform the deprecated function operation."""
+    ...
+
+
+def deprecated_function(
+    fn: Optional[T_Function] = None,
+    /,
+    *,
+    msg_fmt: str = "Deprecated call to '{fn_name}'.",
+    warn_fn: Callable[[str], Any] = partial(warn_once, category=DeprecationWarning),
+    pre_fn: Optional[Callable[..., Any]] = None,
+    post_fn: Optional[Callable[..., Any]] = None,
+) -> Union[Callable[[T_Function], T_Function], T_Function]:
+    """Decorator to wrap deprecated functions."""
+    if pre_fn is None:
+        pre_fn = return_none
+
+    def inner_pre_fn(fn, *args, **kwargs):
+        """Perform the inner pre fn operation."""
+        msg = msg_fmt.format(fn_name=fn.__qualname__)
+        warn_fn(msg)
+        pre_fn(fn, *args, **kwargs)
+
+    decorator = _decorator_factory(None, pre_fn=inner_pre_fn, post_fn=post_fn)
+    if fn is None:
+        return decorator
+    else:
+        return decorator(fn)

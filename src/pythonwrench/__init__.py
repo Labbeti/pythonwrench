@@ -247,6 +247,7 @@ if TYPE_CHECKING or lazy is None:
         is_special_form,
         is_typed_dict,
         isinstance_generic,
+        isinstance_parametrized,
     )
     from .warnings import deprecated_alias, deprecated_function, warn_once
 
@@ -485,6 +486,7 @@ else:
                 "is_special_form",
                 "is_typed_dict",
                 "isinstance_generic",
+                "isinstance_parametrized",
             ],
             "warnings": ["deprecated_alias", "deprecated_function", "warn_once"],
         },
