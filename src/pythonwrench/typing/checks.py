@@ -134,7 +134,11 @@ def isinstance_generic(
         isinstance(class_or_tuple, tuple)
         and any(isinstance(cls_i, (str, ForwardRef)) for cls_i in class_or_tuple)
     ):
-        msg = f"Function `isinstance_generic` does not support future annotations. (found {class_or_tuple})"
+        msg = (
+            f"Function `isinstance_generic` does not support forwarded references annotations. "
+            f"Remove `from __future__ import annotations` from the script that call the function. "
+            f"(with {class_or_tuple=})"
+        )
         raise NotImplementedError(msg)
 
     if _isany(class_or_tuple):

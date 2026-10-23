@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 
 ### Modified
 - `Version` is now converted to str by default in `as_builtin`.
+- `isinstance_generic` now raises explicit exception when forwarded ref is given.
 
 
 ## [0.6.7] 2026-09-07
