@@ -170,8 +170,8 @@ def parse_args_using_dataclass(
 
 
 def parse_args_using_dataclass(
-    dataclass_type: Type[DataclassInstance],
-    *dataclass_types: Type[DataclassInstance],
+    dataclass_type: Dataclass,
+    *dataclass_types: Dataclass,
     args: Optional[Iterable[str]] = None,
     parser: Optional[ArgumentParser] = None,
     list_parsing: ListParsing = "argparse",
@@ -211,7 +211,11 @@ def parse_args_using_dataclass(
     if return_single_namespace:
         return parsed
 
-    dataclass_insts = _instantiate_dataclasses(dataclass_types, init_parser, parsed)
+    accept_more_args = (init_parser is not None) or (len(dataclass_types) != 1)
+    # breakpoint()  # TODO
+    dataclass_insts = _instantiate_dataclasses(
+        dataclass_types, parsed, accept_more_args=accept_more_args
+    )
 
     if len(dataclass_insts) == 1:
         return dataclass_insts[0]
@@ -220,44 +224,61 @@ def parse_args_using_dataclass(
 
 
 def _instantiate_dataclasses(
-    dataclass_types: Tuple[Type[DataclassInstance], ...],
-    init_parser: Optional[ArgumentParser],
-    parsed: Namespace,
+    dcls_types: Tuple[Dataclass, ...],
+    parsed: Union[Namespace, Dict[str, Any]],
+    accept_more_args: bool,
 ) -> List[DataclassInstance]:
-    parsed_dict = parsed.__dict__
-    sub_kwds = {k: v for k, v in parsed_dict.items() if "." in k}
-    flat_sub_kwds = unflat_dict_of_dict(sub_kwds)
-    choices_kwds = {k: v for k, v in parsed_dict.items() if k in flat_sub_kwds}
+    if isinstance(parsed, Namespace):
+        parsed = parsed.__dict__
+    sub_kwds = {k: v for k, v in parsed.items() if "." in k}
+    unflat_sub_kwds = unflat_dict_of_dict(sub_kwds, overwrite=False)
+    choices_kwds = {k: v for k, v in parsed.items() if k in unflat_sub_kwds}
     base_kwds = {
-        k: v
-        for k, v in parsed_dict.items()
-        if k not in sub_kwds and k not in choices_kwds
+        k: v for k, v in parsed.items() if k not in sub_kwds and k not in choices_kwds
     }
+    assert set(unflat_sub_kwds) == set(choices_kwds)
 
-    dataclass_insts = []
+    dcls_insts = []
 
-    for dclass_type_i in dataclass_types:
-        # sub_dclasses = {field.name: field.type for field in fields(dclass_type_i) if _is_union_of_dataclasses(field.type)}
+    for dcls_type_i in dcls_types:
+        sub_dclasses = {
+            field.name: field.type
+            for field in fields(dcls_type_i)
+            if is_dataclass_type(field.type) or _is_union_of_dataclasses(field.type)
+        }
 
         kwds_i = copy.copy(base_kwds)
-        # for name, dclass in sub_dclasses.items():
-        #     if
-        # ...
+        for name, dcls_union in sub_dclasses.items():
+            if _is_union_type(dcls_union):
+                dclasses = get_args(dcls_union)
+                dclasses_names = {dcls.__name__: dcls for dcls in dclasses}
+                dclass_type = dclasses_names[choices_kwds[name]]
+            else:
+                dclass_type = dcls_union
 
-        if init_parser is None and len(dataclass_types) == 1:
             try:
-                instance = dclass_type_i(**kwds_i)
-            except TypeError:
+                dclass = _instantiate_dataclasses(
+                    (dclass_type,),  # type: ignore
+                    parsed=unflat_sub_kwds[name],
+                    accept_more_args=True,
+                )[0]
+            except KeyError:
+                # breakpoint()  # TODO
                 raise
-        else:
+            kwds_i[name] = dclass
+
+        if accept_more_args:
             instance = filter_and_call(
-                dclass_type_i,
+                dcls_type_i,
                 _fill_all_arguments=True,
                 **kwds_i,
             )
+        else:
+            instance = dcls_type_i(**kwds_i)
 
-        dataclass_insts.append(instance)
-    return dataclass_insts
+        dcls_insts.append(instance)
+
+    return dcls_insts
 
 
 def add_dataclass_fields_to_parser(
@@ -297,11 +318,17 @@ def add_dataclass_fields_to_parser(
         elif field.default_factory is not MISSING:
             kwds["default"] = field.default_factory()  # type: ignore
         else:
-            msg = f"Invalid field {field.name}: found values for default and default_factory."
+            msg = f"Invalid field '{field.name}': found values for default and default_factory."
             raise ValueError(msg)
 
-        if _is_union_of_dataclasses(field.type):
+        if is_dataclass_type(field.type):
+            subclasses = (field.type,)
+        elif _is_union_of_dataclasses(field.type):
             subclasses = get_args(field.type)
+        else:
+            subclasses = None
+
+        if subclasses is not None:
             subparsers = parser.add_subparsers(
                 dest=field.name,
                 required=kwds.get("required", False),
@@ -322,12 +349,16 @@ def add_dataclass_fields_to_parser(
             try:
                 inner_kwds = _get_kwds_for_type(field.type, list_parsing, bool_action)
             except (ValueError, TypeError, RuntimeError) as err:
-                msg = f"Invalid field {field.name}: field type '{field.type}' is not supported."
+                msg = f"Invalid field '{field.name}': field type '{field.type}' is not supported."
                 raise type(err)(msg) from err
 
             kwds.update(inner_kwds)
+
+            posargs = [arg.split(".")[-1] for arg in posargs]
             parser.add_argument(*posargs, **kwds)
 
+    # TODO
+    # breakpoint()
     return parser
 
 

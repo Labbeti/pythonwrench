@@ -10,6 +10,7 @@ from typing import Iterable, List, Literal, Optional, Tuple, Union
 from unittest import TestCase
 
 from pythonwrench.argparse import (
+    add_dataclass_fields_to_parser,
     get_parse_fn,
     parse_args_using_dataclass,
     parse_to_bool,
@@ -343,7 +344,7 @@ class TestDataclassParser(TestCase):
         )
         assert cfg == Cfg([None])
 
-    def test_subparsers(self) -> None:
+    def test_subparsers_example_1(self) -> None:
         @dataclass
         class A:
             a: int = 0
@@ -355,10 +356,36 @@ class TestDataclassParser(TestCase):
         @dataclass
         class Cfg:
             subcfg: Union[A, B]
+            c: float = 1.2
+
+        target = Cfg(A())
+        parser = add_dataclass_fields_to_parser(Cfg, parser=None)
+        args = parser.parse_args(["A"])
+        assert args == Namespace(subcfg="A", c=1.2, **{"subcfg.a": 0})
 
         cfg = parse_args_using_dataclass(Cfg, args=["A"])
-        assert isinstance(cfg.subcfg, A)
-        assert cfg.subcfg.a == 1
+        assert cfg == target, f"{cfg=}; {target=}"
+
+    def test_subparsers_example_2(self) -> None:
+        @dataclass(frozen=True)
+        class A:
+            n: int = 0
+
+        @dataclass
+        class B:
+            a: A = A(n=1)
+
+        target = B()
+        cfg = parse_args_using_dataclass(B, args=[])
+        assert cfg == target, f"{cfg=}; {target=}"
+
+        target = B(A())
+        cfg = parse_args_using_dataclass(B, args=["A"])
+        assert cfg == target, f"{cfg=}; {target=}"
+
+        target = B(A(n=2))
+        cfg = parse_args_using_dataclass(B, args=["A", "--n", "2"])
+        assert cfg == target, f"{cfg=}; {target=}"
 
 
 if __name__ == "__main__":

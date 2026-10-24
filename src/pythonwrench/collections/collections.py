@@ -768,7 +768,11 @@ def unflat_dict_of_dict(
         k, kk = k[:idx], k[idx + 1 :]
         if k not in output:
             output[k] = {}
-        elif not isinstance(output[k], Mapping):
+        elif isinstance(output[k], Mapping):
+            pass
+        elif overwrite:
+            output[k] = {}
+        else:
             msg = f"Invalid dict argument. (found keys {k} and {k}{sep}{kk})"
             raise ValueError(msg)
 
