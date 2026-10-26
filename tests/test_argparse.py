@@ -394,6 +394,29 @@ class TestDataclassParser(TestCase):
         cfg = parse_args_using_dataclass(D, args=["C", "--a.n", "2"])
         assert cfg == target, f"{cfg=}; {target=}"
 
+    def test_nested_subparsers(self) -> None:
+        @dataclass
+        class A:
+            value: int = 1
+
+        @dataclass
+        class B:
+            value: int = 2
+
+        @dataclass
+        class Nested:
+            command: Union[A, B]
+
+        @dataclass
+        class Cfg:
+            nested: Nested
+
+        cfg = parse_args_using_dataclass(
+            Cfg,
+            args=["Nested", "A", "--nested.command.value", "3"],
+        )
+        assert cfg == Cfg(Nested(A(3)))
+
 
 if __name__ == "__main__":
     unittest.main()

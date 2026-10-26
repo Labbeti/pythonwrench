@@ -26,7 +26,6 @@ from pythonwrench.argparse.parsers import (
     _is_union_type,
     _search_parse_fn,
 )
-from pythonwrench.collections import unflat_dict_of_dict
 from pythonwrench.functools import filter_and_call
 from pythonwrench.typing.checks import is_dataclass_type
 from pythonwrench.typing.classes import (
@@ -233,19 +232,15 @@ def _instantiate_dataclasses(
     if isinstance(parsed, Namespace):
         parsed = parsed.__dict__
 
-    all_choices = {
+    subparser_fields = {
         field.name
         for dcls_type in dcls_types
         for field in fields(dcls_type)
         if _is_dataclass_or_union_of_dataclasses(field.type)
     }
-    sub_kwds = {k: v for k, v in parsed.items() if "." in k}
-    unflat_sub_kwds = unflat_dict_of_dict(sub_kwds, overwrite=False)
-    choices_kwds = {k: v for k, v in parsed.items() if k in all_choices}
     base_kwds = {
-        k: v for k, v in parsed.items() if k not in sub_kwds and k not in choices_kwds
+        k: v for k, v in parsed.items() if "." not in k and k not in subparser_fields
     }
-    assert set(unflat_sub_kwds).issubset(choices_kwds)
 
     dcls_insts = []
 
@@ -258,22 +253,34 @@ def _instantiate_dataclasses(
 
         kwds_i = copy.copy(base_kwds)
         for name, dcls_union in sub_dclasses.items():
+            selected = parsed.get(name)
+            if selected is None:
+                # note: an optional subparser that was not selected is None,
+                # it must not replace the dataclass field's default/default_factory.
+                continue
+
             if _is_union_type(dcls_union):
                 dclasses = get_args(dcls_union)
                 dclasses_names = {dcls.__name__: dcls for dcls in dclasses}
-                dclass_type = dclasses_names[choices_kwds[name]]
+                try:
+                    dclass_type = dclasses_names[selected]
+                except KeyError as err:
+                    msg = f"Invalid subparser {selected!r} for field {name!r}."
+                    raise ValueError(msg) from err
             else:
                 dclass_type = dcls_union
 
-            try:
-                dclass_inst = _instantiate_dataclasses(
-                    (dclass_type,),  # type: ignore
-                    parsed=unflat_sub_kwds[name],
-                    accept_more_args=True,
-                )[0]
-            except KeyError as err:
-                print(f"DEBUG: {name=}, {parsed=}")
-                raise ValueError(f"{parsed=}") from err
+            field_prefix = f"{name}."
+            field_kwds = {
+                key[len(field_prefix) :]: value
+                for key, value in parsed.items()
+                if key.startswith(field_prefix)
+            }
+            dclass_inst = _instantiate_dataclasses(
+                (dclass_type,),  # type: ignore
+                parsed=field_kwds,
+                accept_more_args=True,
+            )[0]
             kwds_i[name] = dclass_inst
 
         if accept_more_args:
@@ -309,8 +316,6 @@ def add_dataclass_fields_to_parser(
     if parser is None:
         parser = ArgumentParser()
 
-    print(f"DEBUG: {dataclass_type=}")  # TODO
-
     for field in fields(dataclass_type):
         kwds = {}
         posargs = [f"{prefix}{field.name}"]
@@ -341,13 +346,12 @@ def add_dataclass_fields_to_parser(
 
         if subclasses is not None:
             subparsers = parser.add_subparsers(
-                dest=field.name,
+                dest=f"{argprefix}{field.name}",
                 required=kwds.get("required", False),
             )
             for subcls in subclasses:
-                print(f"DEBUG: add subparser {field.name=}: {subcls=}")
                 subparser = subparsers.add_parser(subcls.__name__)
-                subparser = add_dataclass_fields_to_parser(
+                add_dataclass_fields_to_parser(
                     subcls,
                     parser=subparser,
                     list_parsing=list_parsing,
@@ -366,12 +370,8 @@ def add_dataclass_fields_to_parser(
 
             kwds.update(inner_kwds)
 
-            # posargs = [re.sub(r"--(.+)\.([^\.]+)", r"--\2", arg) for arg in posargs]
-            print(f"DEBUG: {posargs=}, {kwds=}")
             parser.add_argument(*posargs, **kwds)
 
-    # TODO
-    # breakpoint()
     return parser
 
 
