@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.6.8] UNRELEASED
+## [0.6.8] 2026-10-26
 ### Added
 - `remove_children` function to remove all content of a directory.
 - `filter_dict_with_patterns` function.
