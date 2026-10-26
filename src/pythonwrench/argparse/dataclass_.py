@@ -203,9 +203,9 @@ def parse_args_using_dataclass(
         )
     assert parser is not None
 
-    parsed, argv = parser.parse_known_args(args)
-    if len(argv) > 0:
-        msg = f"Found {len(argv)} unknown arguments: {argv}."
+    parsed, other_args = parser.parse_known_args(args)
+    if len(other_args) > 0:
+        msg = f"Found {len(other_args)} unknown arguments: {other_args}. (with source {args=})"
         raise ValueError(msg)
 
     if return_single_namespace:
@@ -214,7 +214,9 @@ def parse_args_using_dataclass(
     accept_more_args = (init_parser is not None) or (len(dataclass_types) != 1)
     # breakpoint()  # TODO
     dataclass_insts = _instantiate_dataclasses(
-        dataclass_types, parsed, accept_more_args=accept_more_args
+        dataclass_types,
+        parsed,
+        accept_more_args=accept_more_args,
     )
 
     if len(dataclass_insts) == 1:
@@ -230,13 +232,20 @@ def _instantiate_dataclasses(
 ) -> List[DataclassInstance]:
     if isinstance(parsed, Namespace):
         parsed = parsed.__dict__
+
+    all_choices = {
+        field.name
+        for dcls_type in dcls_types
+        for field in fields(dcls_type)
+        if _is_dataclass_or_union_of_dataclasses(field.type)
+    }
     sub_kwds = {k: v for k, v in parsed.items() if "." in k}
     unflat_sub_kwds = unflat_dict_of_dict(sub_kwds, overwrite=False)
-    choices_kwds = {k: v for k, v in parsed.items() if k in unflat_sub_kwds}
+    choices_kwds = {k: v for k, v in parsed.items() if k in all_choices}
     base_kwds = {
         k: v for k, v in parsed.items() if k not in sub_kwds and k not in choices_kwds
     }
-    assert set(unflat_sub_kwds) == set(choices_kwds)
+    assert set(unflat_sub_kwds).issubset(choices_kwds)
 
     dcls_insts = []
 
@@ -244,7 +253,7 @@ def _instantiate_dataclasses(
         sub_dclasses = {
             field.name: field.type
             for field in fields(dcls_type_i)
-            if is_dataclass_type(field.type) or _is_union_of_dataclasses(field.type)
+            if _is_dataclass_or_union_of_dataclasses(field.type)
         }
 
         kwds_i = copy.copy(base_kwds)
@@ -257,15 +266,15 @@ def _instantiate_dataclasses(
                 dclass_type = dcls_union
 
             try:
-                dclass = _instantiate_dataclasses(
+                dclass_inst = _instantiate_dataclasses(
                     (dclass_type,),  # type: ignore
                     parsed=unflat_sub_kwds[name],
                     accept_more_args=True,
                 )[0]
-            except KeyError:
-                # breakpoint()  # TODO
-                raise
-            kwds_i[name] = dclass
+            except KeyError as err:
+                print(f"DEBUG: {name=}, {parsed=}")
+                raise ValueError(f"{parsed=}") from err
+            kwds_i[name] = dclass_inst
 
         if accept_more_args:
             instance = filter_and_call(
@@ -300,6 +309,8 @@ def add_dataclass_fields_to_parser(
     if parser is None:
         parser = ArgumentParser()
 
+    print(f"DEBUG: {dataclass_type=}")  # TODO
+
     for field in fields(dataclass_type):
         kwds = {}
         posargs = [f"{prefix}{field.name}"]
@@ -316,7 +327,7 @@ def add_dataclass_fields_to_parser(
         elif field.default is not MISSING:
             kwds["default"] = field.default
         elif field.default_factory is not MISSING:
-            kwds["default"] = field.default_factory()  # type: ignore
+            kwds["default"] = field.default_factory()
         else:
             msg = f"Invalid field '{field.name}': found values for default and default_factory."
             raise ValueError(msg)
@@ -334,8 +345,9 @@ def add_dataclass_fields_to_parser(
                 required=kwds.get("required", False),
             )
             for subcls in subclasses:
+                print(f"DEBUG: add subparser {field.name=}: {subcls=}")
                 subparser = subparsers.add_parser(subcls.__name__)
-                _ = add_dataclass_fields_to_parser(
+                subparser = add_dataclass_fields_to_parser(
                     subcls,
                     parser=subparser,
                     list_parsing=list_parsing,
@@ -354,7 +366,8 @@ def add_dataclass_fields_to_parser(
 
             kwds.update(inner_kwds)
 
-            posargs = [arg.split(".")[-1] for arg in posargs]
+            # posargs = [re.sub(r"--(.+)\.([^\.]+)", r"--\2", arg) for arg in posargs]
+            print(f"DEBUG: {posargs=}, {kwds=}")
             parser.add_argument(*posargs, **kwds)
 
     # TODO
@@ -399,6 +412,10 @@ def _get_kwds_for_type(
             f"Unsupported type {field_type}. (with {list_parsing=} and {bool_action=})"
         )
         raise TypeError(msg)
+
+
+def _is_dataclass_or_union_of_dataclasses(x: Any) -> bool:
+    return is_dataclass_type(x) or _is_union_of_dataclasses(x)
 
 
 def _is_union_of_dataclasses(x: Any) -> bool:

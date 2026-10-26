@@ -5,6 +5,7 @@ import unittest
 from argparse import ArgumentParser, Namespace
 from dataclasses import asdict, dataclass, field
 from enum import Enum, auto
+from functools import partial
 from pathlib import Path
 from typing import Iterable, List, Literal, Optional, Tuple, Union
 from unittest import TestCase
@@ -361,30 +362,36 @@ class TestDataclassParser(TestCase):
         target = Cfg(A())
         parser = add_dataclass_fields_to_parser(Cfg, parser=None)
         args = parser.parse_args(["A"])
-        assert args == Namespace(subcfg="A", c=1.2, **{"subcfg.a": 0})
+        assert args == Namespace(subcfg="A", c=1.2, **{"subcfg.a": 0}), (
+            f"{args=}, {parser.format_help()=}"
+        )
 
         cfg = parse_args_using_dataclass(Cfg, args=["A"])
         assert cfg == target, f"{cfg=}; {target=}"
 
+        target = Cfg(B(b="b2"))
+        cfg = parse_args_using_dataclass(Cfg, args=["B", "--subcfg.b", "b2"])
+        assert cfg == target, f"{cfg=}; {target=}"
+
     def test_subparsers_example_2(self) -> None:
         @dataclass(frozen=True)
-        class A:
+        class C:
             n: int = 0
 
         @dataclass
-        class B:
-            a: A = A(n=1)
+        class D:
+            a: C = field(default_factory=partial(C, n=1))
 
-        target = B()
-        cfg = parse_args_using_dataclass(B, args=[])
+        target = D()
+        cfg = parse_args_using_dataclass(D, args=[])
         assert cfg == target, f"{cfg=}; {target=}"
 
-        target = B(A())
-        cfg = parse_args_using_dataclass(B, args=["A"])
+        target = D(C())
+        cfg = parse_args_using_dataclass(D, args=["C"])
         assert cfg == target, f"{cfg=}; {target=}"
 
-        target = B(A(n=2))
-        cfg = parse_args_using_dataclass(B, args=["A", "--n", "2"])
+        target = D(C(n=2))
+        cfg = parse_args_using_dataclass(D, args=["C", "--a.n", "2"])
         assert cfg == target, f"{cfg=}; {target=}"
 
 
