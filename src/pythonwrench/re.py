@@ -5,11 +5,26 @@ import logging
 import re
 from functools import partial
 from re import Pattern
-from typing import Any, Callable, Iterable, List, Literal, Optional, TypeVar, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Literal,
+    Mapping,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+    get_args,
+    overload,
+)
 
 from typing_extensions import TypeAlias
 
-from pythonwrench.collections import find
+from pythonwrench.collections.collections import DictByKV, K, V, find
+from pythonwrench.warnings import deprecated_alias
 
 T = TypeVar("T")
 
@@ -23,7 +38,7 @@ MatchLike = Union[MatchFn, MatchName]
 logger = logging.getLogger(__name__)
 
 
-def filter_with_patterns(
+def filter_iter_with_patterns(
     x: Iterable[str],
     include: Optional[PatternListLike] = ".*",
     *,
@@ -41,6 +56,58 @@ def filter_with_patterns(
         for xi in x
         if match_patterns(xi, include, exclude=exclude, match_fn=match_fn)
     ]
+
+
+@deprecated_alias(filter_iter_with_patterns)
+def filter_with_patterns(*args, **kwargs): ...
+
+
+@overload
+def filter_dict_with_patterns(
+    x: Mapping[str, V],
+    include: Optional[PatternListLike] = ".*",
+    *,
+    by: Literal["key"] = "key",
+    exclude: Optional[PatternListLike] = (),
+    match_fn: MatchLike = re.search,
+) -> Dict[str, V]: ...
+
+
+@overload
+def filter_dict_with_patterns(
+    x: Mapping[K, str],
+    include: Optional[PatternListLike] = ".*",
+    *,
+    by: Literal["value"],
+    exclude: Optional[PatternListLike] = (),
+    match_fn: MatchLike = re.search,
+) -> Dict[K, str]: ...
+
+
+def filter_dict_with_patterns(
+    x: Mapping[K, V],
+    include: Optional[PatternListLike] = ".*",
+    *,
+    by: DictByKV = "key",
+    exclude: Optional[PatternListLike] = (),
+    match_fn: MatchLike = re.search,
+) -> Dict[K, V]:
+    """Perform the filter with patterns operation."""
+    if by == "key":
+
+        def predicate(item: Tuple[K, V]) -> bool:
+            return match_patterns(item[0], include, exclude=exclude, match_fn=match_fn)  # type: ignore[assignment]
+
+    elif by == "value":
+
+        def predicate(item: Tuple[K, V]) -> bool:
+            return match_patterns(item[1], include, exclude=exclude, match_fn=match_fn)  # type: ignore[assignment]
+
+    else:
+        msg = f"Invalid argument {by=}. (expected one of {get_args(DictByKV)})"
+        raise ValueError(msg)
+
+    return {k: v for k, v in x.items() if predicate((k, v))}
 
 
 def match_patterns(

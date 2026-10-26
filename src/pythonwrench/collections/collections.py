@@ -47,6 +47,8 @@ Y = TypeVar("Y", covariant=True)
 
 KeyMode = Literal["intersect", "same", "union"]
 Order = Literal["left", "right"]
+DictByKV = Literal["key", "value"]
+DictByKVI = Literal["key", "value", "item"]
 
 
 class SizedGenerator(Generic[T]):
@@ -304,9 +306,8 @@ def find(
 
         match_fn = revert(match_fn)
     else:
-        raise ValueError(
-            f"Invalid argument {order=}. (expected one of {get_args(Order)})"
-        )
+        msg = f"Invalid argument {order=}. (expected one of {get_args(Order)})"
+        raise ValueError(msg)
 
     for i, xi in enumerate(it):
         if match_fn(xi, target):
@@ -684,7 +685,7 @@ def sorted_dict(
     x: Mapping[K, V],
     /,
     *,
-    by: Literal["key", "value", "item"] = "key",
+    by: DictByKVI = "key",
     key: Optional[Callable[[Any], Any]] = None,
     reverse: bool = False,
 ) -> Dict[K, V]:
@@ -709,7 +710,7 @@ def sorted_dict(
         impl_key = by_value_fn
 
     else:
-        msg = f"Invalid argument {by=}. (expected one of {('key', 'value', 'item')})"
+        msg = f"Invalid argument {by=}. (expected one of {get_args(DictByKVI)})"
         raise ValueError(msg)
 
     return {k: v for k, v in sorted(x.items(), key=impl_key, reverse=reverse)}  # type: ignore
@@ -738,7 +739,9 @@ def shuffled(
         return x
 
 
-def unflat_dict_of_dict(dic: Mapping[str, Any], *, sep: str = ".") -> Dict[str, Any]:
+def unflat_dict_of_dict(
+    dic: Mapping[str, Any], *, sep: str = ".", overwrite: bool = True
+) -> Dict[str, Any]:
     """Unflat a dictionary.
 
     Example 1
@@ -754,18 +757,26 @@ def unflat_dict_of_dict(dic: Mapping[str, Any], *, sep: str = ".") -> Dict[str, 
     """
     output = {}
     for k, v in dic.items():
-        if sep not in k:
+        if not overwrite and k in output:
+            msg = f"Ambiguous flatten dict with key {k=}. (with value {v})"
+            raise ValueError(msg)
+        elif sep not in k:
             output[k] = v
-        else:
-            idx = k.index(sep)
-            k, kk = k[:idx], k[idx + 1 :]
-            if k not in output:
-                output[k] = {}
-            elif not isinstance(output[k], Mapping):
-                msg = f"Invalid dict argument. (found keys {k} and {k}{sep}{kk})"
-                raise ValueError(msg)
+            continue
 
-            output[k][kk] = v
+        idx = k.index(sep)
+        k, kk = k[:idx], k[idx + 1 :]
+        if k not in output:
+            output[k] = {}
+        elif isinstance(output[k], Mapping):
+            pass
+        elif overwrite:
+            output[k] = {}
+        else:
+            msg = f"Invalid dict argument. (found keys {k} and {k}{sep}{kk})"
+            raise ValueError(msg)
+
+        output[k][kk] = v
 
     output = {
         k: (unflat_dict_of_dict(v) if isinstance(v, Mapping) else v)

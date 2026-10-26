@@ -31,6 +31,7 @@ if TYPE_CHECKING or lazy is None:
         is_special_form,
         is_typed_dict,
         isinstance_generic,
+        isinstance_parametrized,
     )
     from .classes import (
         BuiltinCollection,
@@ -91,6 +92,7 @@ else:
                 "is_special_form",
                 "is_typed_dict",
                 "isinstance_generic",
+                "isinstance_parametrized",
             ],
             "classes": [
                 "BuiltinCollection",

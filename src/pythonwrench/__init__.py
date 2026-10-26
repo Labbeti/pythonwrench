@@ -9,7 +9,7 @@ __author_email__ = "labbeti.pub@gmail.com"
 __license__ = "MIT"
 __maintainer__ = "Étienne Labbé (Labbeti)"
 __status__ = "Development"
-__version__ = "0.6.7"
+__version__ = "0.6.8"
 
 
 from typing import TYPE_CHECKING
@@ -157,12 +157,14 @@ if TYPE_CHECKING or lazy is None:
         setup_logging_verbose,
     )
     from .math import argmax, argmin, argsort, clamp, clip
-    from .os import get_num_cpus_available, safe_rmdir, tree_iter
+    from .os import get_num_cpus_available, remove_children, safe_rmdir, tree_iter
     from .random import randstr
     from .re import (
         PatternLike,
         PatternListLike,
         compile_patterns,
+        filter_dict_with_patterns,
+        filter_iter_with_patterns,
         filter_with_patterns,
         find_patterns,
         get_key_fn,
@@ -245,6 +247,7 @@ if TYPE_CHECKING or lazy is None:
         is_special_form,
         is_typed_dict,
         isinstance_generic,
+        isinstance_parametrized,
     )
     from .warnings import deprecated_alias, deprecated_function, warn_once
 
@@ -414,13 +417,20 @@ else:
                 "setup_logging_verbose",
             ],
             "math": ["argmax", "argmin", "argsort", "clamp", "clip"],
-            "os": ["get_num_cpus_available", "safe_rmdir", "tree_iter"],
+            "os": [
+                "get_num_cpus_available",
+                "remove_children",
+                "safe_rmdir",
+                "tree_iter",
+            ],
             "random": ["randstr"],
             "re": [
                 "PatternLike",
                 "PatternListLike",
                 "compile_patterns",
                 "filter_with_patterns",
+                "filter_iter_with_patterns",
+                "filter_dict_with_patterns",
                 "find_patterns",
                 "get_key_fn",
                 "match_patterns",
@@ -476,6 +486,7 @@ else:
                 "is_special_form",
                 "is_typed_dict",
                 "isinstance_generic",
+                "isinstance_parametrized",
             ],
             "warnings": ["deprecated_alias", "deprecated_function", "warn_once"],
         },

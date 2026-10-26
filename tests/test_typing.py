@@ -45,17 +45,6 @@ from pythonwrench.typing import (
 pd = import_if_available("pandas")
 
 
-class ExampleDict(TypedDict):
-    a: int
-    b: str
-
-
-class ExampleDict2(TypedDict):
-    a: int
-    b: str
-    c: NotRequired[float]
-
-
 class TestChecks(TestCase):
     def test_is_iterable_str_1(self) -> None:
         inputs = [
@@ -136,11 +125,26 @@ class TestChecks(TestCase):
 
 class TestIsInstanceGuard(TestCase):
     def test_docstring_examples(self) -> None:
-        assert isinstance_generic({"a": 1, "b": 2}, dict)
-        assert isinstance_generic({"a": 1, "b": 2}, Dict)
-        assert isinstance_generic({"a": 1, "b": 2}, Dict[str, int])
-        assert not isinstance_generic({"a": 1, "b": 2}, Dict[str, str])
-        assert isinstance_generic({"a": 1, "b": 2}, Dict[str, Literal[1, 2]])
+        x = {"a": 1, "b": 2}
+
+        class IntDict(TypedDict):
+            a: int
+            b: int
+
+        class ExactDict(TypedDict):
+            a: Literal[1]
+            b: Literal[2]
+
+        assert is_typed_dict(IntDict)
+        assert is_typed_dict(ExactDict)
+
+        assert isinstance_generic(x, dict)
+        assert isinstance_generic(x, Dict)
+        assert isinstance_generic(x, Dict[str, int])
+        assert not isinstance_generic(x, Dict[str, str])
+        assert isinstance_generic(x, Dict[str, Literal[1, 2]])
+        assert isinstance_generic(x, IntDict)
+        assert isinstance_generic(x, ExactDict)
 
     def test_example_1_int(self) -> None:
         x = 1
@@ -176,6 +180,15 @@ class TestIsInstanceGuard(TestCase):
         assert not isinstance_generic(x, Dict[Literal["a"], Literal[10, 2]])
 
     def test_example_3_typed_dict(self) -> None:
+        class ExampleDict(TypedDict):
+            a: int
+            b: str
+
+        class ExampleDict2(TypedDict):
+            a: int
+            b: str
+            c: NotRequired[float]
+
         assert not is_typed_dict(dict)
         assert not is_typed_dict(Dict)
         assert not is_typed_dict(Dict[str, Any])
@@ -313,20 +326,31 @@ class TestIsInstanceGuard(TestCase):
         with self.assertRaises(TypeError):
             assert not isinstance_generic(1, Generator[int, None, None])
 
-    def test_callable(self) -> None:
-        assert isinstance_generic(lambda x: x, Callable)
-        assert isinstance_generic(Path, Callable)
-
+    def test_callable_example_1(self) -> None:
         def parse(value: str, base: int) -> float:
             return float(value) + base
 
         assert isinstance_generic(parse, Callable[[str, int], float])
+
+        assert isinstance_generic(lambda x: x, Callable)
+        assert isinstance_generic(Path, Callable)
+
         assert isinstance_generic(parse, Callable[..., float])
 
         assert not isinstance_generic(parse, Callable[[str], float])
         assert not isinstance_generic(parse, Callable[[int, int], float])
         assert not isinstance_generic(parse, Callable[[str, int], int])
         assert not isinstance_generic(1, Callable[[str, int], float])
+        assert not isinstance_generic(parse, Callable[[str, bool], float])
+
+    def test_callable_example_2(self) -> None:
+        class A:
+            a: str = "a"
+
+        def fn(n: int, a: A) -> str:
+            return n * a.a
+
+        assert isinstance_generic(fn, Callable[[int, A], str])
 
     def test_check_only_first(self) -> None:
         assert isinstance_generic([1, 2], List[int], check_only_first=True)
@@ -345,6 +369,14 @@ class TestIsInstanceGuard(TestCase):
             if isinstance(handler, StreamHandler)
         ]
         assert isinstance_generic(streams, Iterable[TextIOBase])
+
+    def test_any(self) -> None:
+        targets = [Any, typing_extensions.Any, object]
+        xlst = [1, True, 1.2, None, [], (), {}, self] + targets
+
+        for x in xlst:
+            for target in targets:
+                assert isinstance_generic(x, target)
 
 
 class TestCheckArgsType(TestCase):

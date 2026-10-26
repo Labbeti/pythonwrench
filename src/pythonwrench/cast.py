@@ -22,6 +22,7 @@ from typing import (
 
 from pythonwrench._core import ClassOrTuple, Predicate, _FunctionRegistry
 from pythonwrench.functools import identity
+from pythonwrench.semver import Version
 from pythonwrench.typing import (
     DataclassInstance,
     NamedTupleInstance,
@@ -136,9 +137,14 @@ def _dataclass_to_builtin(x: DataclassInstance, **kwargs) -> Any:
 
 
 @register_as_builtin_fn(NamedTupleInstance)
-def _namedtuple_to_builtin(x: NamedTupleInstance, **kwargs) -> Any:
+def _namedtuple_to_builtin(x: NamedTupleInstance, **kwargs) -> Dict[str, Any]:
     """Perform the namedtuple to builtin operation."""
     return as_builtin(x._asdict(), **kwargs)
+
+
+@register_as_builtin_fn(Version)
+def _version_to_str(x: Version, **kwargs) -> str:
+    return x.to_str()
 
 
 @register_as_builtin_fn(Mapping, priority=-100)
