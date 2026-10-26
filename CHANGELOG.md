@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - `remove_children` function to remove all content of a directory.
 - `filter_dict_with_patterns` function.
+- `parse_args_using_dataclass` and `add_dataclass_fields_to_parser` functions now supports nested dataclasses with subparsers.
 
 ### Modified
 - `Version` is now converted to str by default in `as_builtin`.
