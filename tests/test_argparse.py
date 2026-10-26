@@ -5,11 +5,13 @@ import unittest
 from argparse import ArgumentParser, Namespace
 from dataclasses import asdict, dataclass, field
 from enum import Enum, auto
+from functools import partial
 from pathlib import Path
 from typing import Iterable, List, Literal, Optional, Tuple, Union
 from unittest import TestCase
 
 from pythonwrench.argparse import (
+    add_dataclass_fields_to_parser,
     get_parse_fn,
     parse_args_using_dataclass,
     parse_to_bool,
@@ -342,6 +344,78 @@ class TestDataclassParser(TestCase):
             list_parsing="brackets",
         )
         assert cfg == Cfg([None])
+
+    def test_subparsers_example_1(self) -> None:
+        @dataclass
+        class A:
+            a: int = 0
+
+        @dataclass
+        class B:
+            b: str = "b"
+
+        @dataclass
+        class Cfg:
+            subcfg: Union[A, B]
+            c: float = 1.2
+
+        target = Cfg(A())
+        parser = add_dataclass_fields_to_parser(Cfg, parser=None)
+        args = parser.parse_args(["A"])
+        assert args == Namespace(subcfg="A", c=1.2, **{"subcfg.a": 0}), (
+            f"{args=}, {parser.format_help()=}"
+        )
+
+        cfg = parse_args_using_dataclass(Cfg, args=["A"])
+        assert cfg == target, f"{cfg=}; {target=}"
+
+        target = Cfg(B(b="b2"))
+        cfg = parse_args_using_dataclass(Cfg, args=["B", "--subcfg.b", "b2"])
+        assert cfg == target, f"{cfg=}; {target=}"
+
+    def test_subparsers_example_2(self) -> None:
+        @dataclass(frozen=True)
+        class C:
+            n: int = 0
+
+        @dataclass
+        class D:
+            a: C = field(default_factory=partial(C, n=1))
+
+        target = D()
+        cfg = parse_args_using_dataclass(D, args=[])
+        assert cfg == target, f"{cfg=}; {target=}"
+
+        target = D(C())
+        cfg = parse_args_using_dataclass(D, args=["C"])
+        assert cfg == target, f"{cfg=}; {target=}"
+
+        target = D(C(n=2))
+        cfg = parse_args_using_dataclass(D, args=["C", "--a.n", "2"])
+        assert cfg == target, f"{cfg=}; {target=}"
+
+    def test_nested_subparsers(self) -> None:
+        @dataclass
+        class A:
+            value: int = 1
+
+        @dataclass
+        class B:
+            value: int = 2
+
+        @dataclass
+        class Nested:
+            command: Union[A, B]
+
+        @dataclass
+        class Cfg:
+            nested: Nested
+
+        cfg = parse_args_using_dataclass(
+            Cfg,
+            args=["Nested", "A", "--nested.command.value", "3"],
+        )
+        assert cfg == Cfg(Nested(A(3)))
 
 
 if __name__ == "__main__":

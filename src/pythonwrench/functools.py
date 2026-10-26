@@ -168,7 +168,7 @@ def filter_and_call(
     if _fill_all_arguments:
         missing = set(argnames).difference(kwargs)
         if len(missing) > 0:
-            msg = f"Missing {len(missing)}/{len(argnames)} arguments: {tuple(missing)}. (with {_fill_all_arguments=})"
+            msg = f"Missing {len(missing)}/{len(argnames)} arguments for {fn.__name__}: {tuple(missing)}. (with {_fill_all_arguments=} and provided {kwargs=})"
             raise ValueError(msg)
 
     pos_argnames = argnames[: code.co_posonlyargcount]
