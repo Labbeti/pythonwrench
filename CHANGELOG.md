@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.9] UNRELEASED
+### Added
+- `hash_str`, `hash_bytes` and `hash_bytes_buffer` functions.
+
+
 ## [0.6.8] 2026-10-26
 ### Added
 - `remove_children` function to remove all content of a directory.
