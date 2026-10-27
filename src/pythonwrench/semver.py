@@ -4,7 +4,7 @@ import logging
 import re
 import sys
 from dataclasses import asdict, dataclass
-from typing import List, Mapping, Tuple, TypedDict, Union, overload
+from typing import Any, List, Mapping, Tuple, TypedDict, Union, overload
 
 from typing_extensions import NotRequired, Self, TypeAlias
 
@@ -282,7 +282,7 @@ class Version:
         version_tuple = tuple(version_dict.values())
         return version_tuple  # type: ignore
 
-    def equals(self, other: VersionLike, *, ignore_buildmetadata: bool = False) -> bool:
+    def equals(self, other: Any, *, ignore_buildmetadata: bool = False) -> bool:
         """Perform the equals operation."""
         if isinstance(other, (Mapping, tuple, str)):
             other = Version(other)
