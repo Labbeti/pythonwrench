@@ -196,7 +196,10 @@ def loads_jsonl(
     """Load s jsonl."""
     with StringIO(content) as buffer:
         return _parse_jsonl(
-            buffer, on_error=on_error, default=default, **json_loads_kwds
+            buffer,
+            on_error=on_error,
+            default=default,
+            **json_loads_kwds,
         )
 
 

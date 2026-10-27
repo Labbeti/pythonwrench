@@ -2,15 +2,51 @@
 # -*- coding: utf-8 -*-
 
 import os
-from io import TextIOWrapper
+from io import BytesIO, TextIOBase, TextIOWrapper
 from pathlib import Path
 from typing import (
+    Any,
+    Generic,
     Literal,
+    Tuple,
+    TypeVar,
     Union,
     overload,
 )
 
-OnError = Literal["raise", "default"]
+OnError = Literal["raise", "return_default"]
+OnExist = Literal["overwrite", "skip", "raise"]
+
+T_IOType = TypeVar("T_IOType", TextIOBase, BytesIO)
+T_ContentType = TypeVar("T_ContentType", str, bytes)
+
+
+class _BufferDuplicate(Generic[T_IOType, T_ContentType]):
+    @overload
+    def __init__(
+        self: "_BufferDuplicate[TextIOBase, str]", *buffers: TextIOBase
+    ) -> None: ...
+
+    @overload
+    def __init__(
+        self: "_BufferDuplicate[BytesIO, bytes]", *buffers: BytesIO
+    ) -> None: ...
+
+    def __init__(self, *buffers: Any) -> None:
+        super().__init__()
+        self._buffers: Tuple[T_IOType, ...] = buffers
+
+    def write(self, /, x: T_ContentType) -> int:
+        total = 0
+        for buffer in self._buffers:
+            n = buffer.write(x)  # type: ignore
+            total += n
+        return total
+
+
+file = open("dhqzudh")
+buffer = _BufferDuplicate(file)
+buffer.write
 
 
 @overload

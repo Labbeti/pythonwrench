@@ -209,7 +209,7 @@ def _parse_json(
     except JSONDecodeError as err:
         if on_error == "raise":
             raise err
-        elif on_error == "default":
+        elif on_error in ("return_default", "default"):
             return default
         else:
             msg = f"Invalid argument {on_error=}. (expected one of {get_args(OnError)})"
