@@ -6,6 +6,9 @@ All notable changes to this project will be documented in this file.
 ### Added
 - `hash_str`, `hash_bytes` and `hash_bytes_buffer` functions.
 
+### Modified
+- Update code format with ruff 0.16.10.
+
 
 ## [0.6.8] 2026-10-26
 ### Added
