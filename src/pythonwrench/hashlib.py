@@ -3,7 +3,7 @@
 
 import hashlib
 import logging
-from io import BufferedReader
+from io import BufferedReader, BytesIO
 from pathlib import Path
 from typing import Literal, Optional, Protocol, Union, get_args, runtime_checkable
 
@@ -12,6 +12,7 @@ from typing_extensions import Buffer
 HasherName = Literal["sha256", "md5"]
 HashName = HasherName  # alias
 
+DEFAULT_HASHER = "md5"
 DEFAULT_CHUNK_SIZE = 256 * 1024**2  # 256 MiB
 
 logger = logging.getLogger(__name__)
@@ -37,9 +38,31 @@ class Hasher(Protocol):
         ...
 
 
+def hash_str(
+    x: str,
+    hash_type: Union[HasherName, Hasher] = DEFAULT_HASHER,
+    chunk_size: Optional[int] = DEFAULT_CHUNK_SIZE,
+    *,
+    init_bytes: bytes = b"",
+) -> str:
+    xbytes = x.encode()
+    return hash_bytes(xbytes, hash_type, chunk_size, init_bytes=init_bytes)
+
+
+def hash_bytes(
+    x: bytes,
+    hash_type: Union[HasherName, Hasher] = DEFAULT_HASHER,
+    chunk_size: Optional[int] = DEFAULT_CHUNK_SIZE,
+    *,
+    init_bytes: bytes = b"",
+) -> str:
+    buffer = BytesIO(x)
+    return hash_bytes_buffer(buffer, hash_type, chunk_size, init_bytes=init_bytes)
+
+
 def hash_file(
     fpath: Union[str, Path, BufferedReader],
-    hash_type: Union[HasherName, Hasher] = "md5",
+    hash_type: Union[HasherName, Hasher] = DEFAULT_HASHER,
     chunk_size: Optional[int] = DEFAULT_CHUNK_SIZE,
     *,
     init_bytes: bytes = b"",
@@ -58,11 +81,18 @@ def hash_file(
     """
     if isinstance(fpath, (str, Path)):
         with open(fpath, "rb") as file:
-            return hash_file(file, hash_type, chunk_size)
+            return hash_bytes_buffer(file, hash_type, chunk_size, init_bytes=init_bytes)
     else:
-        file = fpath
-    del fpath
+        return hash_bytes_buffer(fpath, hash_type, chunk_size, init_bytes=init_bytes)
 
+
+def hash_bytes_buffer(
+    buffer: Union[BufferedReader, BytesIO],
+    hash_type: Union[HasherName, Hasher] = DEFAULT_HASHER,
+    chunk_size: Optional[int] = DEFAULT_CHUNK_SIZE,
+    *,
+    init_bytes: bytes = b"",
+) -> str:
     if isinstance(hash_type, str):
         hasher = _get_hasher(hash_type, init_bytes)
     elif isinstance(hash_type, Hasher):
@@ -73,16 +103,17 @@ def hash_file(
     del hash_type
 
     while True:
-        chunk = file.read(chunk_size)
+        chunk = buffer.read(chunk_size)
         if not chunk:
             break
         hasher.update(chunk)
 
     hash_bytes = hasher.digest()
-    return hash_bytes.hex()
+    hash_value = hash_bytes.hex()
+    return hash_value
 
 
-def _get_hasher(hasher_name: HasherName, init_bytes: bytes = b"") -> Hasher:
+def _get_hasher(hasher_name: HasherName, init_bytes: bytes) -> Hasher:
     if hasher_name == "sha256":
         hasher = hashlib.sha256(init_bytes)
     elif hasher_name == "md5":

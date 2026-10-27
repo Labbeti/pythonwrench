@@ -127,7 +127,7 @@ if TYPE_CHECKING or lazy is None:
         identity,
         repeat_fn,
     )
-    from .hashlib import hash_file
+    from .hashlib import hash_bytes, hash_bytes_buffer, hash_file, hash_str
     from .importlib import (
         ModulePlaceholder,
         Placeholder,
@@ -387,7 +387,7 @@ else:
                 "identity",
                 "repeat_fn",
             ],
-            "hashlib": ["hash_file"],
+            "hashlib": ["hash_file", "hash_bytes", "hash_bytes_buffer", "hash_str"],
             "importlib": [
                 "import_if_available",
                 "ModulePlaceholder",
