@@ -44,11 +44,6 @@ class _BufferDuplicate(Generic[T_IOType, T_ContentType]):
         return total
 
 
-file = open("dhqzudh")
-buffer = _BufferDuplicate(file)
-buffer.write
-
-
 @overload
 def _setup_output_fpath(
     fpath: Union[str, Path, os.PathLike],
