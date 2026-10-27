@@ -87,11 +87,6 @@ testpaths = ["tests"]
 [tool.coverage.run]
 source = ["src"]
 
-[tool.ruff.lint.extend-per-file-ignores]
-# F401: module imported but unused
-# F403: ‘from module import *’ used; unable to detect undefined names
-"__init__.py" = ["F401", "F403"]
-
 [tool.uv.sources]
 pythonwrench = { workspace = true }
 
@@ -110,3 +105,19 @@ packages = ["src/pythonwrench"]
 
 [tool.hatch.version]
 path = "src/pythonwrench/__init__.py"
+
+[tool.ruff]
+# In addition to the standard set of exclusions, omit all tests, plus a specific file.
+extend-exclude = ["notebooks/**.ipynb"]
+
+[tool.ruff.lint.per-file-ignores]
+# F401   : unused imports
+# E402   : module import not at top of file
+# UP009  : remove unnecessary utf-8 coding
+# EXE001 : specify sheshang but file is not executable
+# PYI061 : replace Literal[None, ...] by Literal[...] | None
+# FA100  : Add `from __future__ import annotations` to simplify `typing.Dict`
+# PLC0105: `TypeVar` name "T_BuiltinScalar" does not reflect its covariance; consider renaming it to "T_BuiltinScalar_co"
+"__init__.py" = ["F401"]
+"notebooks/**.ipynb" = ["E402"]
+"*.py" = ["UP009", "EXE001", "PYI061", "FA100", "PLC0105"]

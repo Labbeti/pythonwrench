@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import logging
 import os
@@ -228,7 +227,9 @@ def _walker_impl(
 
 
 def remove_children(
-    dpath: Union[str, Path], *dpaths: Union[str, Path], use_tqdm: bool = False
+    dpath: Union[str, Path],
+    *dpaths: Union[str, Path],
+    use_tqdm: bool = False,
 ) -> List[Path]:
     """Remove all children in folder(s), without removing the folder itself.
 
@@ -242,11 +243,11 @@ def remove_children(
     del dpaths
 
     all_children: List[Path] = []
-    for dpath in dpaths_list:
-        if not dpath.is_dir():
-            msg = f"Invalid argument {dpath=}. (not a directory)"
+    for dpath_i in dpaths_list:
+        if not dpath_i.is_dir():
+            msg = f"Invalid argument {dpath_i=}. (not a directory)"
             raise RuntimeError(msg)
-        children = list(dpath.iterdir())
+        children = list(dpath_i.iterdir())
         all_children += children
 
     if use_tqdm:

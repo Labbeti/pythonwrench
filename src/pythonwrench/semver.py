@@ -1,11 +1,10 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import logging
 import re
 import sys
 from dataclasses import asdict, dataclass
-from typing import Any, List, Mapping, Tuple, TypedDict, Union, overload
+from typing import List, Mapping, Tuple, TypedDict, Union, overload
 
 from typing_extensions import NotRequired, Self, TypeAlias
 
@@ -66,7 +65,6 @@ class Version:
         /,
     ) -> None:
         """Initialize the instance."""
-        ...
 
     @overload
     def __init__(
@@ -75,7 +73,6 @@ class Version:
         /,
     ) -> None:
         """Initialize the instance."""
-        ...
 
     @overload
     def __init__(
@@ -84,7 +81,6 @@ class Version:
         /,
     ) -> None:
         """Initialize the instance."""
-        ...
 
     @overload
     def __init__(
@@ -93,7 +89,6 @@ class Version:
         /,
     ) -> None:
         """Initialize the instance."""
-        ...
 
     @overload
     def __init__(
@@ -105,7 +100,6 @@ class Version:
         buildmetadata: BuildMetadata = None,
     ) -> None:
         """Initialize the instance."""
-        ...
 
     def __init__(self, *args, **kwargs) -> None:
         """Initialize the instance."""
@@ -267,11 +261,11 @@ class Version:
 
     def to_str(self) -> str:
         """Convert the value to str."""
-        kwds = dict(
-            major=self.major,
-            minor=self.minor,
-            patch=self.patch,
-        )
+        kwds = {
+            "major": self.major,
+            "minor": self.minor,
+            "patch": self.patch,
+        }
         version_str = _VERSION_FORMAT.format(**kwds)
         if self.prerelease is not None:
             version_str = f"{version_str}-{self.prerelease}"
@@ -308,7 +302,7 @@ class Version:
         """Return the string representation of the instance."""
         return self.to_str()
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         """Return whether this instance equals another object."""
         return self.equals(other)
 

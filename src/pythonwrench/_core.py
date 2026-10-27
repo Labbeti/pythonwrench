@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import warnings
 from functools import lru_cache, partial, wraps
@@ -42,7 +41,7 @@ class Predicate(Protocol[T_PredicateArg]):
 
 def return_none(*args, **kwargs) -> None:
     """Return None function placeholder."""
-    return None
+    return
 
 
 def function_alias(
@@ -162,18 +161,17 @@ class _FunctionRegistry(Generic[T_Output]):
         unk_mode: UnkMode = "error",
         **kwargs,
     ) -> T_Output:
-        """Perform the apply operation."""
+        def wrapped_isinstance(x: Any, target_cls_or_tuple: Any) -> bool:
+            return isinstance_fn(x, target_cls_or_tuple)
+
         for fn, (class_or_tuple, custom_predicate, _) in self.fns.items():
             if custom_predicate is not None:
                 predicate = custom_predicate
 
             elif class_or_tuple is not None:
-
-                def target_isinstance_fn_wrap(x: Any) -> bool:
-                    """Perform the target isinstance fn wrap operation."""
-                    return isinstance_fn(x, class_or_tuple)  # type: ignore
-
-                predicate = target_isinstance_fn_wrap
+                predicate = partial(
+                    wrapped_isinstance, target_cls_or_tuple=class_or_tuple
+                )
             else:
                 msg = f"Invalid function registered. (found {class_or_tuple=} and {custom_predicate=})"
                 raise TypeError(msg)
@@ -229,7 +227,6 @@ def warn_once(
     source: Any = None,
 ) -> None:
     """Warn message once using warnings module."""
-    ...
 
 
 @overload
@@ -240,7 +237,6 @@ def warn_once(
     source: Any = None,
 ) -> None:
     """Warn message once using warnings module."""
-    ...
 
 
 @lru_cache(maxsize=None)
@@ -285,7 +281,6 @@ def deprecated_function(
     warn_fn: Callable[[str], Any] = partial(warn_once, category=DeprecationWarning),
 ) -> Callable[[T_Function], T_Function]:
     """Perform the deprecated function operation."""
-    ...
 
 
 @overload
@@ -297,7 +292,6 @@ def deprecated_function(
     warn_fn: Callable[[str], Any] = partial(warn_once, category=DeprecationWarning),
 ) -> T_Function:
     """Perform the deprecated function operation."""
-    ...
 
 
 def deprecated_function(

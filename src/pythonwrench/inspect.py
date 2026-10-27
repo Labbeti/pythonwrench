@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import inspect
 from typing import Any, Callable, List, TypeVar, Union, get_args

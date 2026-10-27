@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import inspect
 import logging
@@ -493,7 +492,8 @@ def is_sequence_str(
 
 def is_typed_dict(x: Any) -> TypeGuard[type]:
     """Return whether typed dict."""
-    if sys.version_info.major == 3 and sys.version_info.minor < 9:
+    # to be deleted when 3.8 support is discarded
+    if sys.version_info >= (3, 0, 0) and sys.version_info < (3, 9, 0):
         return x.__class__.__name__ == "_TypedDictMeta"
     else:
         return hasattr(x, "__orig_bases__") and TypedDict in x.__orig_bases__

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import hashlib
 import logging
@@ -99,7 +98,7 @@ def hash_bytes_buffer(
         hasher = hash_type
     else:
         msg = f"Invalid argument {hash_type=}. (expected one of {get_args(HasherName)} or custom Hasher type)"
-        raise ValueError(msg)
+        raise TypeError(msg)
     del hash_type
 
     while True:

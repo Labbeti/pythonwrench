@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import sys
 import unittest
@@ -43,7 +42,7 @@ class TestInspect(TestCase):
         assert get_fullname(inspect) == "pythonwrench.inspect"
         assert get_fullname(get_fullname) == "pythonwrench.inspect.get_fullname"
 
-        if sys.version_info.minor >= 11:
+        if sys.version_info >= (3, 11, 0):
             assert get_fullname(Mapping) == "typing.Mapping"
             assert get_fullname(Iterable[str]) == "typing.Iterable[builtins.str]"
             assert (

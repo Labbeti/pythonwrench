@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import inspect
 from types import CodeType
@@ -35,7 +34,6 @@ class Compose(Generic[T, U]):
     @overload
     def __init__(self) -> None:
         """Initialize the instance."""
-        ...
 
     @overload
     def __init__(
@@ -44,7 +42,6 @@ class Compose(Generic[T, U]):
         /,
     ) -> None:
         """Initialize the instance."""
-        ...
 
     @overload
     def __init__(
@@ -53,7 +50,6 @@ class Compose(Generic[T, U]):
         /,
     ) -> None:
         """Initialize the instance."""
-        ...
 
     @overload
     def __init__(
@@ -63,7 +59,6 @@ class Compose(Generic[T, U]):
         /,
     ) -> None:
         """Initialize the instance."""
-        ...
 
     @overload
     def __init__(
@@ -74,7 +69,6 @@ class Compose(Generic[T, U]):
         /,
     ) -> None:
         """Initialize the instance."""
-        ...
 
     @overload
     def __init__(
@@ -86,7 +80,6 @@ class Compose(Generic[T, U]):
         /,
     ) -> None:
         """Initialize the instance."""
-        ...
 
     @overload
     def __init__(
@@ -99,12 +92,10 @@ class Compose(Generic[T, U]):
         /,
     ) -> None:
         """Initialize the instance."""
-        ...
 
     @overload
     def __init__(self, *fns: Callable) -> None:
         """Initialize the instance."""
-        ...
 
     def __init__(self, *fns) -> None:
         """Initialize the instance."""

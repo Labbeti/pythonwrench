@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import os
 import pickle
@@ -111,10 +110,10 @@ def save_pickle(
         \*\*pkl_dumps_kwds: Other args passed to `pickle.dumps`.
     """
     if not overwrite and isinstance(file, (str, Path, PathLike)):
-        return None
+        return
     elif isinstance(file, (str, Path, PathLike)):
         file = _setup_output_fpath(file, overwrite=overwrite, make_parents=make_parents)
-        file = open(file, "wb")
+        file = open(file, "wb")  # noqa: SIM115
         close = True
     elif isinstance(file, BinaryIO):
         close = False
@@ -165,7 +164,7 @@ def load_pickle(
         \*\*pkl_loads_kwds: Other args passed to `pickle.loads`.
     """
     if isinstance(file, (str, Path, PathLike)):
-        file = open(file, "rb")
+        file = open(file, "rb")  # noqa: SIM115
         close = True
     else:
         close = False
@@ -202,7 +201,6 @@ def loads_pickle(
 @function_alias(load_pickle)
 def read_pickle(*args, **kwargs):
     """Read pickle."""
-    ...
 
 
 def _parse_pickle(
@@ -216,9 +214,9 @@ def _parse_pickle(
     """Parse pickle."""
     try:
         return pickle.load(buffer, **pkl_loads_kwds)
-    except UnpicklingError as err:
+    except UnpicklingError:
         if on_error == "raise":
-            raise err
+            raise
         elif on_error in ("return_default", "default"):
             return default
         else:

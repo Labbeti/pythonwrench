@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 from typing import (
     Any,
@@ -71,7 +70,6 @@ def all_ne(
 @function_alias(all_eq)
 def is_full(*args, **kwargs):
     """Return whether full."""
-    ...
 
 
 def is_sorted(
@@ -101,4 +99,3 @@ def is_sorted(
 @function_alias(all_ne)
 def is_unique(*args, **kwargs):
     """Return whether unique."""
-    ...

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import os
 from io import BytesIO, TextIOBase, TextIOWrapper
@@ -22,6 +21,7 @@ T_ContentType = TypeVar("T_ContentType", str, bytes)
 
 
 class _BufferDuplicate(Generic[T_IOType, T_ContentType]):
+    # TODO: use this class for serialization functions to store into file+buffer
     @overload
     def __init__(
         self: "_BufferDuplicate[TextIOBase, str]", *buffers: TextIOBase
@@ -53,7 +53,6 @@ def _setup_output_fpath(
     absolute: bool = True,
 ) -> Path:
     """Perform the setup output fpath operation."""
-    ...
 
 
 @overload
@@ -65,7 +64,6 @@ def _setup_output_fpath(
     absolute: bool = True,
 ) -> TextIOWrapper:
     """Perform the setup output fpath operation."""
-    ...
 
 
 @overload
@@ -77,7 +75,6 @@ def _setup_output_fpath(
     absolute: bool = True,
 ) -> None:
     """Perform the setup output fpath operation."""
-    ...
 
 
 def _setup_output_fpath(

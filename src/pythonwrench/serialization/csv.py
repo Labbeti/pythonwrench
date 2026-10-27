@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import csv
 import io
@@ -155,10 +154,10 @@ def save_csv(
         \*\*csv_writer_kwds: Others optional arguments passed to CSV writer object.
     """
     if not overwrite and isinstance(file, (str, Path, PathLike)):
-        return None
+        return
     elif isinstance(file, (str, Path, PathLike)):
         file = _setup_output_fpath(file, overwrite=overwrite, make_parents=make_parents)
-        file = open(file, "w")
+        file = open(file, "w")  # noqa: SIM115
         close = True
     elif isinstance(file, TextIOBase):
         close = False
@@ -229,7 +228,7 @@ def _serialize_csv(
     if len(data_lst) == 0:
         fieldnames = []
     else:
-        fieldnames = [str(k) for k in data_lst[0].keys()]
+        fieldnames = [str(k) for k in data_lst[0]]
 
     if align_content:
         old_fieldnames = fieldnames
@@ -306,7 +305,6 @@ def load_csv(
     **csv_reader_kwds,
 ) -> List[Dict[str, Any]]:
     """Load csv."""
-    ...
 
 
 @overload
@@ -323,7 +321,6 @@ def load_csv(
     **csv_reader_kwds,
 ) -> Dict[str, List[Any]]:
     """Load csv."""
-    ...
 
 
 def load_csv(
@@ -388,7 +385,6 @@ def loads_csv(
     **csv_reader_kwds,
 ) -> List[Dict[str, Any]]:
     """Load s csv."""
-    ...
 
 
 @overload
@@ -405,7 +401,6 @@ def loads_csv(
     **csv_reader_kwds,
 ) -> Dict[str, List[Any]]:
     """Load s csv."""
-    ...
 
 
 def loads_csv(
@@ -436,7 +431,6 @@ def loads_csv(
 @function_alias(load_csv)
 def read_csv(*args, **kwargs):
     """Read csv."""
-    ...
 
 
 def _parse_csv(

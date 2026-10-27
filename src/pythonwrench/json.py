@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 # for backward compatibility
 from pythonwrench.serialization.json import (  # noqa: F401

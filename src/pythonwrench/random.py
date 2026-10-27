@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import random
 import string
@@ -16,7 +15,6 @@ def randstr(
     seed: Optional[int] = None,
 ) -> str:
     """Perform the randstr operation."""
-    ...
 
 
 @overload
@@ -29,7 +27,6 @@ def randstr(
     seed: Optional[int] = None,
 ) -> str:
     """Perform the randstr operation."""
-    ...
 
 
 def randstr(

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import importlib
 import json
@@ -128,17 +127,17 @@ def reload_submodules(
             logger.info(f"Reload '{candidate}'...")
         try:
             importlib.reload(candidate)
-        except ModuleNotFoundError as err:
+        except ModuleNotFoundError:
             msg = f"ModuleNotFound: did this module '{candidate.__name__}' has been renamed after starting execution?"
             logger.warning(msg)
-            raise err
+            raise
 
     return list(candidates)
 
 
 def reload_editable_packages(*, verbose: int = 0) -> List[ModuleType]:
     """Reload all submodules of editable packages already imported."""
-    pkg_names = {name.split(".")[0] for name in sys.modules.keys()}
+    pkg_names = {name.split(".")[0] for name in sys.modules}
     editable_packages = [
         sys.modules[name] for name in pkg_names if is_editable_package(name)
     ]

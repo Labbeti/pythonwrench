@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import re
 from collections.abc import Iterable as _RuntimeIterable
@@ -52,7 +51,6 @@ def register_parser_fn(
     fn: None = None,
 ) -> Callable[[T_Callable], T_Callable]:
     """Perform the register parser fn operation."""
-    ...
 
 
 @overload
@@ -61,7 +59,6 @@ def register_parser_fn(
     fn: T_Callable,
 ) -> T_Callable:
     """Perform the register parser fn operation."""
-    ...
 
 
 def register_parser_fn(
@@ -69,7 +66,6 @@ def register_parser_fn(
     fn: Optional[Callable] = None,
 ) -> Callable:
     """Perform the register parser fn operation."""
-    global _PARSER_REGISTRY
     if type_ is None:
         type_ = NoneType
 
@@ -128,14 +124,14 @@ def get_parse_fn(
 
     Intended for argparse arguments.
     """
-    kwds = dict(
-        case_sensitive=case_sensitive,
-        true_values=true_values,
-        false_values=false_values,
-        none_values=none_values,
-        list_parsing=list_parsing,
-        handle_exception=handle_exception,
-    )
+    kwds = {
+        "case_sensitive": case_sensitive,
+        "true_values": true_values,
+        "false_values": false_values,
+        "none_values": none_values,
+        "list_parsing": list_parsing,
+        "handle_exception": handle_exception,
+    }
     parse_fn = _search_parse_fn(type_, **kwds)
 
     if parse_fn is None:
@@ -161,7 +157,7 @@ def _search_parse_fn(type_: TargetType[T], **kwds) -> Optional[Callable[[str], T
                 break
         else:
             msg = f"Invalid argument {type_or_pred_i=}. (excepted type or predicate function)"
-            raise ValueError(msg)
+            raise TypeError(msg)
 
     if parse_fn is not None:
         parse_fn = partial(parse_fn, **kwds)
@@ -562,58 +558,48 @@ def _str_in(
 @deprecated_alias(get_parse_fn)
 def parse_to(*args, **kwds):
     """Parse to."""
-    ...
 
 
 @deprecated_alias(parse_to_type)
 def str_to_type(*args, **kwds):
     """Perform the str to type operation."""
-    ...
 
 
 @deprecated_alias(parse_to_bool)
 def str_to_bool(*args, **kwds):
     """Perform the str to bool operation."""
-    ...
 
 
 @deprecated_alias(parse_to_float)
 def str_to_float(*args, **kwds):
     """Perform the str to float operation."""
-    ...
 
 
 @deprecated_alias(parse_to_int)
 def str_to_int(*args, **kwds):
     """Perform the str to int operation."""
-    ...
 
 
 @deprecated_alias(parse_to_none)
 def str_to_none(*args, **kwds):
     """Perform the str to none operation."""
-    ...
 
 
 @deprecated_alias(parse_to_optional_bool)
 def str_to_optional_bool(*args, **kwds):
     """Perform the str to optional bool operation."""
-    ...
 
 
 @deprecated_alias(parse_to_optional_float)
 def str_to_optional_float(*args, **kwds):
     """Perform the str to optional float operation."""
-    ...
 
 
 @deprecated_alias(parse_to_optional_int)
 def str_to_optional_int(*args, **kwds):
     """Perform the str to optional int operation."""
-    ...
 
 
 @deprecated_alias(parse_to_optional_str)
 def str_to_optional_str(*args, **kwds):
     """Perform the str to optional str operation."""
-    ...

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 from dataclasses import MISSING, dataclass, is_dataclass  # noqa: F401
 from typing import Any, Dict, Type, TypeVar, cast

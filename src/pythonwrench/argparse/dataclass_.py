@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import copy
 from argparse import ArgumentParser, Namespace
@@ -318,10 +317,6 @@ def add_dataclass_fields_to_parser(
 
     for field in fields(dataclass_type):
         kwds = {}
-        posargs = [f"{prefix}{field.name}"]
-        if add_dashed_arg and "_" in field.name:
-            dashed_arg_name = field.name.replace("_", "-")
-            posargs.append(f"{prefix}{dashed_arg_name}")
 
         if field.default is MISSING and field.default_factory is MISSING:
             if bool_action != "store" and field.type is bool:
@@ -344,7 +339,22 @@ def add_dataclass_fields_to_parser(
         else:
             subclasses = None
 
-        if subclasses is not None:
+        if subclasses is None:
+            posargs = [f"{prefix}{field.name}"]
+            if add_dashed_arg and "_" in field.name:
+                dashed_arg_name = field.name.replace("_", "-")
+                posargs.append(f"{prefix}{dashed_arg_name}")
+
+            try:
+                inner_kwds = _get_kwds_for_type(field.type, list_parsing, bool_action)
+            except (ValueError, TypeError, RuntimeError) as err:
+                msg = f"Invalid field '{field.name}': field type '{field.type}' is not supported."
+                raise type(err)(msg) from err
+
+            kwds.update(inner_kwds)
+            parser.add_argument(*posargs, **kwds)
+
+        else:
             subparsers = parser.add_subparsers(
                 dest=f"{argprefix}{field.name}",
                 required=kwds.get("required", False),
@@ -360,17 +370,6 @@ def add_dataclass_fields_to_parser(
                     posonly_for_required=posonly_for_required,
                     argprefix=f"{argprefix}{field.name}.",
                 )
-
-        else:
-            try:
-                inner_kwds = _get_kwds_for_type(field.type, list_parsing, bool_action)
-            except (ValueError, TypeError, RuntimeError) as err:
-                msg = f"Invalid field '{field.name}': field type '{field.type}' is not supported."
-                raise type(err)(msg) from err
-
-            kwds.update(inner_kwds)
-
-            parser.add_argument(*posargs, **kwds)
 
     return parser
 
@@ -428,4 +427,3 @@ def _is_union_of_dataclasses(x: Any) -> bool:
 @deprecated_alias(add_dataclass_fields_to_parser)
 def new_parser_from_dataclass(*args, **kwargs):
     """Perform the new parser from dataclass operation."""
-    ...

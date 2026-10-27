@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 # for backward compatibility
 from pythonwrench.serialization.csv import (  # noqa: F401

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 from io import StringIO, TextIOBase
 from os import PathLike
@@ -21,10 +20,10 @@ from pythonwrench.warnings import warn_once
 __all__ = [
     "dump_jsonl",
     "dumps_jsonl",
-    "save_jsonl",
     "load_jsonl",
     "loads_jsonl",
     "read_jsonl",
+    "save_jsonl",
 ]
 
 # -- Dump / Save / Serialize content to JSONL --
@@ -116,10 +115,10 @@ def save_jsonl(
 ) -> None:
     """Save jsonl."""
     if not overwrite and isinstance(file, (str, Path, PathLike)):
-        return None
+        return
     elif isinstance(file, (str, Path, PathLike)):
         file = _setup_output_fpath(file, overwrite=overwrite, make_parents=make_parents)
-        file = open(file, "w")
+        file = open(file, "w")  # noqa: SIM115
         close = True
     elif isinstance(file, TextIOBase):
         close = False
@@ -174,7 +173,7 @@ def load_jsonl(
 ) -> list:
     """Load jsonl."""
     if isinstance(file, (str, Path, PathLike)):
-        file = open(file, "r")
+        file = open(file, "r")  # noqa: SIM115
         close = True
     else:
         close = False
@@ -206,7 +205,6 @@ def loads_jsonl(
 @function_alias(load_json)
 def read_jsonl(*args, **kwargs):
     """Read jsonl."""
-    ...
 
 
 def _parse_jsonl(

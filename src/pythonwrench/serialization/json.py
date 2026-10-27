@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import json
 from io import StringIO, TextIOBase
@@ -108,7 +107,7 @@ def save_json(
     """Save json."""
     if isinstance(file, (str, Path, PathLike)):
         file = _setup_output_fpath(file, overwrite=overwrite, make_parents=make_parents)
-        file = open(file, "w")
+        file = open(file, "w")  # noqa: SIM115
         close = True
     elif isinstance(file, TextIOBase):
         close = False
@@ -156,7 +155,7 @@ def load_json(
 ) -> Any:
     """Load json."""
     if isinstance(file, (str, Path, PathLike)):
-        file = open(file, "r")
+        file = open(file, "r")  # noqa: SIM115
         close = True
     else:
         close = False
@@ -193,7 +192,6 @@ def loads_json(
 @function_alias(load_json)
 def read_json(*args, **kwargs):
     """Read json."""
-    ...
 
 
 def _parse_json(
@@ -206,9 +204,9 @@ def _parse_json(
     """Parse json."""
     try:
         return json.load(buffer, **json_loads_kwds)
-    except JSONDecodeError as err:
+    except JSONDecodeError:
         if on_error == "raise":
-            raise err
+            raise
         elif on_error in ("return_default", "default"):
             return default
         else:

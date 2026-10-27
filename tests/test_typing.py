@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import logging
 import unittest
@@ -85,7 +84,7 @@ class TestChecks(TestCase):
             a: int
             b: str
 
-        NT2 = NamedTuple("NT2", [("a", int), ("b", str)])
+        NT2 = NamedTuple("NT2", [("a", int), ("b", str)])  # noqa: UP014
 
         nt1 = NT1(a=0, b="0")
         nt2 = NT2(a=0, b="0")
@@ -154,7 +153,7 @@ class TestIsInstanceGuard(TestCase):
         assert isinstance_generic(x, Optional[int])  # type: ignore
         assert isinstance_generic(x, Union[int, str])  # type: ignore
         assert isinstance_generic(x, Literal[1])  # type: ignore
-        assert isinstance_generic(x, Literal[2, None, 1, "a"])  # type: ignore
+        assert isinstance_generic(x, Literal[2, None, 1, "a"])
 
         assert not isinstance_generic(x, float)
         assert not isinstance_generic(x, Callable)  # type: ignore

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import logging
 import os
@@ -16,7 +15,6 @@ from typing import (
     Literal,
     Optional,
     Tuple,
-    TypedDict,
     TypeVar,
     Union,
     get_args,
@@ -39,17 +37,6 @@ SavingBackend = Literal["csv", "json", "pickle"]
 StoreMode = Literal["outputs_only", "outputs_metadata", "outputs_metadata_inputs"]
 
 _DEFAULT_CACHE_STORE_MODE: StoreMode = "outputs_only"
-
-
-class _CacheMeta(TypedDict):
-    datetime: str
-    duration: float
-    checksum: int
-    fn_fullname: str
-    output: Any
-    input: Optional[Tuple[Any, Any]]
-
-
 _DEFAULT_CACHE_DPATH = Path.home().joinpath(".cache", "disk_cache")
 
 
@@ -75,7 +62,6 @@ def disk_cache_decorator(
     cache_store_mode: StoreMode,
 ) -> Callable[[Callable[P, T]], Callable[P, T]]:
     """Perform the disk cache decorator operation."""
-    ...
 
 
 @overload
@@ -97,7 +83,6 @@ def disk_cache_decorator(
     cache_store_mode: StoreMode = _DEFAULT_CACHE_STORE_MODE,
 ) -> Callable[[Callable[P, T]], Callable[P, T]]:
     """Perform the disk cache decorator operation."""
-    ...
 
 
 @overload
@@ -119,7 +104,6 @@ def disk_cache_decorator(
     cache_store_mode: StoreMode = _DEFAULT_CACHE_STORE_MODE,
 ) -> Callable[[Callable[P, T]], Callable[P, T]]:
     """Perform the disk cache decorator operation."""
-    ...
 
 
 @overload
@@ -141,7 +125,6 @@ def disk_cache_decorator(
     cache_store_mode: StoreMode = _DEFAULT_CACHE_STORE_MODE,
 ) -> Callable[P, T]:
     """Perform the disk cache decorator operation."""
-    ...
 
 
 @overload
@@ -163,7 +146,6 @@ def disk_cache_decorator(
     cache_store_mode: StoreMode = _DEFAULT_CACHE_STORE_MODE,
 ) -> Callable[P, T]:
     """Perform the disk cache decorator operation."""
-    ...
 
 
 def disk_cache_decorator(
@@ -249,7 +231,6 @@ def disk_cache_call(
     **kwargs,
 ) -> T:
     """Perform the disk cache call operation."""
-    ...
 
 
 @overload
@@ -272,7 +253,6 @@ def disk_cache_call(
     **kwargs,
 ) -> T:
     """Perform the disk cache call operation."""
-    ...
 
 
 @overload
@@ -295,7 +275,6 @@ def disk_cache_call(
     **kwargs,
 ) -> T:
     """Perform the disk cache call operation."""
-    ...
 
 
 def disk_cache_call(
@@ -563,7 +542,7 @@ def _disk_cache_impl(
                         logger.debug(msg)
 
             else:
-                msg = f"Path {str(cache_fpath)} exists but it is not a file."
+                msg = f"Path {cache_fpath!s} exists but it is not a file."
                 raise RuntimeError(msg)
 
             return output
