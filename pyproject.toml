@@ -5,7 +5,7 @@ authors = [
 ]
 description = "Python library with tools for typing, manipulating collections, and more!"
 readme = "README.md"
-requires-python = ">=3.8,<3.15"
+requires-python = ">=3.8,<3.16"
 keywords = ["python", "tools", "utilities"]
 license = {file = "LICENSE"}
 # license-files = ["LICENSE"]  # unsupported by python 3.8, but will be required in 2026
@@ -20,6 +20,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
     "Topic :: Scientific/Engineering",
     "Operating System :: OS Independent",
     "Operating System :: MacOS :: MacOS X",
