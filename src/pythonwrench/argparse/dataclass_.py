@@ -374,8 +374,9 @@ def add_dataclass_fields_to_parser(
             field.name in positionals
         )
 
-        if is_positional_only and field.kw_only is True:
-            msg = f"Incompatible arguments for '{field.name}': found {required=}, {posonly_for_required=} but {field.kw_only=}."
+        kw_only = getattr(field, "kw_only", False)
+        if is_positional_only and kw_only:
+            msg = f"Incompatible arguments for '{field.name}': found {required=}, {posonly_for_required=} but {kw_only=}."
             raise ValueError(msg)
 
         if not is_positional_only:
