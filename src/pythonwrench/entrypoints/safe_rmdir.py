@@ -1,14 +1,57 @@
 #!/usr/bin/env python
 
 import logging
-from argparse import ArgumentParser
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Union
 
-from pythonwrench.argparse import str_to_bool
+from pythonwrench.argparse import parse_args_using_dataclass
 from pythonwrench.os import safe_rmdir
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class SafeRmdirArgs:
+    root: str = field(metadata={"doc": "Root directory path."})
+    rm_root: bool = field(
+        default=True,
+        metadata={
+            "doc": "If True, remove the root directory too if it is empty at the end. defaults to True."
+        },
+    )
+    error_on_non_empty_dir: bool = field(
+        default=True,
+        metadata={
+            "doc": "If True, raises a RuntimeError if a subdirectory contains at least 1 file. Otherwise it will ignore non-empty directories. defaults to True."
+        },
+    )
+    followlinks: bool = field(
+        default=False,
+        metadata={
+            "doc": "Indicates whether or not symbolic links shound be followed. defaults to False."
+        },
+    )
+    dry_run: bool = field(
+        default=False,
+        metadata={
+            "doc": "If True, does not remove any directory and just output the list of directories which could be deleted. defaults to False."
+        },
+    )
+    verbose: int = field(default=0, metadata={"doc": "Verbose level. defaults to 0."})
+
+
+def main_safe_rmdir() -> None:
+    """Perform the main safe rmdir operation."""
+    args = parse_args_using_dataclass(SafeRmdirArgs, posonly_for_required=True)
+    print_safe_rmdir(
+        root=args.root,
+        rm_root=args.rm_root,
+        error_on_non_empty_dir=args.error_on_non_empty_dir,
+        followlinks=args.followlinks,
+        dry_run=args.dry_run,
+        verbose=args.verbose,
+    )
 
 
 def print_safe_rmdir(
@@ -37,60 +80,6 @@ def print_safe_rmdir(
 
     elif verbose >= 1:
         print(f"{len(deleted)} directories has been deleted.")
-
-
-def main_safe_rmdir() -> None:
-    """Perform the main safe rmdir operation."""
-    parser = ArgumentParser()
-    parser.add_argument(
-        "root",
-        type=str,
-        help="Root directory path.",
-    )
-    parser.add_argument(
-        "--rm_root",
-        "--rm-root",
-        type=str_to_bool,
-        default=True,
-        help="If True, remove the root directory too if it is empty at the end. defaults to True.",
-    )
-    parser.add_argument(
-        "--error_on_non_empty_dir",
-        "--error-on-non-empty-dir",
-        type=str_to_bool,
-        default=True,
-        help="If True, raises a RuntimeError if a subdirectory contains at least 1 file. Otherwise it will ignore non-empty directories. defaults to True.",
-    )
-    parser.add_argument(
-        "--followlinks",
-        "--follow_links",
-        "--follow-links",
-        type=str_to_bool,
-        default=False,
-        help="Indicates whether or not symbolic links shound be followed. defaults to False.",
-    )
-    parser.add_argument(
-        "--dry_run",
-        "--dry-run",
-        type=str_to_bool,
-        default=False,
-        help="If True, does not remove any directory and just output the list of directories which could be deleted. defaults to False.",
-    )
-    parser.add_argument(
-        "--verbose",
-        type=int,
-        default=0,
-        help="Verbose level. defaults to 0.",
-    )
-    args = parser.parse_args()
-    print_safe_rmdir(
-        root=args.root,
-        rm_root=args.rm_root,
-        error_on_non_empty_dir=args.error_on_non_empty_dir,
-        followlinks=args.followlinks,
-        dry_run=args.dry_run,
-        verbose=args.verbose,
-    )
 
 
 if __name__ == "__main__":

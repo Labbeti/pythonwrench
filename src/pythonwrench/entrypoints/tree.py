@@ -2,67 +2,49 @@
 
 import logging
 import sys
-from argparse import ArgumentParser
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Union
+from typing import List, Union
 
-from pythonwrench.argparse import str_to_bool
+from pythonwrench.argparse import parse_args_using_dataclass
 from pythonwrench.os import tree_iter
 from pythonwrench.re import PatternListLike
 
 logger = logging.getLogger(__name__)
 
 
+@dataclass
+class TreeArgs:
+    root: str = field(default=".", metadata={"doc": "Root directory path."})
+    include: List[str] = field(
+        default_factory=lambda: [".*"], metadata={"doc": "Include file/dir patterns."}
+    )
+    exclude: List[str] = field(
+        default_factory=list, metadata={"doc": "Exclude file/dir patterns."}
+    )
+    max_depth: int = field(
+        default=sys.maxsize, metadata={"doc": "Max directory tree depth."}
+    )
+    followlinks: bool = field(
+        default=True,
+        metadata={
+            "doc": "Indicates whether or not symbolic links should be followed. defaults to True."
+        },
+    )
+    skipfiles: bool = field(
+        default=False,
+        metadata={
+            "doc": "Indicates whether or not symbolic files should be shown. defaults to False."
+        },
+    )
+    sort: bool = field(
+        default=False, metadata={"doc": "Sort element by name. defaults to False."}
+    )
+
+
 def main_tree() -> None:
     """Perform the main tree operation."""
-    parser = ArgumentParser()
-    parser.add_argument(
-        "root",
-        type=str,
-        help="Root directory path.",
-        default=".",
-        nargs="?",  # for optional positional argument
-    )
-    parser.add_argument(
-        "--include",
-        type=str,
-        help="Include file/dir patterns.",
-        default=".*",
-        nargs="*",
-    )
-    parser.add_argument(
-        "--exclude",
-        type=str,
-        help="Exclude file/dir patterns.",
-        default=(),
-        nargs="*",
-    )
-    parser.add_argument(
-        "--max_depth",
-        type=int,
-        help="Max directory tree depth.",
-        default=sys.maxsize,
-    )
-    parser.add_argument(
-        "--followlinks",
-        type=str_to_bool,
-        help="Indicates whether or not symbolic links should be followed. defaults to True.",
-        default=True,
-    )
-    parser.add_argument(
-        "--skipfiles",
-        type=str_to_bool,
-        help="Indicates whether or not symbolic files should be shown. defaults to False.",
-        default=False,
-    )
-    parser.add_argument(
-        "--sort",
-        type=str_to_bool,
-        help="Sort element by name. defaults to False.",
-        default=False,
-    )
-    args = parser.parse_args()
-
+    args = parse_args_using_dataclass(TreeArgs, positionals=["root"])
     print_tree(
         root=args.root,
         include=args.include,

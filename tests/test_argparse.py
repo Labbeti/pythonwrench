@@ -21,6 +21,8 @@ from pythonwrench.argparse import (
     parse_to_optional_str,
     parse_to_type,
 )
+from pythonwrench.entrypoints.safe_rmdir import SafeRmdirArgs
+from pythonwrench.entrypoints.tree import TreeArgs
 from pythonwrench.typing import NoneType
 
 
@@ -107,8 +109,8 @@ class TestDataclassParser(TestCase):
             c: float = 1.2
 
         target = A(a="a", c=0.5)
-        args = ["--a", target.a, "--c", str(target.c)]
-        output = parse_args_using_dataclass(A, args=args)
+        argv = ["--a", target.a, "--c", str(target.c)]
+        output = parse_args_using_dataclass(A, argv=argv)
         assert output == target
 
     def test_parse_args_using_dataclass_example_2(self) -> None:
@@ -122,7 +124,7 @@ class TestDataclassParser(TestCase):
             arg6: Union[int, str] = 0
 
         target = A(arg1=None, arg2="fall", arg3=[99, 2])
-        args = [
+        argv = [
             "--arg1",
             str(target.arg1),
             "--arg2",
@@ -132,7 +134,7 @@ class TestDataclassParser(TestCase):
             "2",
             "--arg5",
         ]
-        output = parse_args_using_dataclass(A, args=args)
+        output = parse_args_using_dataclass(A, argv=argv)
 
         assert output == target
 
@@ -142,7 +144,7 @@ class TestDataclassParser(TestCase):
             arg_a: List[List[int]] = field(default_factory=list)
 
         with self.assertRaises(TypeError):
-            _ = parse_args_using_dataclass(A, args=[])
+            _ = parse_args_using_dataclass(A, argv=[])
 
     def test_parse_args_using_dataclass_example_3b(self) -> None:
         @dataclass
@@ -150,7 +152,7 @@ class TestDataclassParser(TestCase):
             arg_b: Union[str, List[str]] = ""
 
         with self.assertRaises(SystemExit):
-            _ = parse_args_using_dataclass(B, args=[])
+            _ = parse_args_using_dataclass(B, argv=[])
 
     def test_parse_args_using_dataclass_example_3c(self) -> None:
         @dataclass
@@ -158,7 +160,7 @@ class TestDataclassParser(TestCase):
             arg_c: Tuple[str, ...] = ()
 
         with self.assertRaises(TypeError):
-            _ = parse_args_using_dataclass(C, args=[])
+            _ = parse_args_using_dataclass(C, argv=[])
 
     def test_parse_args_using_dataclass_example_3d(self) -> None:
         @dataclass
@@ -166,7 +168,7 @@ class TestDataclassParser(TestCase):
             arg_d: int = 0
 
         with self.assertRaises(SystemExit):
-            _ = parse_args_using_dataclass(D, args=["--arg_d", "1.1"])
+            _ = parse_args_using_dataclass(D, argv=["--arg_d", "1.1"])
 
     def test_parse_args_using_dataclass_example_4(self) -> None:
         @dataclass
@@ -177,13 +179,13 @@ class TestDataclassParser(TestCase):
 
         nums_args = list(map(str, target.nums))
         result = parse_args_using_dataclass(
-            A, args=["--nums"] + nums_args, list_parsing="argparse"
+            A, argv=["--nums"] + nums_args, list_parsing="argparse"
         )
         assert target == result
 
         nums_args = [f"[{','.join(map(str, target.nums))}]"]
         result = parse_args_using_dataclass(
-            A, args=["--nums"] + nums_args, list_parsing="brackets"
+            A, argv=["--nums"] + nums_args, list_parsing="brackets"
         )
         assert target == result
 
@@ -198,35 +200,35 @@ class TestDataclassParser(TestCase):
 
         result = parse_args_using_dataclass(
             B,
-            args=["--seed", "42"],
+            argv=["--seed", "42"],
             list_parsing="brackets",
         )
         assert result == B(42, ("b",))
 
         result = parse_args_using_dataclass(
             B,
-            args=["--constraint_names", "[a,b]", "--seed", "42"],
+            argv=["--constraint_names", "[a,b]", "--seed", "42"],
             list_parsing="brackets",
         )
         assert result == B(42, ["a", "b"]), f"{result=}"
 
         result = parse_args_using_dataclass(
             B,
-            args=["--constraint_names", "[a]", "--seed", "42"],
+            argv=["--constraint_names", "[a]", "--seed", "42"],
             list_parsing="brackets",
         )
         assert result == B(42, ["a"])
 
         result = parse_args_using_dataclass(
             B,
-            args=["--constraint_names", "[]", "--seed", "42"],
+            argv=["--constraint_names", "[]", "--seed", "42"],
             list_parsing="brackets",
         )
         assert result == B(42, [])
 
         result = parse_args_using_dataclass(
             B,
-            args=["--constraint_names", "none", "--seed", "42"],
+            argv=["--constraint_names", "none", "--seed", "42"],
             list_parsing="brackets",
         )
         assert result == B(42, None)
@@ -234,7 +236,7 @@ class TestDataclassParser(TestCase):
         with self.assertRaises(SystemExit):
             result = parse_args_using_dataclass(
                 B,
-                args=["--constraint_names", "truc", "--seed", "42"],
+                argv=["--constraint_names", "truc", "--seed", "42"],
                 list_parsing="brackets",
             )
             assert result == B(42, "truc")
@@ -246,14 +248,14 @@ class TestDataclassParser(TestCase):
 
         result = parse_args_using_dataclass(
             A,
-            args=[],
+            argv=[],
             list_parsing="brackets",
         )
         assert result == A()
 
         result = parse_args_using_dataclass(
             A,
-            args=["--seed", "[0,a]"],
+            argv=["--seed", "[0,a]"],
             list_parsing="brackets",
         )
         assert result == A([0, "a"])
@@ -261,7 +263,7 @@ class TestDataclassParser(TestCase):
         with self.assertRaises(SystemExit):
             result = parse_args_using_dataclass(
                 A,
-                args=["--seed", "[b]"],
+                argv=["--seed", "[b]"],
                 list_parsing="brackets",
             )
             assert result == A(["b"])  # type: ignore
@@ -269,7 +271,7 @@ class TestDataclassParser(TestCase):
         with self.assertRaises(SystemExit):
             result = parse_args_using_dataclass(
                 A,
-                args=["--seed", "[1]"],
+                argv=["--seed", "[1]"],
                 list_parsing="brackets",
             )
             assert result == A([1])  # type: ignore
@@ -287,13 +289,13 @@ class TestDataclassParser(TestCase):
         expected_cfg1 = Cfg1(Path("test/a.txt"))
         expected_cfg2 = Cfg2(b="b")
 
-        cfg = parse_args_using_dataclass(Cfg1, args=["--path", str(expected_cfg1.path)])
+        cfg = parse_args_using_dataclass(Cfg1, argv=["--path", str(expected_cfg1.path)])
         assert cfg == expected_cfg1
 
         cfg2, cfg1 = parse_args_using_dataclass(
             Cfg2,
             Cfg1,
-            args=[
+            argv=[
                 "--path",
                 str(expected_cfg1.path),
                 "--b",
@@ -306,7 +308,7 @@ class TestDataclassParser(TestCase):
         args = parse_args_using_dataclass(
             Cfg2,
             Cfg1,
-            args=[
+            argv=[
                 "--path",
                 str(expected_cfg1.path),
                 "--b",
@@ -327,7 +329,7 @@ class TestDataclassParser(TestCase):
         target = Cfg(False, 10, True)
         cfg = parse_args_using_dataclass(
             Cfg,
-            args=["--create", "--num", str(target.num)],
+            argv=["--create", "--num", str(target.num)],
             bool_action="store_true",
         )
         assert cfg == target
@@ -339,7 +341,7 @@ class TestDataclassParser(TestCase):
 
         cfg = parse_args_using_dataclass(
             Cfg,
-            args=["--constraints", "[none]"],
+            argv=["--constraints", "[none]"],
             list_parsing="brackets",
         )
         assert cfg == Cfg([None])
@@ -365,11 +367,11 @@ class TestDataclassParser(TestCase):
             f"{args=}, {parser.format_help()=}"
         )
 
-        cfg = parse_args_using_dataclass(Cfg, args=["A"])
+        cfg = parse_args_using_dataclass(Cfg, argv=["A"])
         assert cfg == target, f"{cfg=}; {target=}"
 
         target = Cfg(B(b="b2"))
-        cfg = parse_args_using_dataclass(Cfg, args=["B", "--subcfg.b", "b2"])
+        cfg = parse_args_using_dataclass(Cfg, argv=["B", "--subcfg.b", "b2"])
         assert cfg == target, f"{cfg=}; {target=}"
 
     def test_subparsers_example_2(self) -> None:
@@ -382,15 +384,15 @@ class TestDataclassParser(TestCase):
             a: C = field(default_factory=partial(C, n=1))
 
         target = D()
-        cfg = parse_args_using_dataclass(D, args=[])
+        cfg = parse_args_using_dataclass(D, argv=[])
         assert cfg == target, f"{cfg=}; {target=}"
 
         target = D(C())
-        cfg = parse_args_using_dataclass(D, args=["C"])
+        cfg = parse_args_using_dataclass(D, argv=["C"])
         assert cfg == target, f"{cfg=}; {target=}"
 
         target = D(C(n=2))
-        cfg = parse_args_using_dataclass(D, args=["C", "--a.n", "2"])
+        cfg = parse_args_using_dataclass(D, argv=["C", "--a.n", "2"])
         assert cfg == target, f"{cfg=}; {target=}"
 
     def test_nested_subparsers(self) -> None:
@@ -412,9 +414,27 @@ class TestDataclassParser(TestCase):
 
         cfg = parse_args_using_dataclass(
             Cfg,
-            args=["Nested", "A", "--nested.command.value", "3"],
+            argv=["Nested", "A", "--nested.command.value", "3"],
         )
         assert cfg == Cfg(Nested(A(3)))
+
+    def test_posonly_for_required(self) -> None:
+        @dataclass
+        class A:
+            a: int
+            b: str = "test"
+
+        target = A(0)
+        cfg = parse_args_using_dataclass(
+            A, argv=["--b", target.b, str(target.a)], posonly_for_required=True
+        )
+        assert cfg == target
+
+    def test_check_entrypoint_dataclasses_parsing(self) -> None:
+        _ = parse_args_using_dataclass(TreeArgs, argv=[], positionals=["root"])
+        _ = parse_args_using_dataclass(
+            SafeRmdirArgs, argv=["."], posonly_for_required=True
+        )
 
 
 if __name__ == "__main__":

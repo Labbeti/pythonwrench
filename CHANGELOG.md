@@ -5,9 +5,14 @@ All notable changes to this project will be documented in this file.
 ## [0.6.9] UNRELEASED
 ### Added
 - `hash_str`, `hash_bytes` and `hash_bytes_buffer` functions.
+- Function `parse_args_using_dataclass` now supports metadata doc options.
 
 ### Modified
 - Update code format with ruff 0.16.10.
+- Add check for `field.kw_only` with positional argument.
+
+### Fixed
+- Option value `posonly_for_required=True` in `parse_args_using_dataclass`.
 
 
 ## [0.6.8] 2026-10-26
