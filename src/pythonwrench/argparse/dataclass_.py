@@ -323,7 +323,7 @@ def _instantiate_dataclasses(
 def add_dataclass_fields_to_parser(
     dataclass_type: Type[T_DataclassInstance],
     *,
-    parser: Optional[ArgumentParser],
+    parser: Optional[ArgumentParser] = None,
     list_parsing: ListParsing = "argparse",
     bool_action: BoolAction = "store",
     add_dashed_arg: bool = True,
