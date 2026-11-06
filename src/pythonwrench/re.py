@@ -23,6 +23,7 @@ from typing import (
 from typing_extensions import TypeAlias
 
 from pythonwrench.collections.collections import DictByKV, K, V, find
+from pythonwrench.functools import identity
 from pythonwrench.warnings import deprecated_alias
 
 T = TypeVar("T")
@@ -43,17 +44,20 @@ def filter_iter_with_patterns(
     *,
     exclude: Optional[PatternListLike] = (),
     match_fn: MatchLike = re.search,
+    key: Optional[Callable[[str], str]] = None,
 ) -> List[str]:
     """Perform the filter with patterns operation."""
     if include is None:
         include = ".*"
     if exclude is None:
         exclude = ()
+    if key is None:
+        key = identity
 
     return [
         xi
         for xi in x
-        if match_patterns(xi, include, exclude=exclude, match_fn=match_fn)
+        if match_patterns(key(xi), include, exclude=exclude, match_fn=match_fn)
     ]
 
 
