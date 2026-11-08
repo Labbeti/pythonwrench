@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 from unittest import TestCase
 
-from pythonwrench.csv import dumps_csv, loads_csv, read_csv, save_csv
+from pythonwrench.csv import dump_csv, dumps_csv, loads_csv, read_csv, save_csv
 
 
 class TestCSV(TestCase):
@@ -26,11 +26,22 @@ class TestCSV(TestCase):
         tmp_dpath = Path(tempfile.gettempdir())
 
         tmp_fpath = tmp_dpath.joinpath("subdir", "test.csv")
-        save_csv(examples, tmp_fpath, overwrite=True, make_parents=True)
+        save_csv(examples, tmp_fpath, on_exists="overwrite", make_parents=True)
         result = read_csv(tmp_fpath, orient="list")
 
         assert examples == result
         os.remove(tmp_fpath)
+
+    def test_examples_3(self) -> None:
+        tmp_dpath = Path(tempfile.gettempdir())
+        tmp_fpath = tmp_dpath / "subdir" / "test_csv_3.csv"
+
+        data = {"a": [1, 2]}
+        lineterminator = "\n"
+        expected = f"a{lineterminator}1{lineterminator}2{lineterminator}"
+
+        content = dump_csv(data, tmp_fpath, lineterminator=lineterminator)
+        assert content == expected
 
 
 if __name__ == "__main__":

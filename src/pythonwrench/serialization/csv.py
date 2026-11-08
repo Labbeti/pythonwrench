@@ -3,7 +3,7 @@
 import csv
 import io
 from csv import DictReader, DictWriter
-from io import TextIOBase
+from io import IOBase, TextIOBase
 from os import PathLike
 from pathlib import Path
 from typing import (
@@ -23,7 +23,12 @@ from typing import (
 from pythonwrench.cast import as_builtin
 from pythonwrench.collections import dict_list_to_list_dict, list_dict_to_dict_list
 from pythonwrench.functools import function_alias
-from pythonwrench.serialization._core import _setup_output_fpath
+from pythonwrench.serialization._core import (
+    OnExists,
+    _BufferDuplicate,
+    _resolve_on_exists,
+    _setup_output_fpath,
+)
 from pythonwrench.typing import isinstance_generic
 
 T = TypeVar("T")
@@ -36,10 +41,11 @@ Orient = Literal["list", "dict"]
 
 def dump_csv(
     data: Union[Iterable[Mapping[str, Any]], Mapping[str, Iterable[Any]], Iterable],
-    file: Union[str, Path, PathLike, TextIOBase, None] = None,
+    target: Union[str, Path, PathLike, TextIOBase, None] = None,
     /,
     *,
-    overwrite: bool = True,
+    on_exists: Optional[OnExists] = None,
+    overwrite: Optional[bool] = None,
     make_parents: bool = True,
     to_builtins: bool = False,
     header: Union[bool, Literal["auto"]] = "auto",
@@ -51,8 +57,9 @@ def dump_csv(
 
     Args:
         data: Data to serialize. Can be a list of dicts, dicts of lists or list of lists.
-        file: File path or buffer to write serialized data.
-        overwrite: If True, overwrite target filepath. defaults to True.
+        target: File path or buffer to write serialized data.
+        on_exists: Define how target file should be treated if already exists. defaults to "overwrite".
+        overwrite: (DEPRECATED: use on_exists instead) If True, overwrite target filepath. defaults to None.
         make_parents: Build intermediate directories to filepath. defaults to True.
         to_builtins: If True, converts data to builtin equivalent before saving. defaults to False.
         header: Indicates if CSV must have header. If "auto", an header is added when a dict of list or list of dicts is passed. defaults to "auto".
@@ -63,30 +70,44 @@ def dump_csv(
     Returns:
         Dumped content as string.
     """
-    content = dumps_csv(
-        data,
-        to_builtins=to_builtins,
-        header=header,
-        align_content=align_content,
-        replace_newline_by=replace_newline_by,
-        **csv_writer_kwds,
-    )
+    on_exists, overwrite = _resolve_on_exists(on_exists, overwrite)
 
-    if not overwrite and isinstance(file, (str, Path, PathLike)):
-        return content
-    elif isinstance(file, (str, Path, PathLike)):
-        file = _setup_output_fpath(file, overwrite=overwrite, make_parents=make_parents)
-        with open(file, "w") as opened_file:
-            opened_file.write(content)
-    elif isinstance(file, TextIOBase):
-        file.write(content)
-    elif file is None:
-        pass
-    else:
-        msg = f"Invalid argument type {type(file)}. (expected one of str, Path, TextIOBase, None)"
-        raise TypeError(msg)
+    if isinstance(target, (str, Path, PathLike)):
+        target = _setup_output_fpath(
+            target,
+            overwrite=overwrite,
+            on_exists=on_exists,
+            make_parents=make_parents,
+        )
+        with open(target, "w") as file:
+            return dump_csv(
+                data,
+                file,
+                to_builtins=to_builtins,
+                header=header,
+                align_content=align_content,
+                replace_newline_by=replace_newline_by,
+                **csv_writer_kwds,
+            )
 
-    return content
+    with io.StringIO() as buffer:
+        targets: list[TextIOBase] = [buffer]
+        if isinstance(target, TextIOBase):
+            targets.append(target)
+        target_router = _BufferDuplicate(*targets)
+
+        _serialize_csv(
+            data,
+            target_router,
+            to_builtins=to_builtins,
+            header=header,
+            align_content=align_content,
+            replace_newline_by=replace_newline_by,
+            **csv_writer_kwds,
+        )
+        dumped = buffer.getvalue()
+
+    return dumped
 
 
 def dumps_csv(
@@ -130,10 +151,11 @@ def dumps_csv(
 
 def save_csv(
     data: Union[Iterable[Mapping[str, Any]], Mapping[str, Iterable[Any]], Iterable],
-    file: Union[str, Path, PathLike, TextIOBase],
+    target: Union[str, Path, PathLike, TextIOBase],
     /,
     *,
-    overwrite: bool = True,
+    on_exists: Optional[OnExists] = None,
+    overwrite: Optional[bool] = None,
     make_parents: bool = True,
     to_builtins: bool = False,
     header: Union[bool, Literal["auto"]] = "auto",
@@ -145,7 +167,9 @@ def save_csv(
 
     Args:
         data: Data to serialize. Can be a list of dicts, dicts of lists or list of lists.
-        overwrite: If True, overwrite target filepath. defaults to True.
+        target: File path or buffer to write serialized data.
+        on_exists: Define how target file should be treated if already exists. defaults to "overwrite".
+        overwrite: (DEPRECATED: use on_exists instead) If True, overwrite target filepath. defaults to None.
         make_parents: Build intermediate directories to filepath. defaults to True.
         to_builtins: If True, converts data to builtin equivalent before saving. defaults to False.
         header: Indicates if CSV must have header. If "auto", an header is added when a dict of list or list of dicts is passed. defaults to "auto".
@@ -153,35 +177,44 @@ def save_csv(
         replace_newline_by: Replace newline character to avoid newline in CSV content. defaults to "\\n".
         \*\*csv_writer_kwds: Others optional arguments passed to CSV writer object.
     """
-    if not overwrite and isinstance(file, (str, Path, PathLike)):
-        return
-    elif isinstance(file, (str, Path, PathLike)):
-        file = _setup_output_fpath(file, overwrite=overwrite, make_parents=make_parents)
-        file = open(file, "w")  # noqa: SIM115
-        close = True
-    elif isinstance(file, TextIOBase):
-        close = False
+    if isinstance(target, (str, Path, PathLike)):
+        on_exists, overwrite = _resolve_on_exists(on_exists, overwrite)
+        target = _setup_output_fpath(
+            target,
+            overwrite=overwrite,
+            on_exists=on_exists,
+            make_parents=make_parents,
+        )
+        with open(target, "w") as file:
+            return _serialize_csv(
+                data,
+                file,
+                to_builtins=to_builtins,
+                header=header,
+                align_content=align_content,
+                replace_newline_by=replace_newline_by,
+                **csv_writer_kwds,
+            )
+
+    elif isinstance(target, TextIOBase):
+        _serialize_csv(
+            data,
+            target,
+            to_builtins=to_builtins,
+            header=header,
+            align_content=align_content,
+            replace_newline_by=replace_newline_by,
+            **csv_writer_kwds,
+        )
+
     else:
-        msg = f"Invalid argument type {type(file)}. (expected one of str, Path, PathLike, TextIOBase)"
+        msg = f"Invalid argument type {type(target)=}."
         raise TypeError(msg)
-
-    _serialize_csv(
-        data,
-        file,
-        to_builtins=to_builtins,
-        header=header,
-        align_content=align_content,
-        replace_newline_by=replace_newline_by,
-        **csv_writer_kwds,
-    )
-
-    if close:
-        file.close()
 
 
 def _serialize_csv(
     data: Union[Iterable[Mapping[str, Any]], Mapping[str, Iterable[Any]], Iterable],
-    buffer: TextIOBase,
+    buffer: IOBase,
     *,
     to_builtins: bool = False,
     header: Union[bool, Literal["auto"]] = "auto",

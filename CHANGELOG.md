@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 - `hash_str`, `hash_bytes` and `hash_bytes_buffer` functions.
 - Function `parse_args_using_dataclass` now supports metadata doc options.
 - `key` arg in `filter_iter_with_patterns`.
+- `on_exists` option for serialization.
 
 ### Modified
 - Update code format with ruff 0.16.10.
