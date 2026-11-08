@@ -43,6 +43,14 @@ class TestCSV(TestCase):
         content = dump_csv(data, tmp_fpath, lineterminator=lineterminator)
         assert content == expected
 
+    def test_examples_4(self) -> None:
+        lineterminator = "\r\n"
+        dumped = f"a{lineterminator}1{lineterminator}2{lineterminator}"
+        expected = {"a": ["1", "2"]}
+
+        data = loads_csv(dumped, lineterminator=lineterminator, orient="dict")
+        assert data == expected
+
 
 if __name__ == "__main__":
     unittest.main()
