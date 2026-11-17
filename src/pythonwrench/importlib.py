@@ -8,7 +8,7 @@ from functools import wraps
 from importlib.metadata import Distribution, PackageNotFoundError
 from importlib.util import find_spec
 from types import ModuleType
-from typing import Any, Callable, Dict, Iterable, List, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 
 from typing_extensions import ParamSpec, TypeVar
 
@@ -16,6 +16,7 @@ from pythonwrench.warnings import warn_once
 
 P = ParamSpec("P")
 T = TypeVar("T")
+T_ModuleType = TypeVar("T_ModuleType", bound=ModuleType)
 
 
 _DEFAULT_SKIPPED = (
@@ -234,9 +235,13 @@ class ModulePlaceholder(ModuleType, Placeholder):
         ModuleType.__init__(self, *args, **kwargs)
 
 
-def import_if_available(name: str) -> ModuleType:
+def import_if_available(
+    name: str, *, module_fallback: Optional[T_ModuleType] = None
+) -> Union[ModuleType, T_ModuleType]:
     """Perform the import if available operation."""
     if is_available_package(name):
         return __import__(name)
-    else:
+    elif module_fallback is None:
         return ModulePlaceholder(name)
+    else:
+        return module_fallback
