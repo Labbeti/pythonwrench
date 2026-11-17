@@ -118,7 +118,8 @@ def _setup_output_fpath(
 
 
 def _resolve_on_exists(
-    on_exists: Optional[OnExists], overwrite: Optional[bool]
+    on_exists: Optional[OnExists],
+    overwrite: Optional[bool],
 ) -> Tuple[OnExists, Optional[bool]]:
     if isinstance(overwrite, bool):
         warn_once(f"Depreacted arg {overwrite=}. Use 'on_exists' instead.")
