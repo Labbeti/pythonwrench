@@ -6,6 +6,14 @@ pythonwrench.serialization package
    :undoc-members:
    :show-inheritance:
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pythonwrench.serialization.yaml
+
 Submodules
 ----------
 
