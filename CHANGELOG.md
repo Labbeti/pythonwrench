@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 - `hash_str`, `hash_bytes` and `hash_bytes_buffer` functions.
 - Function `parse_args_using_dataclass` now supports metadata doc options.
 - `key` arg in `filter_iter_with_patterns`.
+- Serialisation function for YAML files.
 - `on_exists` option for serialization fns.
 - `module_fallback` option to `import_if_available` fn.
 

@@ -67,6 +67,8 @@ class TestReadmeExamples(TestCase):
         list_of_dicts = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         pw.dump_csv(list_of_dicts, "data.csv")
         pw.dump_json(list_of_dicts, "data.json")
+
+        # assert pw.load_csv("data.csv") == list_of_dicts
         assert pw.load_json("data.json") == list_of_dicts
 
         os.remove("data.csv")

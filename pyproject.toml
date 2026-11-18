@@ -75,6 +75,9 @@ tests = [
 lazy = [
     "lazy-loader>=0.4,<1",
 ]
+yaml = [
+    "pyyaml>=6.0.3",
+]
 
 [tool.pyright]
 include = ["src"]

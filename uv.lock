@@ -3187,6 +3187,9 @@ tests = [
     { name = "pytest", version = "9.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
     { name = "ruff" },
 ]
+yaml = [
+    { name = "pyyaml" },
+]
 
 [package.metadata]
 requires-dist = [
@@ -3199,6 +3202,7 @@ requires-dist = [
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=3.5.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.5" },
     { name = "pytest", marker = "extra == 'tests'", specifier = ">=8.3.5" },
+    { name = "pyyaml", marker = "extra == 'yaml'", specifier = ">=6.0.3" },
     { name = "ruff", marker = "extra == 'dev'", specifier = "==0.16.10" },
     { name = "ruff", marker = "extra == 'tests'", specifier = "==0.16.10" },
     { name = "sphinx", marker = "extra == 'dev'", specifier = ">=7.1.2,<9.0.0" },
@@ -3208,7 +3212,7 @@ requires-dist = [
     { name = "twine", marker = "extra == 'dev'", specifier = ">=6.1.0" },
     { name = "typing-extensions", specifier = ">=4.10.0" },
 ]
-provides-extras = ["dev", "docs", "lazy", "tests"]
+provides-extras = ["dev", "docs", "lazy", "tests", "yaml"]
 
 [[package]]
 name = "pytz"

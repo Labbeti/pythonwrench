@@ -1,17 +1,24 @@
 #!/usr/bin/env python
 
-from io import StringIO, TextIOBase
+from io import TextIOBase
 from os import PathLike
 from pathlib import Path
-from typing import Any, Union
+from typing import Any, Optional, Union
 
 from pythonwrench.cast import as_builtin
 from pythonwrench.functools import function_alias
 from pythonwrench.semver import Version
-from pythonwrench.serialization._core import OnError, _setup_output_fpath
+from pythonwrench.serialization._core import (
+    OnError,
+    OnExists,
+    _dump_base,
+    _dumps_base,
+    _load_base,
+    _loads_base,
+    _save_base,
+)
 from pythonwrench.serialization.json import (
     _serialize_json,
-    dumps_json,
     load_json,
     loads_json,
 )
@@ -31,10 +38,11 @@ __all__ = [
 
 def dump_jsonl(
     data: list,
-    file: Union[str, Path, None, TextIOBase] = None,
+    target: Union[str, Path, None, TextIOBase] = None,
     /,
     *,
-    overwrite: bool = True,
+    on_exists: Optional[OnExists] = None,
+    overwrite: Optional[bool] = None,
     make_parents: bool = True,
     to_builtins: bool = False,
     # JSON dump kwargs
@@ -45,8 +53,9 @@ def dump_jsonl(
 
     Args:
         data: Data to dump to JSONL.
-        file: Optional filepath to save dumped data. Not used if None. defaults to None.
-        overwrite: If True, overwrite target filepath. defaults to True.
+        target: Optional filepath to save dumped data. Not used if None. defaults to None.
+        on_exists: Define how target file should be treated if already exists. defaults to "overwrite".
+        overwrite: (DEPRECATED: use on_exists instead) If True, overwrite target filepath. defaults to None.
         make_parents: Build intermediate directories to filepath. defaults to True.
         to_builtins: If True, converts data to builtin equivalent before saving. defaults to False.
         ensure_ascii: Ensure only ASCII characters. defaults to False.
@@ -55,32 +64,22 @@ def dump_jsonl(
     Returns:
         Dumped content as string.
     """
-    content = dumps_json(
+    return _dump_base(
+        _serialize_json,
+        "text",
         data,
+        target,
+        on_exists=on_exists,
+        overwrite=overwrite,
+        make_parents=make_parents,
         to_builtins=to_builtins,
         ensure_ascii=ensure_ascii,
         **json_dumps_kwds,
     )
 
-    if not overwrite and isinstance(file, (str, Path, PathLike)):
-        return content
-    elif isinstance(file, (str, Path, PathLike)):
-        file = _setup_output_fpath(file, overwrite=overwrite, make_parents=make_parents)
-        with open(file, "w") as opened_file:
-            opened_file.write(content)
-    elif isinstance(file, TextIOBase):
-        file.write(content)
-    elif file is None:
-        pass
-    else:
-        msg = f"Invalid argument type {type(file)}. (expected one of str, Path, TextIOBase, None)"
-        raise TypeError(msg)
-
-    return content
-
 
 def dumps_jsonl(
-    data: list,
+    source: list,
     /,
     *,
     to_builtins: bool = False,
@@ -88,17 +87,24 @@ def dumps_jsonl(
     ensure_ascii: bool = False,
     **json_dumps_kwds,
 ) -> str:
-    """Perform the dumps jsonl operation."""
-    with StringIO() as buffer:
-        _serialize_jsonl(
-            data,
-            buffer,
-            to_builtins=to_builtins,
-            ensure_ascii=ensure_ascii,
-            **json_dumps_kwds,
-        )
-        content = buffer.getvalue()
-    return content
+    r"""Dump content to JSONL format into a string and/or file.
+
+    Args:
+        data: Data to dump to JSON.
+        to_builtins: If True, converts data to builtin equivalent before saving. defaults to False.
+        \*\*json_dump_kwds: Other args passed to `json.dump`.
+
+    Returns:
+        Dumped content as string.
+    """
+    return _dumps_base(
+        _serialize_jsonl,
+        "text",
+        source,
+        to_builtins=to_builtins,
+        ensure_ascii=ensure_ascii,
+        **json_dumps_kwds,
+    )
 
 
 def save_jsonl(
@@ -114,28 +120,80 @@ def save_jsonl(
     **json_dumps_kwds,
 ) -> None:
     """Save jsonl."""
-    if not overwrite and isinstance(file, (str, Path, PathLike)):
-        return
-    elif isinstance(file, (str, Path, PathLike)):
-        file = _setup_output_fpath(file, overwrite=overwrite, make_parents=make_parents)
-        file = open(file, "w")  # noqa: SIM115
-        close = True
-    elif isinstance(file, TextIOBase):
-        close = False
-    else:
-        msg = f"Invalid argument type {type(file)}. (expected one of str, Path, PathLike, TextIOBase)"
-        raise TypeError(msg)
-
-    _serialize_jsonl(
+    return _save_base(
+        _serialize_jsonl,
+        "text",
         data,
         file,
+        overwrite=overwrite,
+        make_parents=make_parents,
         to_builtins=to_builtins,
         ensure_ascii=ensure_ascii,
         **json_dumps_kwds,
     )
 
-    if close:
-        file.close()
+
+# -- Load / Read / Parse JSONL content --
+
+
+def load_jsonl(
+    source: Union[str, Path, PathLike, TextIOBase],
+    /,
+    *,
+    on_error: OnError = "raise",
+    default: Any = None,
+    **json_loads_kwds,
+) -> list:
+    r"""Load JSONL file.
+
+    Args:
+        target: Target filepath or buffer to read.
+        on_error: Defines how error should be handled.
+            If "raise", raise the exception if file is not found or content is malformed JSON format.
+            If "return_default", return the value provided by default argument.
+        default: Value to return when on_error="return_default".
+        \*\*json_loads_kwds: Other args passed to `json.load`.
+    """
+    return _load_base(
+        _parse_jsonl,
+        "text",
+        source,
+        on_error=on_error,
+        default=default,
+        **json_loads_kwds,
+    )
+
+
+def loads_jsonl(
+    source: str,
+    /,
+    *,
+    on_error: OnError = "raise",
+    default: Any = None,
+    **json_loads_kwds,
+) -> list:
+    r"""Load JSONL from string.
+
+    Args:
+        source: Source content.
+        on_error: Defines how error should be handled.
+            If "raise", raise the exception if file is not found or content is malformed JSON format.
+            If "return_default", return the value provided by default argument.
+        default: Value to return when on_error="return_default".
+        \*\*json_loads_kwds: Other args passed to `json.load`.
+    """
+    return _loads_base(
+        _parse_jsonl,
+        "text",
+        source,
+        on_error=on_error,
+        default=default,
+        **json_loads_kwds,
+    )
+
+
+@function_alias(load_json)
+def read_jsonl(*args, **kwargs): ...
 
 
 def _serialize_jsonl(
@@ -158,53 +216,6 @@ def _serialize_jsonl(
     for data_i in data:
         _serialize_json(data_i, buffer, to_builtins=False, **json_dumps_kwds)
         buffer.write("\n")
-
-
-# -- Load / Read / Parse JSONL content --
-
-
-def load_jsonl(
-    file: Union[str, Path, PathLike, TextIOBase],
-    /,
-    *,
-    on_error: OnError = "raise",
-    default: Any = None,
-    **json_loads_kwds,
-) -> list:
-    """Load jsonl."""
-    if isinstance(file, (str, Path, PathLike)):
-        file = open(file, "r")  # noqa: SIM115
-        close = True
-    else:
-        close = False
-
-    data = _parse_jsonl(file, on_error=on_error, default=default, **json_loads_kwds)
-    if close:
-        file.close()
-    return data
-
-
-def loads_jsonl(
-    content: str,
-    /,
-    *,
-    on_error: OnError = "raise",
-    default: Any = None,
-    **json_loads_kwds,
-) -> list:
-    """Load s jsonl."""
-    with StringIO(content) as buffer:
-        return _parse_jsonl(
-            buffer,
-            on_error=on_error,
-            default=default,
-            **json_loads_kwds,
-        )
-
-
-@function_alias(load_json)
-def read_jsonl(*args, **kwargs):
-    """Read jsonl."""
 
 
 def _parse_jsonl(

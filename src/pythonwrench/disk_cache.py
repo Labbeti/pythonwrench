@@ -356,7 +356,6 @@ def _disk_cache_impl(
     cache_store_mode: StoreMode = _DEFAULT_CACHE_STORE_MODE,
 ) -> Callable[[Callable[P, T]], Callable[P, T]]:
     # for backward compatibility
-    """Perform the disk cache impl operation."""
     if cache_fname_fmt is None:
         expected = "{fn_name}_{csum}{suffix}"
         msg = f"Deprecated argument value {cache_fname_fmt=}. (use {expected} instead)"

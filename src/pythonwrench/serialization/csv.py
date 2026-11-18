@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import csv
-import io
+import os
 from csv import DictReader, DictWriter
 from io import IOBase, TextIOBase
 from os import PathLike
@@ -25,9 +25,11 @@ from pythonwrench.collections import dict_list_to_list_dict, list_dict_to_dict_l
 from pythonwrench.functools import function_alias
 from pythonwrench.serialization._core import (
     OnExists,
-    _BufferDuplicate,
-    _resolve_on_exists,
-    _setup_output_fpath,
+    _dump_base,
+    _dumps_base,
+    _load_base,
+    _loads_base,
+    _save_base,
 )
 from pythonwrench.typing import isinstance_generic
 
@@ -35,6 +37,15 @@ T = TypeVar("T")
 
 Orient = Literal["list", "dict"]
 
+__all__ = [
+    "Orient",
+    "dump_csv",
+    "dumps_csv",
+    "load_csv",
+    "loads_csv",
+    "read_csv",
+    "save_csv",
+]
 
 # -- Dump / Save / Serialize content to CSV --
 
@@ -70,44 +81,20 @@ def dump_csv(
     Returns:
         Dumped content as string.
     """
-    on_exists, overwrite = _resolve_on_exists(on_exists, overwrite)
-
-    if isinstance(target, (str, Path, PathLike)):
-        target = _setup_output_fpath(
-            target,
-            overwrite=overwrite,
-            on_exists=on_exists,
-            make_parents=make_parents,
-        )
-        with open(target, "w") as file:
-            return dump_csv(
-                data,
-                file,
-                to_builtins=to_builtins,
-                header=header,
-                align_content=align_content,
-                replace_newline_by=replace_newline_by,
-                **csv_writer_kwds,
-            )
-
-    with io.StringIO() as buffer:
-        targets: list[TextIOBase] = [buffer]
-        if isinstance(target, TextIOBase):
-            targets.append(target)
-        target_router = _BufferDuplicate(*targets)
-
-        _serialize_csv(
-            data,
-            target_router,
-            to_builtins=to_builtins,
-            header=header,
-            align_content=align_content,
-            replace_newline_by=replace_newline_by,
-            **csv_writer_kwds,
-        )
-        dumped = buffer.getvalue()
-
-    return dumped
+    return _dump_base(
+        _serialize_csv,
+        "text",
+        data,
+        target,
+        on_exists=on_exists,
+        overwrite=overwrite,
+        make_parents=make_parents,
+        to_builtins=to_builtins,
+        header=header,
+        align_content=align_content,
+        replace_newline_by=replace_newline_by,
+        **csv_writer_kwds,
+    )
 
 
 def dumps_csv(
@@ -124,8 +111,6 @@ def dumps_csv(
 
     Args:
         data: Data to serialize. Can be a list of dicts, dicts of lists or list of lists.
-        overwrite: If True, overwrite target filepath. defaults to True.
-        make_parents: Build intermediate directories to filepath. defaults to True.
         to_builtins: If True, converts data to builtin equivalent before saving. defaults to False.
         header: Indicates if CSV must have header. If "auto", an header is added when a dict of list or list of dicts is passed. defaults to "auto".
         align_content: If True, center content at the middle of each row for better visualization. defaults to False.
@@ -135,18 +120,16 @@ def dumps_csv(
     Returns:
         Dumped content as string.
     """
-    with io.StringIO() as buffer:
-        _serialize_csv(
-            data,
-            buffer,
-            to_builtins=to_builtins,
-            header=header,
-            align_content=align_content,
-            replace_newline_by=replace_newline_by,
-            **csv_writer_kwds,
-        )
-        content = buffer.getvalue()
-    return content
+    return _dumps_base(
+        _serialize_csv,
+        "text",
+        data,
+        to_builtins=to_builtins,
+        header=header,
+        align_content=align_content,
+        replace_newline_by=replace_newline_by,
+        **csv_writer_kwds,
+    )
 
 
 def save_csv(
@@ -177,39 +160,156 @@ def save_csv(
         replace_newline_by: Replace newline character to avoid newline in CSV content. defaults to "\\n".
         \*\*csv_writer_kwds: Others optional arguments passed to CSV writer object.
     """
-    if isinstance(target, (str, Path, PathLike)):
-        on_exists, overwrite = _resolve_on_exists(on_exists, overwrite)
-        target = _setup_output_fpath(
-            target,
-            overwrite=overwrite,
-            on_exists=on_exists,
-            make_parents=make_parents,
-        )
-        with open(target, "w") as file:
-            return _serialize_csv(
-                data,
-                file,
-                to_builtins=to_builtins,
-                header=header,
-                align_content=align_content,
-                replace_newline_by=replace_newline_by,
-                **csv_writer_kwds,
-            )
+    return _save_base(
+        _serialize_csv,
+        "text",
+        data,
+        target,
+        overwrite=overwrite,
+        on_exists=on_exists,
+        make_parents=make_parents,
+        to_builtins=to_builtins,
+        header=header,
+        align_content=align_content,
+        replace_newline_by=replace_newline_by,
+        **csv_writer_kwds,
+    )
 
-    elif isinstance(target, TextIOBase):
-        _serialize_csv(
-            data,
-            target,
-            to_builtins=to_builtins,
-            header=header,
-            align_content=align_content,
-            replace_newline_by=replace_newline_by,
-            **csv_writer_kwds,
-        )
 
-    else:
-        msg = f"Invalid argument type {type(target)=}."
-        raise TypeError(msg)
+# -- Load / Read / Parse CSV content --
+
+
+@overload
+def load_csv(
+    file: Union[str, Path, TextIOBase],
+    /,
+    *,
+    orient: Literal["list"] = "list",
+    header: bool = True,
+    comment_start: Optional[str] = None,
+    strip_content: bool = False,
+    # CSV reader kwargs
+    delimiter: Optional[str] = None,
+    **csv_reader_kwds,
+) -> List[Dict[str, Any]]:
+    """Load csv."""
+
+
+@overload
+def load_csv(
+    file: Union[str, Path, TextIOBase],
+    /,
+    *,
+    orient: Literal["dict"],
+    header: bool = True,
+    comment_start: Optional[str] = None,
+    strip_content: bool = False,
+    # CSV reader kwargs
+    delimiter: Optional[str] = None,
+    **csv_reader_kwds,
+) -> Dict[str, List[Any]]:
+    """Load csv."""
+
+
+def load_csv(
+    source: Union[str, Path, TextIOBase],
+    /,
+    *,
+    orient: Orient = "list",
+    header: bool = True,
+    comment_start: Optional[str] = None,
+    strip_content: bool = False,
+    # CSV reader kwargs
+    delimiter: Optional[str] = ",",
+    **csv_reader_kwds,
+) -> Union[List[Dict[str, Any]], Dict[str, List[Any]]]:
+    r"""Load content from csv filepath.
+
+    Args:
+        orient: Orientation of the output value. Can be "list" or "dict". defaults to "list".
+        header: Specify if CSV has header column. defaults to True.
+        comment_start: If this string is not None and a line starts with this string, the line will be ignored. defaults to None.
+        delimiter: Value delimiter. defaults to ",".
+        \*\*csv_reader_kwds: Other optional csv arguments.
+
+    Returns:
+        The loaded values as dict of lists, list of dicts or list of lists.
+    """
+    if delimiter is None and isinstance(source, (str, Path, os.PathLike)):
+        source = Path(source)
+        delimiter = "\t" if source.suffix == ".tsv" else ","
+
+    return _load_base(
+        _parse_csv,
+        "text",
+        source,
+        orient=orient,
+        header=header,
+        comment_start=comment_start,
+        strip_content=strip_content,
+        delimiter=delimiter,
+        **csv_reader_kwds,
+    )
+
+
+@overload
+def loads_csv(
+    content: str,
+    /,
+    *,
+    orient: Literal["list"] = "list",
+    header: bool = True,
+    comment_start: Optional[str] = None,
+    strip_content: bool = False,
+    # CSV reader kwargs
+    delimiter: Optional[str] = ",",
+    **csv_reader_kwds,
+) -> List[Dict[str, Any]]: ...
+
+
+@overload
+def loads_csv(
+    content: str,
+    /,
+    *,
+    orient: Literal["dict"],
+    header: bool = True,
+    comment_start: Optional[str] = None,
+    strip_content: bool = False,
+    # CSV reader kwargs
+    delimiter: Optional[str] = ",",
+    **csv_reader_kwds,
+) -> Dict[str, List[Any]]: ...
+
+
+def loads_csv(
+    content: str,
+    /,
+    *,
+    orient: Orient = "list",
+    header: bool = True,
+    comment_start: Optional[str] = None,
+    strip_content: bool = False,
+    # CSV reader kwargs
+    delimiter: Optional[str] = ",",
+    **csv_reader_kwds,
+) -> Union[List[Dict[str, Any]], Dict[str, List[Any]]]:
+    """Load a CSV file from string content."""
+    return _loads_base(
+        _parse_csv,
+        "text",
+        content,
+        orient=orient,
+        header=header,
+        comment_start=comment_start,
+        strip_content=strip_content,
+        delimiter=delimiter,
+        **csv_reader_kwds,
+    )
+
+
+@function_alias(load_csv)
+def read_csv(*args, **kwargs): ...
 
 
 def _serialize_csv(
@@ -319,152 +419,6 @@ def _stringify(x: Any) -> Any:
         return type(x)(_stringify(xi) for xi in x)
     else:
         return str(x)
-
-
-# -- Load / Read / Parse CSV content --
-
-
-@overload
-def load_csv(
-    file: Union[str, Path, TextIOBase],
-    /,
-    *,
-    orient: Literal["list"] = "list",
-    header: bool = True,
-    comment_start: Optional[str] = None,
-    strip_content: bool = False,
-    # CSV reader kwargs
-    delimiter: Optional[str] = None,
-    **csv_reader_kwds,
-) -> List[Dict[str, Any]]:
-    """Load csv."""
-
-
-@overload
-def load_csv(
-    file: Union[str, Path, TextIOBase],
-    /,
-    *,
-    orient: Literal["dict"],
-    header: bool = True,
-    comment_start: Optional[str] = None,
-    strip_content: bool = False,
-    # CSV reader kwargs
-    delimiter: Optional[str] = None,
-    **csv_reader_kwds,
-) -> Dict[str, List[Any]]:
-    """Load csv."""
-
-
-def load_csv(
-    target: Union[str, Path, TextIOBase],
-    /,
-    *,
-    orient: Orient = "list",
-    header: bool = True,
-    comment_start: Optional[str] = None,
-    strip_content: bool = False,
-    # CSV reader kwargs
-    delimiter: Optional[str] = ",",
-    **csv_reader_kwds,
-) -> Union[List[Dict[str, Any]], Dict[str, List[Any]]]:
-    r"""Load content from csv filepath.
-
-    Args:
-        orient: Orientation of the output value. Can be "list" or "dict". defaults to "list".
-        header: Specify if CSV has header column. defaults to True.
-        comment_start: If this string is not None and a line starts with this string, the line will be ignored. defaults to None.
-        delimiter: Value delimiter. defaults to ",".
-        \*\*csv_reader_kwds: Other optional csv arguments.
-
-    Returns:
-        The loaded values as dict of lists, list of dicts or list of lists.
-    """
-    if isinstance(target, (str, Path, PathLike)):
-        target = Path(target)
-        if delimiter is None:
-            delimiter = "\t" if target.suffix == ".tsv" else ","
-
-        with open(target, "r") as file:
-            return _parse_csv(
-                file,
-                orient=orient,
-                header=header,
-                comment_start=comment_start,
-                strip_content=strip_content,
-                delimiter=delimiter,
-                **csv_reader_kwds,
-            )
-
-    data = _parse_csv(
-        target,
-        orient=orient,
-        header=header,
-        comment_start=comment_start,
-        strip_content=strip_content,
-        delimiter=delimiter,
-        **csv_reader_kwds,
-    )
-    return data
-
-
-@overload
-def loads_csv(
-    content: str,
-    /,
-    *,
-    orient: Literal["list"] = "list",
-    header: bool = True,
-    comment_start: Optional[str] = None,
-    strip_content: bool = False,
-    # CSV reader kwargs
-    delimiter: Optional[str] = ",",
-    **csv_reader_kwds,
-) -> List[Dict[str, Any]]: ...
-
-
-@overload
-def loads_csv(
-    content: str,
-    /,
-    *,
-    orient: Literal["dict"],
-    header: bool = True,
-    comment_start: Optional[str] = None,
-    strip_content: bool = False,
-    # CSV reader kwargs
-    delimiter: Optional[str] = ",",
-    **csv_reader_kwds,
-) -> Dict[str, List[Any]]: ...
-
-
-def loads_csv(
-    content: str,
-    /,
-    *,
-    orient: Orient = "list",
-    header: bool = True,
-    comment_start: Optional[str] = None,
-    strip_content: bool = False,
-    # CSV reader kwargs
-    delimiter: Optional[str] = ",",
-    **csv_reader_kwds,
-) -> Union[List[Dict[str, Any]], Dict[str, List[Any]]]:
-    """Load a CSV file from string content."""
-    with io.StringIO(content) as buffer:
-        return _parse_csv(
-            buffer,
-            orient=orient,
-            header=header,
-            comment_start=comment_start,
-            strip_content=strip_content,
-            delimiter=delimiter,
-            **csv_reader_kwds,
-        )
-
-
-@function_alias(load_csv)
-def read_csv(*args, **kwargs): ...
 
 
 def _parse_csv(

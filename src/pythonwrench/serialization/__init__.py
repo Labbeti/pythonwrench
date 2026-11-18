@@ -27,11 +27,19 @@ if TYPE_CHECKING or lazy is None:
         read_pickle,
         save_pickle,
     )
+    from .yaml import (
+        dump_yaml,
+        dumps_yaml,
+        load_yaml,
+        loads_yaml,
+        read_yaml,
+        save_yaml,
+    )
 
 else:
     __getattr__, __dir__, __all__ = lazy.attach(
         __name__,
-        submodules=["csv", "json", "jsonl", "pickle"],
+        submodules=["csv", "json", "jsonl", "pickle", "yaml"],
         submod_attrs={
             "csv": [
                 "dump_csv",
@@ -64,6 +72,14 @@ else:
                 "loads_pickle",
                 "read_pickle",
                 "save_pickle",
+            ],
+            "yaml": [
+                "dump_yaml",
+                "dumps_yaml",
+                "load_yaml",
+                "loads_yaml",
+                "read_yaml",
+                "save_yaml",
             ],
         },
     )

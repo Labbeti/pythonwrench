@@ -188,7 +188,7 @@ def requires_packages(
                 prefix = "\n - "
                 missing_str = prefix.join(missing)
                 msg = (
-                    f"Cannot use/import objects because the following optionals dependencies are missing:"
+                    f"Cannot call {fn.__name__} because the following optionals dependencies are missing:"
                     f"{prefix}{missing_str}\n"
                 )
                 raise ImportError(msg)
@@ -236,7 +236,9 @@ class ModulePlaceholder(ModuleType, Placeholder):
 
 
 def import_if_available(
-    name: str, *, module_fallback: Optional[T_ModuleType] = None
+    name: str,
+    *,
+    module_fallback: Optional[T_ModuleType] = None,
 ) -> Union[ModuleType, T_ModuleType]:
     """Perform the import if available operation."""
     if is_available_package(name):
