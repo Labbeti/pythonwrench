@@ -70,7 +70,7 @@ def dataclassdict(
         "unsafe_hash": unsafe_hash,
         "frozen": frozen,
     }
-    if Version.python() < (3, 10, 0):
+    if Version.python() >= (3, 10, 0):
         kwds |= {
             "match_args": match_args,
             "kw_only": kw_only,
