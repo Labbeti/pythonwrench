@@ -11,9 +11,12 @@ from pythonwrench.functools import function_alias
 from pythonwrench.importlib import requires_packages
 from pythonwrench.serialization._core import (
     OnError,
+    OnExists,
     _dump_base,
+    _dumps_base,
     _load_base,
     _loads_base,
+    _save_base,
 )
 from pythonwrench.serialization.yaml.definitions import (
     MappingNode,
@@ -41,9 +44,10 @@ def dump_yaml(
     ],
     target: Union[str, Path, None] = None,
     *,
-    overwrite: bool = True,
-    to_builtins: bool = False,
+    on_exists: Optional[OnExists] = None,
+    overwrite: Optional[bool] = None,
     make_parents: bool = True,
+    to_builtins: bool = False,
     encoding: Optional[str] = "utf-8",
     # YAML dump kwargs
     sort_keys: bool = False,
@@ -58,6 +62,7 @@ def dump_yaml(
         "text",
         data,
         target,
+        on_exists=on_exists,
         overwrite=overwrite,
         to_builtins=to_builtins,
         make_parents=make_parents,
@@ -70,12 +75,78 @@ def dump_yaml(
     )
 
 
-@function_alias(dump_yaml)
-def dumps_yaml(*args, **kwargs): ...
+@requires_packages("yaml")
+def dumps_yaml(
+    data: Union[
+        Iterable[Any],
+        Mapping[str, Any],
+        Namespace,
+        DataclassInstance,
+        NamedTupleInstance,
+    ],
+    *,
+    to_builtins: bool = False,
+    encoding: Optional[str] = "utf-8",
+    # YAML dump kwargs
+    sort_keys: bool = False,
+    indent: Union[int, None] = None,
+    width: Union[int, None] = 1000,
+    allow_unicode: bool = True,
+    **yaml_dump_kwds,
+) -> str:
+    return _dumps_base(
+        _serialize_yaml,
+        "text",
+        data,
+        to_builtins=to_builtins,
+        encoding=encoding,
+        sort_keys=sort_keys,
+        indent=indent,
+        width=width,
+        allow_unicode=allow_unicode,
+        **yaml_dump_kwds,
+    )
 
 
-@function_alias(dump_yaml)
-def save_yaml(*args, **kwargs): ...
+@requires_packages("yaml")
+def save_yaml(
+    data: Union[
+        Iterable[Any],
+        Mapping[str, Any],
+        Namespace,
+        DataclassInstance,
+        NamedTupleInstance,
+    ],
+    target: Union[str, Path],
+    *,
+    on_exists: Optional[OnExists] = None,
+    overwrite: Optional[bool] = None,
+    make_parents: bool = True,
+    to_builtins: bool = False,
+    encoding: Optional[str] = "utf-8",
+    # YAML dump kwargs
+    sort_keys: bool = False,
+    indent: Union[int, None] = None,
+    width: Union[int, None] = 1000,
+    allow_unicode: bool = True,
+    **yaml_dump_kwds,
+) -> None:
+    return _save_base(
+        _serialize_yaml,
+        "text",
+        data,
+        target,
+        on_exists=on_exists,
+        overwrite=overwrite,
+        to_builtins=to_builtins,
+        make_parents=make_parents,
+        encoding=encoding,
+        sort_keys=sort_keys,
+        indent=indent,
+        width=width,
+        allow_unicode=allow_unicode,
+        **yaml_dump_kwds,
+    )
 
 
 @requires_packages("yaml")
