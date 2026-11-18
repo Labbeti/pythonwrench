@@ -234,7 +234,7 @@ def remove_children(
     """Remove all children in folder(s), without removing the folder itself.
 
     Why using this function instead of just remove directory recursively then mkdir it ?
-    Because it can mess up with applications that expectes a directory at all times (like standard explorers), and can also avoid replacing the root folder by a directory if it is a symlink.
+    Because it can mess up with applications that expects a directory at all times (like standard explorers), and can also avoid replacing the root folder by a directory if it is a symlink.
 
     Returns the list of paths to children removed.
     """

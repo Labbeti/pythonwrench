@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from dataclasses import MISSING, dataclass, is_dataclass  # noqa: F401
-from typing import Any, Dict, Type, TypeVar, cast
+from typing import Any, Callable, Dict, Optional, Type, TypeVar, Union, cast, overload
 
 from typing_extensions import dataclass_transform
 
@@ -14,10 +14,73 @@ from pythonwrench.typing.classes import Dataclass, DataclassInstance  # noqa: F4
 T = TypeVar("T")
 
 
+@overload
+def dataclassdict(
+    cls: None = None,
+    *,
+    init: bool = True,
+    repr: bool = True,
+    eq: bool = True,
+    order: bool = False,
+    unsafe_hash: bool = False,
+    frozen: bool = False,
+    match_args: bool = True,
+    kw_only: bool = False,
+    slots: bool = False,
+) -> Callable[[Type[T]], Type[T]]: ...
+
+
+@overload
+def dataclassdict(
+    cls: Type[T],
+    *,
+    init: bool = True,
+    repr: bool = True,
+    eq: bool = True,
+    order: bool = False,
+    unsafe_hash: bool = False,
+    frozen: bool = False,
+    match_args: bool = True,
+    kw_only: bool = False,
+    slots: bool = False,
+) -> Type[T]: ...
+
+
 @dataclass_transform()
-def dataclassdict(cls: Type[T]) -> Type[T]:
+def dataclassdict(
+    cls: Optional[Type[T]] = None,
+    *,
+    init: bool = True,
+    repr: bool = True,
+    eq: bool = True,
+    order: bool = False,
+    unsafe_hash: bool = False,
+    frozen: bool = False,
+    match_args: bool = True,
+    kw_only: bool = False,
+    slots: bool = False,
+) -> Union[Callable[[Type[T]], Type[T]], Type[T]]:
     """Decorate a class so it becomes both a dataclass and a dictionary."""
-    return add_dict_methods(dataclass(cls))
+
+    def _impl(cls2: Type[T]) -> Type[T]:
+        cls2 = dataclass(
+            cls2,
+            init=init,
+            repr=repr,
+            eq=eq,
+            order=order,
+            unsafe_hash=unsafe_hash,
+            frozen=frozen,
+            match_args=match_args,
+            kw_only=kw_only,
+            slots=slots,
+        )
+        return add_dict_methods(cls2)
+
+    if cls is None:
+        return _impl
+    else:
+        return _impl(cls)
 
 
 def add_dict_methods(cls: Type[T]) -> Type[T]:
