@@ -5,6 +5,7 @@ from typing import Any, Callable, Dict, Optional, Type, TypeVar, Union, cast, ov
 
 from typing_extensions import dataclass_transform
 
+from pythonwrench.semver import Version
 from pythonwrench.typing.checks import (  # noqa: F401
     is_dataclass_instance,
     is_dataclass_type,
@@ -61,20 +62,23 @@ def dataclassdict(
     slots: bool = False,
 ) -> Union[Callable[[Type[T]], Type[T]], Type[T]]:
     """Decorate a class so it becomes both a dataclass and a dictionary."""
+    kwds = {
+        "init": init,
+        "repr": repr,
+        "eq": eq,
+        "order": order,
+        "unsafe_hash": unsafe_hash,
+        "frozen": frozen,
+    }
+    if Version.python() < (3, 10, 0):
+        kwds |= {
+            "match_args": match_args,
+            "kw_only": kw_only,
+            "slots": slots,
+        }
 
     def _impl(cls2: Type[T]) -> Type[T]:
-        cls2 = dataclass(
-            cls2,
-            init=init,
-            repr=repr,
-            eq=eq,
-            order=order,
-            unsafe_hash=unsafe_hash,
-            frozen=frozen,
-            match_args=match_args,
-            kw_only=kw_only,
-            slots=slots,
-        )
+        cls2 = dataclass(cls2, **kwds)
         return add_dict_methods(cls2)
 
     if cls is None:
