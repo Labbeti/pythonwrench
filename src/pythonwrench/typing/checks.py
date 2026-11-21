@@ -148,7 +148,8 @@ def isinstance_generic(
         return any(
             isinstance_generic(obj, target_type_i) for target_type_i in class_or_tuple
         )
-
+    if _is_type_alias_type(class_or_tuple):
+        return isinstance_generic(obj, class_or_tuple.__value__)  # type: ignore
     if is_typed_dict(class_or_tuple):
         return _isinstance_generic_typed_dict(obj, class_or_tuple)
 
@@ -610,6 +611,15 @@ def _is_callable_type(x: Any) -> bool:
 
 def _isany(x: Any) -> bool:
     return x is object or x is Any or x is typing_extensions.Any
+
+
+class _Sentinel: ...
+
+
+def _is_type_alias_type(x: Any) -> bool:
+    return (x.__class__ == typing_extensions.TypeAliasType) or (
+        x.__class__ == getattr(typing, "TypeAliasType", _Sentinel())
+    )
 
 
 def _future_annotations_is_imported() -> bool:

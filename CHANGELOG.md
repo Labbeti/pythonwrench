@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 - Serialisation function for YAML files.
 - `on_exists` option for serialization fns.
 - `module_fallback` option to `import_if_available` fn.
+- support for TypeAliasType in `isinstance_generic`.
 
 ### Modified
 - Update code format with ruff 0.16.10.

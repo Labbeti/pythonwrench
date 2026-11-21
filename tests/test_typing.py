@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import logging
+import typing
 import unittest
 from dataclasses import dataclass
 from io import TextIOBase
@@ -28,6 +29,7 @@ import typing_extensions
 from typing_extensions import NotRequired
 
 from pythonwrench.importlib import import_if_available, is_available_package
+from pythonwrench.semver import Version
 from pythonwrench.typing import (
     NoneType,
     check_args_types,
@@ -120,6 +122,16 @@ class TestChecks(TestCase):
 
         if is_available_package("pandas"):
             assert not is_special_form(pd.DataFrame({"a": [1, 2, 3]}))
+
+    @unittest.skipIf(Version.python() < (3, 12), "type statement requires Python 3.12")
+    def test_type_alias_type(self) -> None:
+        namespace = {}
+        exec("type A = int | float", namespace)  # noqa: S102
+        A = namespace["A"]
+
+        assert A.__class__ == getattr(typing, "TypeAliasType", None)
+        assert isinstance_generic(1.2, A)
+        assert not isinstance_generic("a", A)
 
 
 class TestIsInstanceGuard(TestCase):
