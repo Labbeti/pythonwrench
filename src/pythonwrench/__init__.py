@@ -8,7 +8,7 @@ __author_email__ = "labbeti.pub@gmail.com"
 __license__ = "MIT"
 __maintainer__ = "Étienne Labbé (Labbeti)"
 __status__ = "Development"
-__version__ = "0.6.8"
+__version__ = "0.6.9"
 
 
 from typing import TYPE_CHECKING

@@ -29,7 +29,7 @@ With pip:
 pip install pythonwrench
 ```
 
-This library has been tested on all Python versions **3.8 - 3.14**, requires only `typing_extensions>=4.10.0`, and runs on **Linux, Mac and Windows** systems.
+This library has been tested on all Python versions **3.8 - 3.15**, requires only `typing_extensions>=4.10.0`, and runs on **Linux, Mac and Windows** systems.
 
 ## Examples
 

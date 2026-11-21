@@ -2,8 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.6.9] UNRELEASED
+## [0.6.9] 2026-11-21
 ### Added
+- Support Python 3.15.
 - `hash_str`, `hash_bytes` and `hash_bytes_buffer` functions.
 - Function `parse_args_using_dataclass` now supports metadata doc options.
 - `key` arg in `filter_iter_with_patterns`.
