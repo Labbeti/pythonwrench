@@ -16,6 +16,7 @@ from pythonwrench.pickle import (
     read_pickle,
     save_pickle,
 )
+from pythonwrench.serialization.yaml import dumps_yaml, loads_yaml, yaml_is_available
 
 
 class TestCSV(TestCase):
@@ -104,6 +105,21 @@ class TestPickle(TestCase):
         dumped = dump_pickle(data, fpath)
         assert dumped == fpath.read_bytes()
         fpath.unlink()
+
+
+class TestYAML(TestCase):
+    def test_load(self) -> None:
+        data = {"a": [1, 2], "b": "b_value"}
+
+        if yaml_is_available():
+            dumped = dumps_yaml(data)
+            result = loads_yaml(dumped)
+            assert data == result
+        else:
+            with self.assertRaises(ImportError):
+                _ = dumps_yaml(data)
+            with self.assertRaises(ImportError):
+                _ = loads_yaml("a: 1")
 
 
 if __name__ == "__main__":
