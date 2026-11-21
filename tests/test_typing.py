@@ -125,6 +125,7 @@ class TestChecks(TestCase):
 
     @unittest.skipIf(Version.python() < (3, 12), "type statement requires Python 3.12")
     def test_type_alias_type(self) -> None:
+        # trick to pass precommit that will not accept `type A = int | float` statement
         namespace = {}
         exec("type A = int | float", namespace)  # noqa: S102
         A = namespace["A"]
