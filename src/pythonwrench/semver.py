@@ -9,6 +9,7 @@ from typing import Any, List, Mapping, Tuple, TypedDict, Union, overload
 from typing_extensions import NotRequired, Self, TypeAlias
 
 from pythonwrench.typing import NoneType, isinstance_generic
+from pythonwrench.warnings import warn_once
 
 PreRelease: TypeAlias = Union[int, str, None, List[Union[int, str]]]
 BuildMetadata: TypeAlias = Union[int, str, None, List[Union[int, str]]]
@@ -63,6 +64,8 @@ class Version:
         self,
         version: Self,
         /,
+        *,
+        strict: bool = True,
     ) -> None:
         """Initialize the instance."""
 
@@ -71,6 +74,8 @@ class Version:
         self,
         version_str: str,
         /,
+        *,
+        strict: bool = True,
     ) -> None:
         """Initialize the instance."""
 
@@ -79,6 +84,8 @@ class Version:
         self,
         version_dict: VersionDictLike,
         /,
+        *,
+        strict: bool = True,
     ) -> None:
         """Initialize the instance."""
 
@@ -87,6 +94,8 @@ class Version:
         self,
         version_tuple: VersionTupleLike,
         /,
+        *,
+        strict: bool = True,
     ) -> None:
         """Initialize the instance."""
 
@@ -98,6 +107,8 @@ class Version:
         patch: int,
         prerelease: PreRelease = None,
         buildmetadata: BuildMetadata = None,
+        *,
+        strict: bool = True,
     ) -> None:
         """Initialize the instance."""
 
@@ -136,6 +147,17 @@ class Version:
             if len(invalid) > 0:
                 msg = f"Got an unexpected arguments {invalid=}. (with {args=} and {kwargs=})"
                 raise TypeError(msg)
+
+        strict = kwargs.get("strict", True)
+        if not strict and "minor" not in version_dict:
+            version_dict = dict(version_dict.items())
+            version_dict["minor"] = 0
+            warn_once("Missing argument 'minor', assuming 0.")
+
+        if not strict and "patch" not in version_dict:
+            version_dict = dict(version_dict.items())
+            version_dict["patch"] = 0
+            warn_once("Missing argument 'patch', assuming 0.")
 
         if not isinstance_generic(version_dict, VersionDict):
             msg = f"Invalid argument {args=} and {kwargs=}. (invalid argument types, expected (major=int, minor=int, patch=int, prerelease={PreRelease}, buildmetadata={BuildMetadata}))"

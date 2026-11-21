@@ -123,7 +123,9 @@ class TestChecks(TestCase):
         if is_available_package("pandas"):
             assert not is_special_form(pd.DataFrame({"a": [1, 2, 3]}))
 
-    @unittest.skipIf(Version.python() < (3, 12), "type statement requires Python 3.12")
+    @unittest.skipIf(
+        Version.python() < (3, 12, 0), "type statement requires Python 3.12"
+    )
     def test_type_alias_type(self) -> None:
         # trick to pass precommit that will not accept `type A = int | float` statement
         namespace = {}
