@@ -170,7 +170,7 @@ def isinstance_generic(
     if len(args) == 0:
         return isinstance_generic(obj, origin)
 
-    if origin is Union:
+    if _is_union_type(origin):
         return any(isinstance_generic(obj, arg) for arg in args)
 
     if origin is Literal:
@@ -192,10 +192,10 @@ def isinstance_generic(
         assert len(args) == 3, f"{args=}"
         item_type, yield_type, return_type = args
         if yield_type is not None:
-            msg = f"Unsupported parametrized Generator {yield_type=}. (expected None)"
+            msg = f"Unsupported parametrized Generator {yield_type=}. (expected None for type 2)"
             raise NotImplementedError(msg)
         if return_type is not None:
-            msg = f"Unsupported parametrized Generator {return_type=}. (expected None)"
+            msg = f"Unsupported parametrized Generator {return_type=}. (expected None for type 3)"
             raise NotImplementedError(msg)
 
         return all(isinstance_generic(xi, item_type) for xi in obj)
@@ -236,7 +236,10 @@ def isinstance_generic(
         else:
             return all(isinstance_generic(xi, args[0]) for xi in obj)
 
-    msg = f"Unsupported type {class_or_tuple}. (expected unparametrized type or parametrized Union, TypedDict, Generator, Literal, Mapping or Iterable)"
+    msg = (
+        f"Unsupported type {class_or_tuple} (of class {class_or_tuple.__class__})."
+        f"(expected unparametrized type or parametrized Union, TypedDict, Generator, Literal, Mapping or Iterable)"
+    )
     raise NotImplementedError(msg)
 
 
@@ -626,3 +629,10 @@ def _future_annotations_is_imported() -> bool:
     def f(x: int): ...
 
     return inspect.signature(f).parameters["x"].annotation == "int"
+
+
+def _is_union_type(x: Any) -> bool:
+    return x == Union or getattr(x, "__name__", None) in (
+        "Union",
+        "UnionType",
+    )

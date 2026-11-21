@@ -20,9 +20,9 @@ from typing import (
 
 from pythonwrench.argparse.parsers import (
     ListParsing,
+    _has_literal_origin,
+    _has_union_origin,
     _is_iterable_type_like,
-    _is_literal_type,
-    _is_union_type,
     _search_parse_fn,
 )
 from pythonwrench.functools import filter_and_call
@@ -282,7 +282,7 @@ def _instantiate_dataclasses(
                 # it must not replace the dataclass field's default/default_factory.
                 continue
 
-            if _is_union_type(dcls_union):
+            if _has_union_origin(dcls_union):
                 dclasses = get_args(dcls_union)
                 dclasses_names = {dcls.__name__: dcls for dcls in dclasses}
                 try:
@@ -456,7 +456,7 @@ def _get_kwds_for_type(
 
     if parse_fn is not None:
         kwds["type"] = parse_fn
-        if _is_literal_type(field_type):
+        if _has_literal_origin(field_type):
             kwds["choices"] = get_args(field_type)
         return kwds
 
@@ -472,7 +472,7 @@ def _is_dataclass_or_union_of_dataclasses(x: Any) -> bool:
 
 
 def _is_union_of_dataclasses(x: Any) -> bool:
-    return _is_union_type(x) and all(
+    return _has_union_origin(x) and all(
         is_dataclass_type(subcls) for subcls in get_args(x)
     )
 
