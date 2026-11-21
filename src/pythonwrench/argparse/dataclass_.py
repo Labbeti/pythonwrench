@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import copy
 from argparse import ArgumentParser, Namespace
@@ -21,9 +20,9 @@ from typing import (
 
 from pythonwrench.argparse.parsers import (
     ListParsing,
+    _has_literal_origin,
+    _has_union_origin,
     _is_iterable_type_like,
-    _is_literal_type,
-    _is_union_type,
     _search_parse_fn,
 )
 from pythonwrench.functools import filter_and_call
@@ -56,13 +55,14 @@ BoolAction = Union[_BoolActionName, Type[BooleanOptionalAction]]
 def parse_args_using_dataclass(
     dataclass_type: Type[DataclassInstance],
     *dataclass_types: Type[DataclassInstance],
-    args: Optional[Iterable[str]] = None,
+    argv: Optional[Iterable[str]] = None,
     parser: Optional[ArgumentParser] = None,
     list_parsing: ListParsing = "argparse",
     bool_action: BoolAction = "store",
     add_dashed_arg: bool = True,
     return_single_namespace: Literal[True],
     posonly_for_required: bool = False,
+    positionals: Iterable[str] = (),
 ) -> Namespace: ...
 
 
@@ -70,13 +70,14 @@ def parse_args_using_dataclass(
 def parse_args_using_dataclass(
     dataclass_type: Type[T_DataclassInstance],
     *,
-    args: Optional[Iterable[str]] = None,
+    argv: Optional[Iterable[str]] = None,
     parser: Optional[ArgumentParser] = None,
     list_parsing: ListParsing = "argparse",
     bool_action: BoolAction = "store",
     add_dashed_arg: bool = True,
     return_single_namespace: Literal[False] = False,
     posonly_for_required: bool = False,
+    positionals: Iterable[str] = (),
 ) -> T_DataclassInstance: ...
 
 
@@ -86,13 +87,14 @@ def parse_args_using_dataclass(
     dataclass_type_2: Type[T_DataclassInstance_2],
     /,
     *,
-    args: Optional[Iterable[str]] = None,
+    argv: Optional[Iterable[str]] = None,
     parser: Optional[ArgumentParser] = None,
     list_parsing: ListParsing = "argparse",
     bool_action: BoolAction = "store",
     add_dashed_arg: bool = True,
     return_single_namespace: Literal[False] = False,
     posonly_for_required: bool = False,
+    positionals: Iterable[str] = (),
 ) -> Tuple[
     T_DataclassInstance,
     T_DataclassInstance_2,
@@ -106,13 +108,14 @@ def parse_args_using_dataclass(
     dataclass_type_3: Type[T_DataclassInstance_3],
     /,
     *,
-    args: Optional[Iterable[str]] = None,
+    argv: Optional[Iterable[str]] = None,
     parser: Optional[ArgumentParser] = None,
     list_parsing: ListParsing = "argparse",
     bool_action: BoolAction = "store",
     add_dashed_arg: bool = True,
     return_single_namespace: Literal[False] = False,
     posonly_for_required: bool = False,
+    positionals: Iterable[str] = (),
 ) -> Tuple[
     T_DataclassInstance,
     T_DataclassInstance_2,
@@ -128,13 +131,14 @@ def parse_args_using_dataclass(
     dataclass_type_4: Type[T_DataclassInstance_4],
     /,
     *,
-    args: Optional[Iterable[str]] = None,
+    argv: Optional[Iterable[str]] = None,
     parser: Optional[ArgumentParser] = None,
     list_parsing: ListParsing = "argparse",
     bool_action: BoolAction = "store",
     add_dashed_arg: bool = True,
     return_single_namespace: Literal[False] = False,
     posonly_for_required: bool = False,
+    positionals: Iterable[str] = (),
 ) -> Tuple[
     T_DataclassInstance,
     T_DataclassInstance_2,
@@ -152,13 +156,14 @@ def parse_args_using_dataclass(
     dataclass_type_5: Type[T_DataclassInstance_5],
     /,
     *,
-    args: Optional[Iterable[str]] = None,
+    argv: Optional[Iterable[str]] = None,
     parser: Optional[ArgumentParser] = None,
     list_parsing: ListParsing = "argparse",
     bool_action: BoolAction = "store",
     add_dashed_arg: bool = True,
     return_single_namespace: Literal[False] = False,
     posonly_for_required: bool = False,
+    positionals: Iterable[str] = (),
 ) -> Tuple[
     T_DataclassInstance,
     T_DataclassInstance_2,
@@ -171,13 +176,14 @@ def parse_args_using_dataclass(
 def parse_args_using_dataclass(
     dataclass_type: Dataclass,
     *dataclass_types: Dataclass,
-    args: Optional[Iterable[str]] = None,
+    argv: Optional[Iterable[str]] = None,
     parser: Optional[ArgumentParser] = None,
     list_parsing: ListParsing = "argparse",
     bool_action: BoolAction = "store",
     add_dashed_arg: bool = True,
     return_single_namespace: bool = False,
     posonly_for_required: bool = False,
+    positionals: Iterable[str] = (),
 ) -> Union[
     DataclassInstance,
     Tuple[DataclassInstance, ...],
@@ -186,6 +192,22 @@ def parse_args_using_dataclass(
     """Converts prog args to a typed dataclass using argparse.
 
     Currently only supports dataclasses that contains only builtin scalars: str, int, float, None, bool OR list of builtin scalars.
+
+    Args:
+        dataclass_type: Target dataclass type to convert to.
+        *dataclass_type: Others dataclass types.
+        argv: Arguments value given. If None, use sys.argv arguments.
+        parser: Optional ArgumentParser to update and parse.
+        list_parsing: Defines how Iterables should be handled.
+            If "argparse", it uses nargs="*", which follows argparse convention.
+            If "brackets", it excepts 1 arguments surrounded by squared brackets e.g. [a,b]
+        bool_action: Define how boolean are handled.
+            "store": boolean value mlust be explicitely provided with "--arg true" or "--arg false".
+        add_dashed_arg: If argument name has underscore, add dashed variant.
+            e.g. --arg_number/--arg-number.
+        return_single_namespace: If True, avoid parsing argv to dataclass and return argparse.Namespace instance.
+        posonly_for_required: If True, make all required arguments positional by default.
+        positionals: List of fields considered as positional.
     """
     init_parser = parser
     dataclass_types = (dataclass_type,) + dataclass_types
@@ -199,12 +221,13 @@ def parse_args_using_dataclass(
             bool_action=bool_action,
             add_dashed_arg=add_dashed_arg,
             posonly_for_required=posonly_for_required,
+            positionals=positionals,
         )
     assert parser is not None
 
-    parsed, other_args = parser.parse_known_args(args)
+    parsed, other_args = parser.parse_known_args(argv)
     if len(other_args) > 0:
-        msg = f"Found {len(other_args)} unknown arguments: {other_args}. (with source {args=})"
+        msg = f"Found {len(other_args)} unknown arguments: {other_args}. (with source {argv=})"
         raise ValueError(msg)
 
     if return_single_namespace:
@@ -259,7 +282,7 @@ def _instantiate_dataclasses(
                 # it must not replace the dataclass field's default/default_factory.
                 continue
 
-            if _is_union_type(dcls_union):
+            if _has_union_origin(dcls_union):
                 dclasses = get_args(dcls_union)
                 dclasses_names = {dcls.__name__: dcls for dcls in dclasses}
                 try:
@@ -300,41 +323,44 @@ def _instantiate_dataclasses(
 def add_dataclass_fields_to_parser(
     dataclass_type: Type[T_DataclassInstance],
     *,
-    parser: Optional[ArgumentParser],
+    parser: Optional[ArgumentParser] = None,
     list_parsing: ListParsing = "argparse",
     bool_action: BoolAction = "store",
     add_dashed_arg: bool = True,
     posonly_for_required: bool = False,
     argprefix: str = "",
+    positionals: Iterable[str] = (),
 ) -> ArgumentParser:
     """Perform the add dataclass fields to parser operation."""
-    if posonly_for_required:
-        prefix = argprefix
-    else:
-        prefix = f"--{argprefix}"
-
     if parser is None:
         parser = ArgumentParser()
+    positionals = dict.fromkeys(positionals)
 
     for field in fields(dataclass_type):
-        kwds = {}
-        posargs = [f"{prefix}{field.name}"]
-        if add_dashed_arg and "_" in field.name:
-            dashed_arg_name = field.name.replace("_", "-")
-            posargs.append(f"{prefix}{dashed_arg_name}")
+        help = getattr(field, "doc", None)
+        if help is None and isinstance(field.metadata.get("doc"), str):
+            help = field.metadata["doc"]
+
+        kwds: dict[str, Any] = {
+            "help": help,
+        }
 
         if field.default is MISSING and field.default_factory is MISSING:
             if bool_action != "store" and field.type is bool:
                 msg = f"Invalid arguments: boolean '{field.name}' without default value is incompatible with {bool_action=}."
                 raise RuntimeError(msg)
-            kwds["required"] = True
+            required = True
 
         elif field.default is not MISSING:
             kwds["default"] = field.default
+            required = False
+
         elif field.default_factory is not MISSING:
             kwds["default"] = field.default_factory()
+            required = False
+
         else:
-            msg = f"Invalid field '{field.name}': found values for default and default_factory."
+            msg = f"Invalid field '{field.name}': found values for default and default_factory for the same field."
             raise ValueError(msg)
 
         if is_dataclass_type(field.type):
@@ -344,10 +370,47 @@ def add_dataclass_fields_to_parser(
         else:
             subclasses = None
 
-        if subclasses is not None:
+        is_positional_only = (required and posonly_for_required) or (
+            field.name in positionals
+        )
+
+        kw_only = getattr(field, "kw_only", False)
+        if is_positional_only and kw_only:
+            msg = f"Incompatible arguments for '{field.name}': found {required=}, {posonly_for_required=} but {kw_only=}."
+            raise ValueError(msg)
+
+        if not is_positional_only:
+            # note: required option is invalid for posonly arg
+            kwds["required"] = required
+
+        if subclasses is None:
+            if is_positional_only:
+                prefix = argprefix
+            else:
+                prefix = f"--{argprefix}"
+
+            posargs = [f"{prefix}{field.name}"]
+            if add_dashed_arg and "_" in field.name:
+                dashed_arg_name = field.name.replace("_", "-")
+                posargs.append(f"{prefix}{dashed_arg_name}")
+
+            try:
+                inner_kwds = _get_kwds_for_type(field.type, list_parsing, bool_action)
+                kwds.update(inner_kwds)
+            except (ValueError, TypeError, RuntimeError) as err:
+                msg = f"Invalid field '{field.name}': field type '{field.type}' is not supported."
+                raise type(err)(msg) from err
+
+            if is_positional_only and "nargs" not in kwds and not required:
+                kwds["nargs"] = "?"
+
+            parser.add_argument(*posargs, **kwds)
+
+        else:
             subparsers = parser.add_subparsers(
                 dest=f"{argprefix}{field.name}",
                 required=kwds.get("required", False),
+                help=kwds.get("help", None),
             )
             for subcls in subclasses:
                 subparser = subparsers.add_parser(subcls.__name__)
@@ -359,18 +422,8 @@ def add_dataclass_fields_to_parser(
                     add_dashed_arg=add_dashed_arg,
                     posonly_for_required=posonly_for_required,
                     argprefix=f"{argprefix}{field.name}.",
+                    positionals=positionals,
                 )
-
-        else:
-            try:
-                inner_kwds = _get_kwds_for_type(field.type, list_parsing, bool_action)
-            except (ValueError, TypeError, RuntimeError) as err:
-                msg = f"Invalid field '{field.name}': field type '{field.type}' is not supported."
-                raise type(err)(msg) from err
-
-            kwds.update(inner_kwds)
-
-            parser.add_argument(*posargs, **kwds)
 
     return parser
 
@@ -403,7 +456,7 @@ def _get_kwds_for_type(
 
     if parse_fn is not None:
         kwds["type"] = parse_fn
-        if _is_literal_type(field_type):
+        if _has_literal_origin(field_type):
             kwds["choices"] = get_args(field_type)
         return kwds
 
@@ -419,7 +472,7 @@ def _is_dataclass_or_union_of_dataclasses(x: Any) -> bool:
 
 
 def _is_union_of_dataclasses(x: Any) -> bool:
-    return _is_union_type(x) and all(
+    return _has_union_origin(x) and all(
         is_dataclass_type(subcls) for subcls in get_args(x)
     )
 
@@ -428,4 +481,3 @@ def _is_union_of_dataclasses(x: Any) -> bool:
 @deprecated_alias(add_dataclass_fields_to_parser)
 def new_parser_from_dataclass(*args, **kwargs):
     """Perform the new parser from dataclass operation."""
-    ...

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import inspect
 import logging
@@ -53,8 +52,8 @@ def log_once(
 ) -> None:
     """Log message to loggers at the specified level."""
     loggers = _get_loggers(logger)
-    for logger in loggers:
-        logger.log(level, msg)
+    for logger_i in loggers:
+        logger_i.log(level, msg)
 
 
 def setup_logging_verbose(

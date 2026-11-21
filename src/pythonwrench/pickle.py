@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 # for backward compatibility
 from pythonwrench.serialization.pickle import (  # noqa: F401

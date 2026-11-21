@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import copy
 import operator
@@ -78,19 +77,13 @@ def contained(
     order: Literal["left", "right"] = "right",
 ) -> bool:
     """Returns True if name in include set and not in exclude set."""
-    if (
-        include is not None
-        and find(x, include, match_fn=match_fn, order=order, default=-1) == -1
-    ):
-        return False
-
-    if (
-        exclude is not None
-        and find(x, exclude, match_fn=match_fn, order=order, default=-1) != -1
-    ):
-        return False
-
-    return True
+    return (
+        include is None
+        or find(x, include, match_fn=match_fn, order=order, default=-1) != -1
+    ) and (
+        exclude is None
+        or find(x, exclude, match_fn=match_fn, order=order, default=-1) == -1
+    )
 
 
 @overload
@@ -100,7 +93,6 @@ def dict_list_to_list_dict(
     default_val: Any = None,
 ) -> List[Dict[T, U]]:
     """Perform the dict list to list dict operation."""
-    ...
 
 
 @overload
@@ -110,7 +102,6 @@ def dict_list_to_list_dict(
     default_val: W = None,
 ) -> List[Dict[T, Union[U, W]]]:
     """Perform the dict list to list dict operation."""
-    ...
 
 
 def dict_list_to_list_dict(
@@ -225,7 +216,6 @@ def find(
     return_value: Literal[False] = False,
 ) -> Union[int, U]:
     """Perform the find operation."""
-    ...
 
 
 @overload
@@ -239,7 +229,6 @@ def find(
     return_value: Literal[False] = False,
 ) -> Union[int, U]:
     """Perform the find operation."""
-    ...
 
 
 @overload
@@ -253,7 +242,6 @@ def find(
     return_value: Literal[True],
 ) -> Tuple[Union[int, U], Union[V, U]]:
     """Perform the find operation."""
-    ...
 
 
 @overload
@@ -267,7 +255,6 @@ def find(
     return_value: Literal[True],
 ) -> Tuple[Union[int, U], Union[V, U]]:
     """Perform the find operation."""
-    ...
 
 
 def find(
@@ -323,7 +310,6 @@ def flatten(
     end_dim: Optional[int] = None,
 ) -> List[T_BuiltinScalar]:
     """Perform the flatten operation."""
-    ...
 
 
 @overload
@@ -333,7 +319,6 @@ def flatten(  # type: ignore
     end_dim: Optional[int] = None,
 ) -> List[T_BuiltinScalar]:
     """Perform the flatten operation."""
-    ...
 
 
 @overload
@@ -346,7 +331,6 @@ def flatten(
     ] = is_builtin_scalar,
 ) -> List[Any]:
     """Perform the flatten operation."""
-    ...
 
 
 def flatten(
@@ -455,7 +439,6 @@ def flat_list_of_list(
     return_sizes: Literal[True] = True,
 ) -> Tuple[List[T], List[int]]:
     """Perform the flat list of list operation."""
-    ...
 
 
 @overload
@@ -464,7 +447,6 @@ def flat_list_of_list(
     return_sizes: Literal[False],
 ) -> List[T]:
     """Perform the flat list of list operation."""
-    ...
 
 
 def flat_list_of_list(
@@ -503,7 +485,6 @@ def list_dict_to_dict_list(
     list_fn: None = None,
 ) -> Dict[K, List[V]]:
     """Perform the list dict to dict list operation."""
-    ...
 
 
 @overload
@@ -516,7 +497,6 @@ def list_dict_to_dict_list(
     list_fn: None = None,
 ) -> Dict[K, List[Union[V, X]]]:
     """Perform the list dict to dict list operation."""
-    ...
 
 
 @overload
@@ -529,7 +509,6 @@ def list_dict_to_dict_list(
     list_fn: None = None,
 ) -> Dict[K, List[Union[V, W]]]:
     """Perform the list dict to dict list operation."""
-    ...
 
 
 @overload
@@ -542,7 +521,6 @@ def list_dict_to_dict_list(
     list_fn: Callable[[List[Union[V, W, X]]], Y],
 ) -> Dict[K, Y]:
     """Perform the list dict to dict list operation."""
-    ...
 
 
 def list_dict_to_dict_list(
@@ -652,7 +630,6 @@ def sorted_dict(
     reverse: bool = False,
 ) -> Dict[K, V]:
     """Perform the sorted dict operation."""
-    ...
 
 
 @overload
@@ -665,7 +642,6 @@ def sorted_dict(
     reverse: bool = False,
 ) -> Dict[K, V]:
     """Perform the sorted dict operation."""
-    ...
 
 
 @overload
@@ -678,7 +654,6 @@ def sorted_dict(
     reverse: bool = False,
 ) -> Dict[K, V]:
     """Perform the sorted dict operation."""
-    ...
 
 
 def sorted_dict(
@@ -827,25 +802,21 @@ def union_lists(lst_of_lst: Iterable[Iterable[K]]) -> List[K]:
 @overload
 def unzip(lst: Iterable[Tuple[()]]) -> Tuple[()]:
     """Perform the unzip operation."""
-    ...
 
 
 @overload
 def unzip(lst: Iterable[Tuple[T]]) -> Tuple[List[T]]:
     """Perform the unzip operation."""
-    ...
 
 
 @overload
 def unzip(lst: Iterable[Tuple[T, U]]) -> Tuple[List[T], List[U]]:
     """Perform the unzip operation."""
-    ...
 
 
 @overload
 def unzip(lst: Iterable[Tuple[T, U, V]]) -> Tuple[List[T], List[U], List[V]]:
     """Perform the unzip operation."""
-    ...
 
 
 @overload
@@ -853,7 +824,6 @@ def unzip(
     lst: Iterable[Tuple[T, U, V, W]],
 ) -> Tuple[List[T], List[U], List[V], List[W]]:
     """Perform the unzip operation."""
-    ...
 
 
 @overload
@@ -861,7 +831,6 @@ def unzip(
     lst: Iterable[Tuple[T, U, V, W, X]],
 ) -> Tuple[List[T], List[U], List[V], List[W], List[X]]:
     """Perform the unzip operation."""
-    ...
 
 
 @overload
@@ -869,7 +838,6 @@ def unzip(
     lst: Iterable[Tuple[T, ...]],
 ) -> Tuple[List[T], ...]:
     """Perform the unzip operation."""
-    ...
 
 
 def unzip(lst):

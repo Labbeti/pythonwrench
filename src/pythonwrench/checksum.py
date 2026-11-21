@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import functools
 import re
@@ -54,7 +53,6 @@ def register_checksum_fn(
     priority: int = 0,
 ) -> Callable:
     """Perform the register checksum fn operation."""
-    ...
 
 
 @overload
@@ -65,7 +63,6 @@ def register_checksum_fn(
     priority: int = 0,
 ) -> Callable:
     """Perform the register checksum fn operation."""
-    ...
 
 
 def register_checksum_fn(
@@ -108,7 +105,6 @@ def checksum_any(
 @function_alias(checksum_any)
 def checksum_object(*args, **kwargs):
     """Return a checksum for object."""
-    ...
 
 
 # Terminate functions

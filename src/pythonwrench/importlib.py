@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import importlib
 import json
@@ -9,7 +8,7 @@ from functools import wraps
 from importlib.metadata import Distribution, PackageNotFoundError
 from importlib.util import find_spec
 from types import ModuleType
-from typing import Any, Callable, Dict, Iterable, List, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 
 from typing_extensions import ParamSpec, TypeVar
 
@@ -17,6 +16,7 @@ from pythonwrench.warnings import warn_once
 
 P = ParamSpec("P")
 T = TypeVar("T")
+T_ModuleType = TypeVar("T_ModuleType", bound=ModuleType)
 
 
 _DEFAULT_SKIPPED = (
@@ -128,17 +128,17 @@ def reload_submodules(
             logger.info(f"Reload '{candidate}'...")
         try:
             importlib.reload(candidate)
-        except ModuleNotFoundError as err:
+        except ModuleNotFoundError:
             msg = f"ModuleNotFound: did this module '{candidate.__name__}' has been renamed after starting execution?"
             logger.warning(msg)
-            raise err
+            raise
 
     return list(candidates)
 
 
 def reload_editable_packages(*, verbose: int = 0) -> List[ModuleType]:
     """Reload all submodules of editable packages already imported."""
-    pkg_names = {name.split(".")[0] for name in sys.modules.keys()}
+    pkg_names = {name.split(".")[0] for name in sys.modules}
     editable_packages = [
         sys.modules[name] for name in pkg_names if is_editable_package(name)
     ]
@@ -188,7 +188,7 @@ def requires_packages(
                 prefix = "\n - "
                 missing_str = prefix.join(missing)
                 msg = (
-                    f"Cannot use/import objects because the following optionals dependencies are missing:"
+                    f"Cannot call {fn.__name__} because the following optionals dependencies are missing:"
                     f"{prefix}{missing_str}\n"
                 )
                 raise ImportError(msg)
@@ -235,9 +235,15 @@ class ModulePlaceholder(ModuleType, Placeholder):
         ModuleType.__init__(self, *args, **kwargs)
 
 
-def import_if_available(name: str) -> ModuleType:
+def import_if_available(
+    name: str,
+    *,
+    module_fallback: Optional[T_ModuleType] = None,
+) -> Union[ModuleType, T_ModuleType]:
     """Perform the import if available operation."""
     if is_available_package(name):
         return __import__(name)
-    else:
+    elif module_fallback is None:
         return ModulePlaceholder(name)
+    else:
+        return module_fallback

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """Python library with tools for typing, manipulating collections, and more!"""
 
@@ -9,7 +8,7 @@ __author_email__ = "labbeti.pub@gmail.com"
 __license__ = "MIT"
 __maintainer__ = "Étienne Labbé (Labbeti)"
 __status__ = "Development"
-__version__ = "0.6.8"
+__version__ = "0.6.9"
 
 
 from typing import TYPE_CHECKING
@@ -127,7 +126,7 @@ if TYPE_CHECKING or lazy is None:
         identity,
         repeat_fn,
     )
-    from .hashlib import hash_file
+    from .hashlib import hash_bytes, hash_bytes_buffer, hash_file, hash_str
     from .importlib import (
         ModulePlaceholder,
         Placeholder,
@@ -177,26 +176,32 @@ if TYPE_CHECKING or lazy is None:
         dump_json,
         dump_jsonl,
         dump_pickle,
+        dump_yaml,
         dumps_csv,
         dumps_json,
         dumps_jsonl,
         dumps_pickle,
+        dumps_yaml,
         load_csv,
         load_json,
         load_jsonl,
         load_pickle,
+        load_yaml,
         loads_csv,
         loads_json,
         loads_jsonl,
         loads_pickle,
+        loads_yaml,
         read_csv,
         read_json,
         read_jsonl,
         read_pickle,
+        read_yaml,
         save_csv,
         save_json,
         save_jsonl,
         save_pickle,
+        save_yaml,
     )
     from .time import Ticker
     from .typing import (
@@ -373,6 +378,12 @@ else:
                 "save_json",
                 "save_jsonl",
                 "save_pickle",
+                "dump_yaml",
+                "dumps_yaml",
+                "load_yaml",
+                "loads_yaml",
+                "read_yaml",
+                "save_yaml",
             ],
             "dataclasses": ["add_dict_methods", "dataclassdict", "get_defaults_values"],
             "datetime": ["get_now", "get_now_iso8601"],
@@ -387,7 +398,7 @@ else:
                 "identity",
                 "repeat_fn",
             ],
-            "hashlib": ["hash_file"],
+            "hashlib": ["hash_file", "hash_bytes", "hash_bytes_buffer", "hash_str"],
             "importlib": [
                 "import_if_available",
                 "ModulePlaceholder",

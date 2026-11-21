@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 from argparse import Namespace
 from collections import Counter
@@ -30,7 +29,7 @@ from pythonwrench.typing import (
     is_builtin_scalar,
 )
 
-__all__ = ["register_as_builtin_fn", "as_builtin"]
+__all__ = ["as_builtin", "register_as_builtin_fn"]
 
 T = TypeVar("T")
 K = TypeVar("K", bound=Hashable)
@@ -47,7 +46,6 @@ def register_as_builtin_fn(
     priority: int = 0,
 ) -> Callable:
     """Perform the register as builtin fn operation."""
-    ...
 
 
 @overload
@@ -58,7 +56,6 @@ def register_as_builtin_fn(
     priority: int = 0,
 ) -> Callable:
     """Perform the register as builtin fn operation."""
-    ...
 
 
 def register_as_builtin_fn(
@@ -162,67 +159,56 @@ def _iterable_to_builtin(x: Iterable, **kwargs) -> Any:
 @overload
 def as_builtin(x: Counter, **kwargs) -> Dict[Any, int]:
     """Perform the as builtin operation."""
-    ...
 
 
 @overload
 def as_builtin(x: date, **kwargs) -> str:
     """Perform the as builtin operation."""
-    ...
 
 
 @overload
 def as_builtin(x: Enum, **kwargs) -> str:
     """Perform the as builtin operation."""
-    ...
 
 
 @overload
 def as_builtin(x: Path, **kwargs) -> str:
     """Perform the as builtin operation."""
-    ...
 
 
 @overload
 def as_builtin(x: Pattern, **kwargs) -> str:
     """Perform the as builtin operation."""
-    ...
 
 
 @overload
 def as_builtin(x: Namespace, **kwargs) -> Dict[str, Any]:
     """Perform the as builtin operation."""
-    ...
 
 
 @overload
 def as_builtin(x: Mapping[K, V], **kwargs) -> Dict[K, V]:
     """Perform the as builtin operation."""
-    ...
 
 
 @overload
 def as_builtin(x: DataclassInstance, **kwargs) -> Dict[str, Any]:
     """Perform the as builtin operation."""
-    ...
 
 
 @overload
 def as_builtin(x: NamedTupleInstance, **kwargs) -> Dict[str, Any]:
     """Perform the as builtin operation."""
-    ...
 
 
 @overload
 def as_builtin(x: T_BuiltinScalar, **kwargs) -> T_BuiltinScalar:
     """Perform the as builtin operation."""
-    ...
 
 
 @overload
 def as_builtin(x: Any, **kwargs) -> Any:
     """Perform the as builtin operation."""
-    ...
 
 
 def as_builtin(x: Any, **kwargs) -> Any:

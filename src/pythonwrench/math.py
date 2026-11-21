@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import math
 import struct
@@ -28,7 +27,6 @@ def clip(
 @function_alias(clip)
 def clamp(*args, **kwargs):
     """Perform the clamp operation."""
-    ...
 
 
 def argmax(x: Iterable) -> int:

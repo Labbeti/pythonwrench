@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.9] 2026-11-21
+### Added
+- Support Python 3.15.
+- `hash_str`, `hash_bytes` and `hash_bytes_buffer` functions.
+- Function `parse_args_using_dataclass` now supports metadata doc options.
+- `key` arg in `filter_iter_with_patterns`.
+- Serialisation function for YAML files.
+- `on_exists` option for serialization fns.
+- `module_fallback` option to `import_if_available` fn.
+- support for TypeAliasType in `isinstance_generic`.
+
+### Modified
+- Update code format with ruff 0.16.10.
+- Add check for `field.kw_only` with positional argument.
+
+### Fixed
+- Option value `posonly_for_required=True` in `parse_args_using_dataclass`.
+
+
 ## [0.6.8] 2026-10-26
 ### Added
 - `remove_children` function to remove all content of a directory.

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import inspect
 import logging
@@ -149,7 +148,8 @@ def isinstance_generic(
         return any(
             isinstance_generic(obj, target_type_i) for target_type_i in class_or_tuple
         )
-
+    if _is_type_alias_type(class_or_tuple):
+        return isinstance_generic(obj, class_or_tuple.__value__)  # type: ignore
     if is_typed_dict(class_or_tuple):
         return _isinstance_generic_typed_dict(obj, class_or_tuple)
 
@@ -170,7 +170,7 @@ def isinstance_generic(
     if len(args) == 0:
         return isinstance_generic(obj, origin)
 
-    if origin is Union:
+    if _is_union_type(origin):
         return any(isinstance_generic(obj, arg) for arg in args)
 
     if origin is Literal:
@@ -192,10 +192,10 @@ def isinstance_generic(
         assert len(args) == 3, f"{args=}"
         item_type, yield_type, return_type = args
         if yield_type is not None:
-            msg = f"Unsupported parametrized Generator {yield_type=}. (expected None)"
+            msg = f"Unsupported parametrized Generator {yield_type=}. (expected None for type 2)"
             raise NotImplementedError(msg)
         if return_type is not None:
-            msg = f"Unsupported parametrized Generator {return_type=}. (expected None)"
+            msg = f"Unsupported parametrized Generator {return_type=}. (expected None for type 3)"
             raise NotImplementedError(msg)
 
         return all(isinstance_generic(xi, item_type) for xi in obj)
@@ -236,7 +236,10 @@ def isinstance_generic(
         else:
             return all(isinstance_generic(xi, args[0]) for xi in obj)
 
-    msg = f"Unsupported type {class_or_tuple}. (expected unparametrized type or parametrized Union, TypedDict, Generator, Literal, Mapping or Iterable)"
+    msg = (
+        f"Unsupported type {class_or_tuple} (of class {class_or_tuple.__class__})."
+        f"(expected unparametrized type or parametrized Union, TypedDict, Generator, Literal, Mapping or Iterable)"
+    )
     raise NotImplementedError(msg)
 
 
@@ -493,7 +496,8 @@ def is_sequence_str(
 
 def is_typed_dict(x: Any) -> TypeGuard[type]:
     """Return whether typed dict."""
-    if sys.version_info.major == 3 and sys.version_info.minor < 9:
+    # to be deleted when 3.8 support is discarded
+    if sys.version_info >= (3, 0, 0) and sys.version_info < (3, 9, 0):
         return x.__class__.__name__ == "_TypedDictMeta"
     else:
         return hasattr(x, "__orig_bases__") and TypedDict in x.__orig_bases__
@@ -612,7 +616,23 @@ def _isany(x: Any) -> bool:
     return x is object or x is Any or x is typing_extensions.Any
 
 
+class _Sentinel: ...
+
+
+def _is_type_alias_type(x: Any) -> bool:
+    return (x.__class__ == typing_extensions.TypeAliasType) or (
+        x.__class__ == getattr(typing, "TypeAliasType", _Sentinel())
+    )
+
+
 def _future_annotations_is_imported() -> bool:
     def f(x: int): ...
 
     return inspect.signature(f).parameters["x"].annotation == "int"
+
+
+def _is_union_type(x: Any) -> bool:
+    return x == Union or getattr(x, "__name__", None) in (
+        "Union",
+        "UnionType",
+    )

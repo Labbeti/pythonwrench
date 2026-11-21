@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import copy
 import random
@@ -203,7 +202,7 @@ class TestGetKeyFn(TestCase):
     def test_example_1(self) -> None:
         lst = ["a", "abc", "aa", "abcd"]
         patterns = ["^ab.*"]  # sort list with elements starting with 'ab' first
-        result = list(sorted(lst, key=get_key_fn(patterns)))
+        result = sorted(lst, key=get_key_fn(patterns))
         expected = ["abc", "abcd", "a", "aa"]
         assert result == expected
 
@@ -216,17 +215,17 @@ class TestFlatten(TestCase):
         assert result == expected
 
     def test_example_2(self) -> None:
-        xlst = [[range(0, 3), range(3, 6)], [range(6, 9), range(9, 12)]]
+        xlst = [[range(3), range(3, 6)], [range(6, 9), range(9, 12)]]
 
-        expected = list(range(0, 12))
+        expected = list(range(12))
         result = flatten(xlst)
         assert result == expected
 
-        expected = [list(range(0, 6)), list(range(6, 12))]
+        expected = [list(range(6)), list(range(6, 12))]
         result = flatten(xlst, 1, 2)
         assert result == expected
 
-        expected = [range(0, 3), range(3, 6), range(6, 9), range(9, 12)]
+        expected = [range(3), range(3, 6), range(6, 9), range(9, 12)]
         result = flatten(xlst, 0, 1)
         assert result == expected
 
@@ -239,9 +238,9 @@ class TestRecursiveGenerator(TestCase):
         assert result == expected
 
     def test_example_2(self) -> None:
-        xlst = [[range(0, 3), range(3, 6)], [range(6, 9), range(9, 12)]]
+        xlst = [[range(3), range(3, 6)], [range(6, 9), range(9, 12)]]
 
-        expected = list(zip(range(0, 12), [0, 1, 2] * 4, [3] * 12))
+        expected = list(zip(range(12), [0, 1, 2] * 4, [3] * 12))
         result = list(recursive_generator(xlst))
         assert result == expected
 

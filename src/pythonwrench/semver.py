@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import logging
 import re
@@ -10,6 +9,7 @@ from typing import Any, List, Mapping, Tuple, TypedDict, Union, overload
 from typing_extensions import NotRequired, Self, TypeAlias
 
 from pythonwrench.typing import NoneType, isinstance_generic
+from pythonwrench.warnings import warn_once
 
 PreRelease: TypeAlias = Union[int, str, None, List[Union[int, str]]]
 BuildMetadata: TypeAlias = Union[int, str, None, List[Union[int, str]]]
@@ -64,36 +64,40 @@ class Version:
         self,
         version: Self,
         /,
+        *,
+        strict: bool = True,
     ) -> None:
         """Initialize the instance."""
-        ...
 
     @overload
     def __init__(
         self,
         version_str: str,
         /,
+        *,
+        strict: bool = True,
     ) -> None:
         """Initialize the instance."""
-        ...
 
     @overload
     def __init__(
         self,
         version_dict: VersionDictLike,
         /,
+        *,
+        strict: bool = True,
     ) -> None:
         """Initialize the instance."""
-        ...
 
     @overload
     def __init__(
         self,
         version_tuple: VersionTupleLike,
         /,
+        *,
+        strict: bool = True,
     ) -> None:
         """Initialize the instance."""
-        ...
 
     @overload
     def __init__(
@@ -103,9 +107,10 @@ class Version:
         patch: int,
         prerelease: PreRelease = None,
         buildmetadata: BuildMetadata = None,
+        *,
+        strict: bool = True,
     ) -> None:
         """Initialize the instance."""
-        ...
 
     def __init__(self, *args, **kwargs) -> None:
         """Initialize the instance."""
@@ -142,6 +147,17 @@ class Version:
             if len(invalid) > 0:
                 msg = f"Got an unexpected arguments {invalid=}. (with {args=} and {kwargs=})"
                 raise TypeError(msg)
+
+        strict = kwargs.get("strict", True)
+        if not strict and "minor" not in version_dict:
+            version_dict = dict(version_dict.items())
+            version_dict["minor"] = 0
+            warn_once("Missing argument 'minor', assuming 0.")
+
+        if not strict and "patch" not in version_dict:
+            version_dict = dict(version_dict.items())
+            version_dict["patch"] = 0
+            warn_once("Missing argument 'patch', assuming 0.")
 
         if not isinstance_generic(version_dict, VersionDict):
             msg = f"Invalid argument {args=} and {kwargs=}. (invalid argument types, expected (major=int, minor=int, patch=int, prerelease={PreRelease}, buildmetadata={BuildMetadata}))"
@@ -267,11 +283,11 @@ class Version:
 
     def to_str(self) -> str:
         """Convert the value to str."""
-        kwds = dict(
-            major=self.major,
-            minor=self.minor,
-            patch=self.patch,
-        )
+        kwds = {
+            "major": self.major,
+            "minor": self.minor,
+            "patch": self.patch,
+        }
         version_str = _VERSION_FORMAT.format(**kwds)
         if self.prerelease is not None:
             version_str = f"{version_str}-{self.prerelease}"
@@ -288,7 +304,7 @@ class Version:
         version_tuple = tuple(version_dict.values())
         return version_tuple  # type: ignore
 
-    def equals(self, other: VersionLike, *, ignore_buildmetadata: bool = False) -> bool:
+    def equals(self, other: Any, *, ignore_buildmetadata: bool = False) -> bool:
         """Perform the equals operation."""
         if isinstance(other, (Mapping, tuple, str)):
             other = Version(other)
@@ -308,7 +324,7 @@ class Version:
         """Return the string representation of the instance."""
         return self.to_str()
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         """Return whether this instance equals another object."""
         return self.equals(other)
 

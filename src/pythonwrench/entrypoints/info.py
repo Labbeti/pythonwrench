@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import logging
 import platform
@@ -11,6 +10,7 @@ from typing import Any, Dict
 import pythonwrench
 from pythonwrench.os import get_num_cpus_available
 from pythonwrench.serialization.json import dumps_json
+from pythonwrench.serialization.yaml import yaml_is_available
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +32,7 @@ def get_install_info() -> Dict[str, Any]:
         "python": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
         "pythonwrench": pythonwrench.__version__,
         "pythonwrench_path": get_pythonwrench_repository_path(),
+        "yaml_is_available": yaml_is_available(),
     }
 
 

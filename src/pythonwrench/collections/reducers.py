@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import operator
 from typing import (
@@ -40,7 +39,6 @@ def reduce_add(
     start: T_SupportsAdd,
 ) -> T_SupportsAdd:
     """Perform the reduce add operation."""
-    ...
 
 
 @overload
@@ -49,7 +47,6 @@ def reduce_add(
     start: T_SupportsAdd,
 ) -> T_SupportsAdd:
     """Perform the reduce add operation."""
-    ...
 
 
 @overload
@@ -60,7 +57,6 @@ def reduce_add(
     start: Optional[T_SupportsAdd] = None,
 ) -> T_SupportsAdd:
     """Perform the reduce add operation."""
-    ...
 
 
 def reduce_add(*args, start=None):
@@ -76,7 +72,6 @@ def reduce_and(
     start: T_SupportsAnd,
 ) -> T_SupportsAnd:
     """Perform the reduce and operation."""
-    ...
 
 
 @overload
@@ -85,7 +80,6 @@ def reduce_and(
     start: T_SupportsAnd,
 ) -> T_SupportsAnd:
     """Perform the reduce and operation."""
-    ...
 
 
 @overload
@@ -96,7 +90,6 @@ def reduce_and(
     start: Optional[T_SupportsAnd] = None,
 ) -> T_SupportsAnd:
     """Perform the reduce and operation."""
-    ...
 
 
 def reduce_and(*args, start=None):
@@ -112,7 +105,6 @@ def reduce_matmul(
     start: T_SupportsMatmul,
 ) -> T_SupportsMatmul:
     """Perform the reduce matmul operation."""
-    ...
 
 
 @overload
@@ -121,7 +113,6 @@ def reduce_matmul(
     start: T_SupportsMatmul,
 ) -> T_SupportsMatmul:
     """Perform the reduce matmul operation."""
-    ...
 
 
 @overload
@@ -132,7 +123,6 @@ def reduce_matmul(
     start: Optional[T_SupportsMatmul] = None,
 ) -> T_SupportsMatmul:
     """Perform the reduce matmul operation."""
-    ...
 
 
 def reduce_matmul(*args, start=None):
@@ -148,7 +138,6 @@ def reduce_mul(
     start: T_SupportsMul,
 ) -> T_SupportsMul:
     """Perform the reduce mul operation."""
-    ...
 
 
 @overload
@@ -157,7 +146,6 @@ def reduce_mul(
     start: T_SupportsMul,
 ) -> T_SupportsMul:
     """Perform the reduce mul operation."""
-    ...
 
 
 @overload
@@ -168,7 +156,6 @@ def reduce_mul(
     start: Optional[T_SupportsMul] = None,
 ) -> T_SupportsMul:
     """Perform the reduce mul operation."""
-    ...
 
 
 def reduce_mul(*args, start=None):
@@ -184,7 +171,6 @@ def reduce_or(
     start: T_SupportsOr,
 ) -> T_SupportsOr:
     """Perform the reduce or operation."""
-    ...
 
 
 @overload
@@ -193,7 +179,6 @@ def reduce_or(
     start: T_SupportsOr,
 ) -> T_SupportsOr:
     """Perform the reduce or operation."""
-    ...
 
 
 @overload
@@ -204,7 +189,6 @@ def reduce_or(
     start: Optional[T_SupportsOr] = None,
 ) -> T_SupportsOr:
     """Perform the reduce or operation."""
-    ...
 
 
 def reduce_or(*args, start=None):
@@ -254,7 +238,6 @@ def sum(
     start: T_SupportsAdd = 0,
 ) -> T_SupportsAdd:
     """Perform the sum operation."""
-    ...
 
 
 @overload
@@ -263,7 +246,6 @@ def sum(
     start: T_SupportsAdd = 0,
 ) -> T_SupportsAdd:
     """Perform the sum operation."""
-    ...
 
 
 @overload
@@ -274,7 +256,6 @@ def sum(
     start: Optional[T_SupportsAdd] = 0,
 ) -> T_SupportsAdd:
     """Perform the sum operation."""
-    ...
 
 
 # note: we do not use function_alias because start arg has default value of 0
@@ -291,7 +272,6 @@ def prod(
     start: T_SupportsMul = 1,
 ) -> T_SupportsMul:
     """Perform the prod operation."""
-    ...
 
 
 @overload
@@ -300,7 +280,6 @@ def prod(
     start: T_SupportsMul = 1,
 ) -> T_SupportsMul:
     """Perform the prod operation."""
-    ...
 
 
 @overload
@@ -311,7 +290,6 @@ def prod(
     start: Optional[T_SupportsMul] = 1,
 ) -> T_SupportsMul:
     """Perform the prod operation."""
-    ...
 
 
 # note: we do not use function_alias because start arg has default value of 1
@@ -323,10 +301,8 @@ def prod(*args, start: Any = 1):
 @function_alias(reduce_and)
 def intersect(*args, **kwargs):
     """Perform the intersect operation."""
-    ...
 
 
 @function_alias(reduce_or)
 def union(*args, **kwargs):
     """Perform the union operation."""
-    ...

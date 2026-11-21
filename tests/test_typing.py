@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import logging
+import typing
 import unittest
 from dataclasses import dataclass
 from io import TextIOBase
@@ -29,6 +29,7 @@ import typing_extensions
 from typing_extensions import NotRequired
 
 from pythonwrench.importlib import import_if_available, is_available_package
+from pythonwrench.semver import Version
 from pythonwrench.typing import (
     NoneType,
     check_args_types,
@@ -85,7 +86,7 @@ class TestChecks(TestCase):
             a: int
             b: str
 
-        NT2 = NamedTuple("NT2", [("a", int), ("b", str)])
+        NT2 = NamedTuple("NT2", [("a", int), ("b", str)])  # noqa: UP014
 
         nt1 = NT1(a=0, b="0")
         nt2 = NT2(a=0, b="0")
@@ -122,6 +123,19 @@ class TestChecks(TestCase):
         if is_available_package("pandas"):
             assert not is_special_form(pd.DataFrame({"a": [1, 2, 3]}))
 
+    @unittest.skipIf(
+        Version.python() < (3, 12, 0), "type statement requires Python 3.12"
+    )
+    def test_type_alias_type(self) -> None:
+        # trick to pass precommit that will not accept `type A = int | float` statement
+        namespace = {}
+        exec("type A = int | float", namespace)  # noqa: S102
+        A = namespace["A"]
+
+        assert A.__class__ == getattr(typing, "TypeAliasType", None)
+        assert isinstance_generic(1.2, A)
+        assert not isinstance_generic("a", A)
+
 
 class TestIsInstanceGuard(TestCase):
     def test_docstring_examples(self) -> None:
@@ -154,7 +168,7 @@ class TestIsInstanceGuard(TestCase):
         assert isinstance_generic(x, Optional[int])  # type: ignore
         assert isinstance_generic(x, Union[int, str])  # type: ignore
         assert isinstance_generic(x, Literal[1])  # type: ignore
-        assert isinstance_generic(x, Literal[2, None, 1, "a"])  # type: ignore
+        assert isinstance_generic(x, Literal[2, None, 1, "a"])
 
         assert not isinstance_generic(x, float)
         assert not isinstance_generic(x, Callable)  # type: ignore
